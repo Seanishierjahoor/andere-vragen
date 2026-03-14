@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Scroll-triggered animations via IntersectionObserver
+    // Scroll-triggered animations
     const observer = new IntersectionObserver(function(entries) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -68,6 +68,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const inGrid = el.closest('.pillars-grid, .cards-grid, .intro-grid, .two-col-grid');
             if (inGrid) el.style.transitionDelay = (i % 3) * 0.1 + 's';
             observer.observe(el);
+        });
+    });
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     });
 });
@@ -94,51 +103,3 @@ function handleFormSubmit(event) {
             }).catch(() => {});
         }
         if (formContent) formContent.style.display = 'none';
-        if (successMessage) {
-            successMessage.style.display = 'block';
-            successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    })
-    .catch(() => {
-        if (formContent) formContent.style.display = 'none';
-        if (successMessage) successMessage.style.display = 'block';
-    });
-    return false;
-}
-
-function resetForm() {
-    const successMessage = document.getElementById('success-message');
-    const formContent = document.getElementById('form-content');
-    if (successMessage && formContent) {
-        formContent.style.display = 'block';
-        successMessage.style.display = 'none';
-        document.querySelector('form').reset();
-    }
-}
-
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-});
-
-function handleNewsletterSubmit(event) {
-    event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
-    fetch(form.action, {
-        method: 'POST',
-        body: new URLSearchParams(formData).toString(),
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    })
-    .then(() => {
-        form.style.display = 'none';
-        document.getElementById('newsletter-success').style.display = 'block';
-    })
-    .catch(() => {
-        form.style.display = 'none';
-        document.getElementById('newsletter-success').style.display = 'block';
-    });
-}
