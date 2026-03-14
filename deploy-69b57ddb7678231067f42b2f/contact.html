@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - Andere Vragen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon"><span>AV</span></div>
+                <span class="logo-text">Andere Vragen</span>
+            </a>
+            <ul class="nav-desktop">
+                <li><a href="perspective.html">Hoe ik kijk</a></li>
+                <li><a href="method.html">Wat ik doe</a></li>
+                <li><a href="collaboration.html">Samenwerking</a></li>
+                <li><a href="about.html">Achtergrond</a></li>
+                <li><a href="contact.html" class="active">Contact</a></li>
+            </ul>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menu openen">
+                <svg id="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+                <svg id="close-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </nav>
+    </header>
+
+    <div id="mobile-menu" class="mobile-menu">
+        <ul>
+            <li><a href="perspective.html">Hoe ik kijk</a></li>
+            <li><a href="method.html">Wat ik doe</a></li>
+            <li><a href="collaboration.html">Samenwerking</a></li>
+            <li><a href="about.html">Achtergrond</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </div>
+
+    <main class="main-content">
+        <div class="page-container">
+            <div class="two-col-grid">
+                <div class="space-y-12">
+                    <p class="section-label italic">Contact</p>
+                    <h1 style="font-size: clamp(2.25rem, 6vw, 3.75rem); font-family: var(--font-serif); line-height: 1.2; font-style: italic; margin-bottom: 3rem;">Een eerste gesprek</h1>
+                    <div class="space-y-8" style="max-width: 32rem;">
+                        <p style="font-size: 1.25rem; line-height: 1.6; color: rgba(26, 26, 26, 0.8); font-weight: 300;">
+                            Een eerste gesprek is bedoeld om te verkennen of deze manier van werken past. Niet om meteen iets vast te leggen, maar om samen te kijken of er genoeg ruimte is voor aandacht, twijfel en verschuiving.
+                        </p>
+                        <p style="font-size: 1.25rem; line-height: 1.6; color: rgba(26, 26, 26, 0.8); font-weight: 300;">
+                            Soms is er al een duidelijke vraag. Vaker is er iets wat blijft terugkomen zonder goed benoemd te kunnen worden.
+                        </p>
+                    </div>
+                    <div style="padding-top: 6rem; border-top: 1px solid rgba(0, 0, 0, 0.1);" class="space-y-12">
+                        <div>
+                            <p class="section-label italic">E-mail</p>
+                            <a href="mailto:anderevragen@proton.me" style="font-size: clamp(1.5rem, 3vw, 1.875rem); font-family: var(--font-serif); font-style: italic; color: rgba(26, 26, 26, 0.8); line-height: 1.6; transition: color 0.3s;">anderevragen@proton.me</a>
+                            <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-top: 1rem;">
+                                Ik reageer persoonlijk.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-container">
+                    <div id="form-content">
+                        <p class="form-label">Start de dialoog</p>
+                        <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="handleFormSubmit(event)">
+                            <input type="hidden" name="form-name" value="contact">
+                            <p style="display:none;"><input name="bot-field"></p>
+                            <div class="form-group">
+                                <label for="name">Naam</label>
+                                <input id="name" name="name" type="text" required placeholder="Uw naam">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">E-mailadres</label>
+                                <input id="email" name="email" type="email" required placeholder="uw@email.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="message">Wat speelt er?</label>
+                                <p class="form-hint">Een paar zinnen is voldoende.</p>
+                                <textarea id="message" name="message" rows="4" required placeholder="..."></textarea>
+                            </div>
+                            <div class="form-group form-check">
+                                <label class="check-label">
+                                    <input type="checkbox" name="newsletter" value="ja" checked>
+                                    <span>Ja, ik ontvang graag af en toe een bericht van Andere Vragen.</span>
+                                </label>
+                            </div>
+                            <button type="submit" class="form-submit">Verzenden</button>
+                        </form>
+                    </div>
+                    <div id="success-message" style="display: none;">
+                        <div class="success-inner">
+                            <p class="success-title">Uw bericht is verstuurd.</p>
+                            <p class="success-sub">Bedankt voor uw bericht. Andere Vragen neemt zo snel mogelijk persoonlijk contact met u op.</p>
+                            <button onclick="resetForm()" class="success-reset">Nog een bericht versturen</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-about">
+                <h3>Andere Vragen</h3>
+                <p>Een filosofisch-artistieke praktijk voor organisaties en leiderschap. Luisteren, kijken en vragen stellen die het denken opnieuw openen.</p>
+            </div>
+            <div class="footer-nav">
+                <h4>Navigatie</h4>
+                <ul>
+                    <li><a href="perspective.html">Hoe ik kijk</a></li>
+                    <li><a href="method.html">Wat ik doe</a></li>
+                    <li><a href="collaboration.html">Samenwerking</a></li>
+                    <li><a href="about.html">Achtergrond</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-contact">
+                <h4>Locaties</h4>
+                <ul>
+                    <li class="location">Rotterdam</li>
+                    <li><a href="mailto:anderevragen@proton.me">anderevragen@proton.me</a></li>
+                <

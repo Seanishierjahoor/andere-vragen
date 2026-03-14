@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bericht verstuurd - Andere Vragen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon"><span>AV</span></div>
+                <span class="logo-text">Andere Vragen</span>
+            </a>
+            <ul class="nav-desktop">
+                <li><a href="perspective.html">Hoe ik kijk</a></li>
+                <li><a href="method.html">Wat ik doe</a></li>
+                <li><a href="collaboration.html">Samenwerking</a></li>
+                <li><a href="about.html">Achtergrond</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menu openen">
+                <svg id="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+                <svg id="close-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <div class="page-container" style="min-height: 60vh; display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center; max-width: 32rem;">
+                <p class="section-label italic">Andere Vragen</p>
+                <h1 style="font-size: clamp(2rem, 5vw, 3rem); font-family: var(--font-serif); font-style: italic; line-height: 1.2; margin-bottom: 2rem;">
+                    Uw bericht is verstuurd.
+                </h1>
+                <p style="font-size: 1.125rem; color: var(--muted); font-weight: 300; line-height: 1.6; margin-bottom: 3rem;">
+                    Andere Vragen neemt zo snel mogelijk persoonlijk contact met u op.
+                </p>
+                <div style="width: 1px; height: 4rem; background: rgba(26,26,26,0.1); margin: 0 auto 3rem;"></div>
+                <a href="index.html" class="btn-secondary">Terug naar de site</a>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

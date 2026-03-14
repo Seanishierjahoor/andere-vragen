@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samenwerking - Andere Vragen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon"><span>AV</span></div>
+                <span class="logo-text">Andere Vragen</span>
+            </a>
+            <ul class="nav-desktop">
+                <li><a href="perspective.html">Hoe ik kijk</a></li>
+                <li><a href="method.html">Wat ik doe</a></li>
+                <li><a href="collaboration.html" class="active">Samenwerking</a></li>
+                <li><a href="about.html">Achtergrond</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menu openen">
+                <svg id="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+                <svg id="close-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </nav>
+    </header>
+
+    <div id="mobile-menu" class="mobile-menu">
+        <ul>
+            <li><a href="perspective.html">Hoe ik kijk</a></li>
+            <li><a href="method.html">Wat ik doe</a></li>
+            <li><a href="collaboration.html">Samenwerking</a></li>
+            <li><a href="about.html">Achtergrond</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </div>
+
+    <main class="main-content">
+        <div class="page-container">
+            <div class="text-center max-w-4xl mx-auto" style="margin-bottom: 12rem;">
+                <p class="section-label italic">Samenwerking</p>
+                <h1 style="font-size: clamp(2.25rem, 6vw, 3.75rem); font-family: var(--font-serif); line-height: 1.2; font-style: italic; margin-bottom: 3rem;">Vormen van aanwezigheid</h1>
+                <p style="font-size: 1.25rem; color: rgba(26, 26, 26, 0.8); font-weight: 300; line-height: 1.6; max-width: 42rem; margin: 0 auto;">
+                    Mijn werk laat zich niet vastleggen in een vast traject of format. Wat wel te onderscheiden is, zijn verschillende vormen van aanwezigheid.
+                </p>
+            </div>
+
+            <div class="cards-grid">
+                <div class="card">
+                    <h3>Meekijken</h3>
+                    <p>Een tijdelijke aanwezigheid waarin ik observeer, luister en gesprekken volg. Ik sluit aan bij bestaande overleggen, loop mee in de praktijk en neem waar hoe taal, besluitvorming en routines functioneren.</p>
+                    <div class="card-footer">
+                        <p>Geschikt wanneer er veel gebeurt, maar weinig verandert.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Gesprekken</h3>
+                    <p>Gerichte gesprekken met leiders, teams of betrokkenen. Geen coaching en geen begeleiding richting antwoorden, maar gesprekken waarin aannames worden onderzocht en vragen worden verdiept.</p>
+                    <div class="card-footer">
+                        <p>Geschikt wanneer er wel gesproken wordt, maar weinig wordt benoemd.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Tijdelijk ingebed</h3>
+                    <p>Een intensievere vorm, waarin ik gedurende een afgebakende periode onderdeel ben van de omgeving. Niet als adviseur, maar als aanwezige buitenstaander.</p>
+                    <div class="card-footer">
+                        <p>Geschikt wanneer vraagstukken hardnekkig zijn en zich niet laten vangen in losse gesprekken.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Aanwezig bij evenementen</h3>
+                    <p>Ik kan aanwezig zijn tijdens evenementen, lezingen of bijeenkomsten — niet als spreker met een voorbereid verhaal, maar als iemand die meekijkt en luistert naar wat er gebeurt. Aan het einde ontvangen aanwezigen vragen die voortkomen uit wat zichtbaar werd.</p>
+                    <div class="card-footer">
+                        <p>Geschikt wanneer je een bijeenkomst wilt afsluiten met vragen in plaats van antwoorden.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Praktisch Section -->
+            <section style="border-top: 1px solid var(--border); padding-top: 6rem;">
+                <div class="max-w-4xl mx-auto">
+                    <p class="section-label">Praktisch</p>
+                    <div class="two-col-grid">
+                        <div class="space-y-12">
+                            <div class="space-y-4">
+                                <h4 style="font-size: 1.25rem; font-family: var(--font-serif); font-style: italic;">Hoe een samenwerking begint</h4>
+                                <p style="font-size: 1rem; color: rgba(26, 26, 26, 0.7); font-weight: 300; line-height: 1.6;">
+                                    Elke samenwerking start met een gesprek om te onderzoeken of deze manier van werken past bij de context en de vraag die speelt.
+                                </p>
+                            </div>
+                            <div class="space-y-4">
+                                <h4 style="font-size: 1.25rem; font-family: var(--font-serif); font-style: italic;">Duur en inzet</h4>
+                                <p style="font-size: 1rem; color: rgba(26, 26, 26, 0.7); font-weight: 300; line-height: 1.6;">
+                                    De inzet varieert per situatie — van een korte periode van meekijken tot een tijdelijk ingebedde aanwezigheid. Er wordt altijd gewerkt met een duidelijke afbakening in tijd en rol.
+                                </p>
+                            </div>
+                            <div class="space-y-4">
+                                <h4 style="font-size: 1.25rem; font-family: var(--font-serif); font-style: italic;">Tarieven</h4>
+                                <p style="font-size: 1rem; color: rgba(26, 26, 26, 0.7); font-weight: 300; line-height: 1.6;">
+                                    Ik werk niet met standaardpakketten of vaste formats. Het tarief hangt samen met de vorm, duur en intensiteit van de samenwerking en wordt besproken in het eerste gesprek.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="space-y-12">
+                            <div class="space-y-4">
+                                <h4 style="font-size: 1.25rem; font-family: var(--font-serif); font-style: italic;">Positie en onafhankelijkheid</h4>
+                                <p style="font-size: 1rem; color: rgba(26, 26, 26, 0.7); font-weight: 300; line-height: 1.6;">
+                                    Ik werk onafhankelijk en zonder belang bij een specifieke uitkomst. Mijn positie is die van betrokken buitenstaander: nabij genoeg om te zien wat speelt, ver genoeg om het te kunnen benoemen.
+                                </p>
+                            </div>
+                            <div class="space-y-4">
+                                <h4 style="font-size: 1.25rem; font-family: var(--font-serif); font-style: italic;">Vertrouwelijkheid</h4>
+                                <p style="font-size: 1rem; color: rgba(26, 26, 26, 0.7); font-weight: 300; line-height: 1.6;">
+                                    Wat ik zie en hoor binnen een organisatie blijft daar. Vertrouwelijkheid is een voorwaarde voor het werk.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="text-center" style="margin-top: 12rem; background-color: rgba(217, 210, 197, 0.05); padding: 6rem 1.5rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+                <p style="font-size: 1.5rem; font-family: var(--font-serif); font-style: italic; color: rgba(26, 26, 26, 0.7); margin-bottom: 2rem; max-width: 36rem; margin-left: auto; margin-right: auto;">
+                    "Deze vormen zijn geen trainingen, geen trajecten en geen consultancy."
+                </p>
+                <a href="contact.html" class="btn-primary">Start de Dialoog</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-about">
+                <h3>Andere Vragen</h3>
+                <p>Een filosofisch-artistieke praktijk voor organisaties en leiderschap. Luisteren, kijken en vragen stellen die het denken opnieuw openen.</p>
+            </div>
+            <div class="footer-nav">
+                <h4>Navigatie</h4>
+                <ul>
+                    <li><a href="perspective.html">Hoe ik kijk</a></li>
+                    <li><a href="method.html">Wat ik doe</a></li>
+                    <li><a href="collaboration.html">Samenwerking</a></li>
+                    <li><a href="about.html">Achtergrond</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-contact">
+                <h4>Locaties</h4>
+                <ul>
+                    <li class="location">Rotterdam</li>
+                    <li><a href="mailto:anderevragen@proton.me">anderevragen@proton.me</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-newsletter">
+            <p class="footer-newsletter-label">Nieuwsbrief</p>
+            <form action="https://buttondown.com/api/emails/embed-subscribe/Anderevragen" method="post" class="footer-newsletter-form">
+                <input type="email" name="email" placeholder="Uw e-mailadres" required>
+                <button type="submit">Aanmelden</button>
+            </form>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 Andere Vragen. Alle rechten voorbehouden.<
