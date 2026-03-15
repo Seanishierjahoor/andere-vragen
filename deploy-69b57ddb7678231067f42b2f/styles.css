@@ -5,6 +5,10 @@
     box-sizing: border-box;
 }
 
+html {
+    overflow-x: hidden;
+}
+
 :root {
     --background: #fcfaf7;
     --foreground: #1a1a1a;
@@ -12,7 +16,7 @@
     --sand: #d9d2c5;
     --moss: #4a5d4e;
     --muted: #5a5a5a;
-    
+
     --font-serif: "Instrument Serif", "Playfair Display", serif;
     --font-sans: "Inter", system-ui, -apple-system, sans-serif;
 }
@@ -168,11 +172,11 @@ a {
     .nav-desktop {
         display: flex;
     }
-    
+
     .mobile-menu-btn {
         display: none;
     }
-    
+
     .logo-text {
         display: inline;
     }
@@ -797,6 +801,7 @@ a {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
 /* Two column grid - responsive */
 .two-col-grid {
     display: grid;
@@ -811,7 +816,7 @@ a {
     }
 }
 
-/* Form hint text - fix overlap */
+/* Form hint text */
 .form-hint {
     font-size: 10px;
     text-transform: uppercase;
@@ -823,10 +828,9 @@ a {
 
 /* Success message */
 .success-inner {
-    padding: 4rem 0;
+    padding: 4rem 2rem;
     text-align: center;
     border: 1px solid var(--border);
-    padding: 4rem 2rem;
     background-color: rgba(217, 210, 197, 0.08);
 }
 
@@ -1087,6 +1091,7 @@ a {
     border-left: none;
     transform: rotate(45deg);
 }
+
 /* =====================
    Scroll Animations
    ===================== */
@@ -1134,14 +1139,8 @@ a {
 /* Mobile fixes */
 @media (max-width: 767px) {
     .hero-title {
-        font-size: clamp(2.5rem, 12vw, 4rem);
-    }
-}
-
-/* Mobile fixes */
-@media (max-width: 767px) {
-    .hero-title {
-        font-size: clamp(2.5rem, 12vw, 4rem);
+        font-size: clamp(2rem, 9vw, 3rem);
+        word-break: break-word;
     }
     .hero-subtitle {
         letter-spacing: 0.15em;
