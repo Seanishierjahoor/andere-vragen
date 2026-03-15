@@ -139,7 +139,7 @@ a {
     right: 0;
     bottom: 0;
     background-color: var(--background);
-    z-index: 40;
+    z-index: 60;
     padding: 1.5rem;
 }
 
@@ -1129,4 +1129,11 @@ a {
 
 .card.animate-on-scroll {
     transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+/* Mobile fixes */
+@media (max-width: 767px) {
+    .hero-title {
+        font-size: clamp(2.5rem, 12vw, 4rem);
+    }
 }
