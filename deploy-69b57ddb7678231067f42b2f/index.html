@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andere Vragen - Different Questions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <span>AV</span>
+                </div>
+                <span class="logo-text">Andere Vragen</span>
+            </a>
+            
+            <ul class="nav-desktop">
+                <li><a href="perspective.html">Hoe ik kijk</a></li>
+                <li><a href="method.html">Wat ik doe</a></li>
+                <li><a href="collaboration.html">Samenwerking</a></li>
+                <li><a href="about.html">Achtergrond</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menu openen">
+                <svg id="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+                <svg id="close-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="mobile-menu">
+        <ul>
+            <li><a href="perspective.html">Hoe ik kijk</a></li>
+            <li><a href="method.html">Wat ik doe</a></li>
+            <li><a href="collaboration.html">Samenwerking</a></li>
+            <li><a href="about.html">Achtergrond</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-bg">
+                <img src="https://images.unsplash.com/photo-1614036417651-efe5912149d8" alt="Subtiele papierstructuur">
+            </div>
+            
+            <div class="hero-content fade-in">
+                <h1 class="hero-title">Andere vragen.</h1>
+                <p class="hero-subtitle">Different Questions.</p>
+                
+                <div class="hero-text fade-in-delay">
+                    <h2 class="hero-quote">"Soms is vooruitkomen niet een kwestie van betere antwoorden, maar van betere vragen."</h2>
+                    
+                    <div class="hero-actions">
+                        <div class="divider-line"></div>
+                        <div class="button-group">
+                            <a href="contact.html" class="btn-primary">Start een gesprek</a>
+                            <a href="perspective.html" class="btn-secondary">Lees hoe ik kijk</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Intro Section -->
+        <section class="intro-section">
+            <div class="intro-content">
+                <p class="intro-text">
+                    Ik word gevraagd op plekken waar iets vastzit, zichtbaar of onderhuids. Daar luister ik, kijk mee en stel vragen die richting geven zonder deze vast te leggen.
+                </p>
+                <div class="intro-grid">
+                    <p class="intro-item muted">Geen advies.</p>
+                    <p class="intro-item muted">Geen oplossingen.</p>
+                    <p class="intro-item">Wel de vragen die het denken opnieuw openen.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Philosophy Brief -->
+        <section class="philosophy-section">
+            <div class="philosophy-container">
+                <div class="philosophy-text">
+                    <h3 class="philosophy-title">Wanneer iets vastloopt</h3>
+                    <div class="philosophy-body">
+                        <p>Ik werk vanuit kunst en filosofie binnen organisaties, bijeenkomsten en leiderschapssituaties waar spanning voelbaar is, maar moeilijk onder woorden komt.</p>
+                        <p class="italic">Ik blijf wanneer het ongemakkelijk wordt — en onderzoek wat zichtbaar wil worden.</p>
+                    </div>
+                </div>
+                <div class="philosophy-image">
+                    <!-- VERVANG DEZE SRC MET JE EIGEN GOLVEN FOTO -->
+                    <img src="golven.jpg" alt="Oceaanstromen patroon">
+                </div>
+            </div>
+        </section>
+
+        <!-- Three Pillars -->
+        <section class="pillars-section">
+            <div class="pillars-container">
+                <p class="section-label">Drie manieren waarop ik werk</p>
+                <div class="pillars-grid">
+                    <div class="pillar">
+                        <h4>Meekijken</h4>
+                        <p>Ik observeer wat vanzelfsprekend is geworden.</p>
+                    </div>
+                    <div class="pillar">
+                        <h4>Vragen stellen</h4>
+                        <p>Ik open het denken waar het zich heeft gesloten.</p>
+                    </div>
+                    <div class="pillar">
+                        <h4>Aanwezig blijven</h4>
+                        <p>Ik ga niet weg wanneer het spannend wordt.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Closing Quote -->
+        <section class="closing-section">
+            <div class="closing-content">
+                <div class="closing-labels">
+                    <p>Geen consultancy.</p>
+                    <p>Geen coaching.</p>
+                    <p>Geen traject.</p>
+                </div>
+                <h3 class="closing-title">Een andere manier van kijken.</h3>
+            </div>
+        </section>
+
+        <!-- Nieuwsbrief -->
+        <section class="newsletter-section">
+            <div class="newsletter-container">
+                <p class="section-label">Nieuwsbrief</p>
+                <h3 class="newsletter-title">Vragen die blijven hangen.</h3>
+                <p class="newsletter-sub">Af en toe een bericht over wat ik zie, hoor en denk. Niet periodiek maar wanneer er iets is.</p>
+                <form action="https://buttondown.com/api/emails/embed-subscribe/Anderevragen" method="post" class="newsletter-form" onsubmit="handleNewsletterSubmit(event)">
+                    <div class="newsletter-input-group">
+                        <input type="email" name="email" id="bd-email" placeholder="Uw e-mailadres" required>
+                        <button type="submit">Aanmelden</button>
+                    </div>
+                    <p class="newsletter-powered">Via <a href="https://buttondown.com/refer/Anderevragen" target="_blank">Buttondown</a></p>
+                </form>
+                <div id="newsletter-success" style="display:none;">
+                    <p class="newsletter-success-msg">Bedankt. U ontvangt een bevestigingsmail.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-about">
+                <h3>Andere Vragen</h3>
+                <p>Een filosofisch-artistieke praktijk voor organisaties en leiderschap. Luisteren, kijken en vragen stellen die het denken opnieuw openen.</p>
+            </div>
+            <div class="footer-nav">
+                <h4>Navigatie</h4>
+                <ul>
+                    <li><a href="perspective.html">Hoe ik kijk</a></li>
+                    <li><a href="method.html">Wat ik doe</a></li>
+                    <li><a href="collaboration.html">Samenwerking</a></li>
+                    <li><a href="about.html">Achtergrond</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-contact">
+                <h4>Locaties</h4>
+                <ul>
+                    <li class="location">Rotterdam</li>
+                    <li><a href="/cdn-cgi/l/email-protection#e4858a8081968192968583818aa494968b908b8aca8981"><span class="__cf_email__" data-cfemail="a6c7c8c2c3d4c3d0d4c7c1c3c8e6d6d4c9d2c9c888cbc3">[email&#160;protected]</span></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-newsletter">
+            <p class="footer-newsletter-label">Nieuwsbrief</p>
+            <form action="https://buttondown.com/api/emails/embed-subscribe/Anderevragen" method="post" class="footer-newsletter-form">
+                <input type="email" name="email" placeholder="Uw e-mailadres" required>
+                <button type="submit">Aanmelden</button>
+            </form>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 Andere Vragen. Alle rechten voorbehouden.</p>
+            <p class="italic">Different Questions</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
