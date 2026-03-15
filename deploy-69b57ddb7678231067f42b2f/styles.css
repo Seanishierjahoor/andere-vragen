@@ -1155,3 +1155,17 @@ a {
         font-size: clamp(1.1rem, 5vw, 1.5rem);
     }
 }
+
+/* Animation groups — appear together instead of staggered */
+.intro-grid > * {
+    transition-delay: 0s !important;
+}
+
+.philosophy-text > *,
+.philosophy-body > * {
+    transition-delay: 0s !important;
+}
+
+.closing-labels > * {
+    transition-delay: 0s !important;
+}
