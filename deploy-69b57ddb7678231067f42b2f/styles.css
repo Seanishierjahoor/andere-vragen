@@ -1169,3 +1169,13 @@ a {
 .closing-labels > * {
     transition-delay: 0s !important;
 }
+
+/* Subpage animations — more unfolding feel while scrolling */
+.animate-subpage {
+    transform: translateY(48px);
+    transition: opacity 0.95s ease, transform 0.95s ease;
+}
+
+.animate-subpage.is-visible {
+    transform: translateY(0);
+}

@@ -45,6 +45,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Scroll-triggered animations — page-sidebar uitgesloten om mobiel menu niet te blokkeren
+    const isSubpage = currentPage !== 'index.html' && currentPage !== '';
+
     const observer = new IntersectionObserver(function(entries) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -52,7 +54,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 observer.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    }, {
+        threshold: 0.1,
+        rootMargin: isSubpage ? '0px 0px -100px 0px' : '0px 0px -40px 0px'
+    });
 
     const selectors = [
         '.hero-title', '.hero-subtitle', '.hero-quote', '.hero-actions',
@@ -65,8 +70,10 @@ document.addEventListener('DOMContentLoaded', function() {
     selectors.forEach(selector => {
         document.querySelectorAll(selector).forEach((el, i) => {
             el.classList.add('animate-on-scroll');
-            const inGrid = el.closest('.pillars-grid, .cards-grid, .intro-grid, .two-col-grid');
-            if (inGrid) el.style.transitionDelay = (i % 3) * 0.1 + 's';
+            if (isSubpage) el.classList.add('animate-subpage');
+            const inGrid = el.closest('.pillars-grid, .cards-grid, .intro-grid, .two-col-grid, .page-content');
+            const delay = isSubpage ? 0.15 : 0.1;
+            if (inGrid) el.style.transitionDelay = (i % 4) * delay + 's';
             observer.observe(el);
         });
     });
