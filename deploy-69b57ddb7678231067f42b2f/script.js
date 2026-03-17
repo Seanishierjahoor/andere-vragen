@@ -79,14 +79,26 @@ document.addEventListener('DOMContentLoaded', function() {
         '.newsletter-sub', '.two-col-grid > *', '.page-content > *'
     ];
 
+    // Eerst klassen toevoegen zodat browser de beginstaat (opacity:0) kan renderen,
+    // dan pas na één frame de observer starten zodat de transitie altijd speelt.
+    const elementsToObserve = [];
     selectors.forEach(selector => {
         document.querySelectorAll(selector).forEach((el, i) => {
+            if (el.closest('#mobile-menu')) return; // mobiel menu nooit animeren
             el.classList.add('animate-on-scroll');
             if (isSubpage) el.classList.add('animate-subpage');
             const inGrid = el.closest('.pillars-grid, .cards-grid, .intro-grid, .two-col-grid, .page-content');
             const delay = isSubpage ? 0.08 : 0.1;
             if (inGrid) el.style.transitionDelay = (i % 6) * delay + 's';
-            observer.observe(el);
+            elementsToObserve.push(el);
+        });
+    });
+
+    // Na één animatieframe starten: browser heeft beginstaat (opacity:0) dan al getekend
+    // zodat de transitie ook voor elementen bovenaan de pagina zichtbaar is.
+    requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+            elementsToObserve.forEach(el => observer.observe(el));
         });
     });
 
