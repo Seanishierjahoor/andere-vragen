@@ -1179,3 +1179,21 @@ a {
 .animate-subpage.is-visible {
     transform: translateY(0);
 }
+
+/* Lighter lift for individual text elements on subpages */
+p.animate-subpage,
+h1.animate-subpage,
+h2.animate-subpage,
+h3.animate-subpage,
+h4.animate-subpage {
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+p.animate-subpage.is-visible,
+h1.animate-subpage.is-visible,
+h2.animate-subpage.is-visible,
+h3.animate-subpage.is-visible,
+h4.animate-subpage.is-visible {
+    transform: translateY(0);
+}

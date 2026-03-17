@@ -55,11 +55,23 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }, {
-        threshold: 0.1,
-        rootMargin: isSubpage ? '0px 0px -100px 0px' : '0px 0px -40px 0px'
+        threshold: 0.08,
+        rootMargin: isSubpage ? '0px 0px -50px 0px' : '0px 0px -40px 0px'
     });
 
-    const selectors = [
+    const selectors = isSubpage ? [
+        // Subpage: animate individual elements so mobile gets a true unfolding feel
+        '.section-label',
+        '.page-sidebar',
+        '.card', '.newsletter-title', '.newsletter-sub',
+        '.page-content h1', '.page-content h2', '.page-content h3', '.page-content h4',
+        '.page-content p',
+        '.page-content > * > div',
+        '.two-col-grid h1', '.two-col-grid h2', '.two-col-grid h3', '.two-col-grid h4',
+        '.two-col-grid > * > p',
+        '.two-col-grid > * > div > p',
+        '.two-col-grid > * > div > div',
+    ] : [
         '.hero-title', '.hero-subtitle', '.hero-quote', '.hero-actions',
         '.intro-text', '.intro-item', '.philosophy-title', '.philosophy-body',
         '.philosophy-image', '.section-label', '.pillar', '.closing-title',
@@ -72,8 +84,8 @@ document.addEventListener('DOMContentLoaded', function() {
             el.classList.add('animate-on-scroll');
             if (isSubpage) el.classList.add('animate-subpage');
             const inGrid = el.closest('.pillars-grid, .cards-grid, .intro-grid, .two-col-grid, .page-content');
-            const delay = isSubpage ? 0.15 : 0.1;
-            if (inGrid) el.style.transitionDelay = (i % 4) * delay + 's';
+            const delay = isSubpage ? 0.08 : 0.1;
+            if (inGrid) el.style.transitionDelay = (i % 6) * delay + 's';
             observer.observe(el);
         });
     });
