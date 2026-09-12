@@ -2,7 +2,36 @@ functionsDirectory = "/opt/build/repo/netlify/functions"
 functionsDirectoryOrigin = "config-v1"
 plugins = []
 headers = []
-redirects = []
+
+[[redirects]]
+  from = "/perspective"
+  to = "/praktijk.html"
+  status = 301
+
+[[redirects]]
+  from = "/perspective.html"
+  to = "/praktijk.html"
+  status = 301
+
+[[redirects]]
+  from = "/method"
+  to = "/praktijk.html"
+  status = 301
+
+[[redirects]]
+  from = "/method.html"
+  to = "/praktijk.html"
+  status = 301
+
+[[redirects]]
+  from = "/about.html"
+  to = "/over-mij.html"
+  status = 301
+
+[[redirects]]
+  from = "/collaboration.html"
+  to = "/organisaties.html"
+  status = 301
 
 [build]
 publish = "/opt/build/repo"

@@ -703,7 +703,8 @@ a {
 }
 
 .form-group input,
-.form-group textarea {
+.form-group textarea,
+.form-group select {
     width: 100%;
     border: none;
     border-bottom: 1px solid rgba(26, 26, 26, 0.1);
@@ -711,12 +712,17 @@ a {
     background: transparent;
     font-style: italic;
     font-family: var(--font-sans);
+    font-size: 1rem;
     color: var(--foreground);
     transition: border-color 0.3s;
+    border-radius: 0;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .form-group input:focus,
-.form-group textarea:focus {
+.form-group textarea:focus,
+.form-group select:focus {
     outline: none;
     border-bottom-color: rgba(26, 26, 26, 0.4);
 }

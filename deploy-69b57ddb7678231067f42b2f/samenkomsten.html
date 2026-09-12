@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filosofische gesprekken - Andere Vragen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>@media(max-width:1023px){.page-sidebar{position:relative;top:0;}}</style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon"><span>AV</span></div>
+                <span class="logo-text">Andere Vragen</span>
+            </a>
+            <ul class="nav-desktop">
+                <li><a href="samenkomsten.html" class="active">Samenkomsten</a></li>
+                <li><a href="organisaties.html">Voor organisaties</a></li>
+                <li><a href="praktijk.html">De praktijk</a></li>
+                <li><a href="over-mij.html">Over mij</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menu openen">
+                <svg id="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+                <svg id="close-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </nav>
+    </header>
+
+    <div id="mobile-menu" class="mobile-menu">
+        <ul>
+            <li><a href="samenkomsten.html">Samenkomsten</a></li>
+            <li><a href="organisaties.html">Voor organisaties</a></li>
+            <li><a href="praktijk.html">De praktijk</a></li>
+            <li><a href="over-mij.html">Over mij</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </div>
+
+    <main class="main-content">
+        <div class="page-container">
+            <div class="page-grid">
+                <aside class="page-sidebar">
+                    <p class="section-label italic">Samenkomsten</p>
+                    <h1 style="font-size: clamp(2.25rem, 6vw, 3.75rem); font-family: var(--font-serif); line-height: 1.2; font-style: italic; margin-bottom: 1rem;">Filosofische gesprekken</h1>
+                    <p style="font-size: 1.125rem; font-family: var(--font-serif); font-style: italic; color: rgba(26, 26, 26, 0.6); margin-bottom: 3rem;">Denken is een gezamenlijke activiteit.</p>
+                    <div style="width: 3rem; height: 1px; background-color: rgba(26, 26, 26, 0.1); margin-bottom: 3rem;"></div>
+                </aside>
+
+                <article class="page-content">
+                    <div style="max-width: 42rem;">
+                        <p style="font-size: 1.25rem; line-height: 1.6; color: rgba(26, 26, 26, 0.8); font-weight: 300;">
+                            Elke twee weken kom je met een groep mensen samen in Rotterdam om na te denken over wat blijft terugkomen. Niet om ergens uit te komen. Om te merken wat er gebeurt wanneer een vraag echt gesteld wordt, en er ruimte is om erbij stil te staan.
+                        </p>
+                    </div>
+
+                    <div class="space-y-8" style="max-width: 38rem;">
+                        <p style="font-size: 1.125rem; line-height: 1.6; color: rgba(26, 26, 26, 0.7); font-weight: 300;">
+                            Een samenkomst begint met een vraag, niet met een thema dat al is dichtgetimmerd. Soms brengt iemand die vraag mee. Vaker ontstaat hij ter plekke, uit wat er speelt.
+                        </p>
+                        <p style="font-size: 1.125rem; line-height: 1.6; color: rgba(26, 26, 26, 0.7); font-weight: 300;">
+                            Wat volgt is een gesprek volgens de socratische methode: geen discussie om gelijk te krijgen, geen brainstorm om tot een antwoord te komen, maar het samen uitvouwen van wat een vraag eigenlijk vraagt.
+                        </p>
+                        <p style="font-size: 1.125rem; line-height: 1.6; color: rgba(26, 26, 26, 0.7); font-weight: 300;">
+                            Je hoeft niets voor te bereiden en niets te weten. Filosofische kennis is geen voorwaarde — aandacht wel.
+                        </p>
+                        <p style="font-style: italic; font-family: var(--font-serif); font-size: 1.5rem; color: rgba(26, 26, 26, 0.8); margin-top: 2rem; line-height: 1.6;">
+                            "Ik geloof niet dat denken iets is wat je alleen doet."
+                        </p>
+                    </div>
+
+                    <section style="padding-top: 4rem; border-top: 1px solid var(--border);">
+                        <p class="section-label">Praktisch</p>
+                        <div class="two-col-grid">
+                            <div class="space-y-12">
+                                <div class="space-y-4">
+                                    <h4 style="font-size: 1.25rem; font-family: var(--font-serif); font-style: italic;">Eerste editie</h4>
+                                    <p style="font-size: 1rem; color: rgba(26, 26, 26, 0.7); font-weight: 300; line-height: 1.6;">
+                                        Donderdag 8 oktober, 19:00 — bij Social Art Platform (SAP), Rotterdam.
+                                    </p>
+                                </div>
+                                <div class="space-y-4">
+                                    <h4 style="font-size: 1.25rem; font-family: var(--font-serif); font-style: italic;">Ritme</h4>
+                                    <p style="font-size: 1rem; color: rgba(26, 26, 26, 0.7); font-weight: 300; line-height: 1.6;">
+                                        Daarna elke twee weken, zelfde dag en tijd.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="space-y-12">
+                                <div class="space-y-4">
+                                    <h4 style="font-size: 1.25rem; font-family: var(--font-serif); font-style: italic;">Voor wie</h4>
+                                    <p style="font-size: 1rem; color: rgba(26, 26, 26, 0.7); font-weight: 300; line-height: 1.6;">
+                                        Voor iedereen die tijd wil nemen om te denken. Geen voorkennis nodig.
+                                    </p>
+                                </div>
+                                <div class="space-y-4">
+                                    <h4 style="font-size: 1.25rem; font-family: var(--font-serif); font-style: italic;">Bijdrage</h4>
+                                    <!-- TODO: bijdrage/prijs invullen -->
+                                    <p style="font-size: 1rem; color: rgba(26, 26, 26, 0.7); font-weight: 300; line-height: 1.6;">
+                                        <em>[gratis / bedrag / vrije bijdrage — nog in te vullen]</em>.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </article>
+            </div>
+
+            <div style="max-width: 32rem; margin: 8rem auto 0;">
+                <div class="form-container">
+                    <div id="form-content">
+                        <p class="form-label">Aanmelden</p>
+                        <form name="samenkomst" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="handleFormSubmit(event)">
+                            <input type="hidden" name="form-name" value="samenkomst">
+                            <p style="display:none;"><input name="bot-field"></p>
+                            <div class="form-group">
+                                <label for="name">Naam</label>
+                                <input id="name" name="name" type="text" required placeholder="Je naam">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">E-mailadres</label>
+                                <input id="email" name="email" type="email" required placeholder="jij@email.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="message">Opmerking</label>
+                                <p class="form-hint">Optioneel.</p>
+                                <textarea id="message" name="message" rows="3" placeholder="..."></textarea>
+                            </div>
+                            <div class="form-group form-check">
+                                <label class="check-label">
+                                    <input type="checkbox" name="newsletter" value="ja" checked>
+                                    <span>Ja, ik ontvang graag af en toe een bericht van Andere Vragen.</span>
+                                </label>
+                            </div>
+                            <button type="submit" class="form-submit">Aanmelden</button>
+                        </form>
+                    </div>
+                    <div id="success-message" style="display: none;">
+                        <div class="success-inner">
+                            <p class="success-title">Je aanmelding is verstuurd.</p>
+                            <p class="success-sub">Je ontvangt een bevestiging per e-mail.</p>
+                            <button onclick="resetForm()" class="success-reset">Nog een keer aanmelden</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-about">
+                <h3>Andere Vragen</h3>
+                <p>Een filosofisch-artistieke praktijk. Denken als gezamenlijke activiteit — in samenkomsten, in organisaties en in leiderschap. Luisteren, kijken en vragen stellen die het denken opnieuw openen.</p>
+            </div>
+            <div class="footer-nav">
+                <h4>Navigatie</h4>
+                <ul>
+                    <li><a href="samenkomsten.html">Samenkomsten</a></li>
+                    <li><a href="organisaties.html">Voor organisaties</a></li>
+                    <li><a href="praktijk.html">De praktijk</a></li>
+                    <li><a href="over-mij.html">Over mij</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-contact">
+                <h4>Locaties</h4>
+                <ul>
+                    <li class="location">Rotterdam</li>
+                    <li><a href="mailto:anderevragen@proton.me">anderevragen@proton.me</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-newsletter">
+            <p class="footer-newsletter-label">Nieuwsbrief</p>
+            <form action="https://buttondown.com/api/emails/embed-subscribe/Anderevragen" method="post" class="footer-newsletter-form">
+                <input type="email" name="email" placeholder="Uw e-mailadres" required>
+                <button type="submit">Aanmelden</button>
+            </form>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 Andere Vragen. Alle rechten voorbehouden.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

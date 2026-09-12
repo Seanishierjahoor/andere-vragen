@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andere Vragen — Ontvouwende gesprekken voor leiderschap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon"><span>AV</span></div>
+                <span class="logo-text">Andere Vragen</span>
+            </a>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <div class="page-container" style="max-width: 46rem;">
+            <p class="section-label italic">Andere Vragen</p>
+            <h1 style="font-size: clamp(2.25rem, 6vw, 3.75rem); font-family: var(--font-serif); line-height: 1.2; font-style: italic; margin-bottom: 3rem;">
+                Uw team weet meer dan het uitspreekt.
+            </h1>
+
+            <p style="font-size: 1.375rem; line-height: 1.6; color: rgba(26, 26, 26, 0.85); font-weight: 300; margin-bottom: 4rem; max-width: 40rem;">
+                Ik faciliteer ontvouwende gesprekken. Filosofische, socratische gesprekken die het denken van een team of leiderschapsgroep weer in beweging brengen, zonder een uitkomst op te leggen.
+            </p>
+
+            <div class="space-y-8" style="max-width: 38rem; margin-bottom: 6rem;">
+                <p style="font-size: 1.125rem; line-height: 1.6; color: rgba(26, 26, 26, 0.7); font-weight: 300;">
+                    De meeste vergaderingen zijn gericht op besluiten. Een ontvouwend gesprek is dat niet.
+                </p>
+                <p style="font-size: 1.125rem; line-height: 1.6; color: rgba(26, 26, 26, 0.7); font-weight: 300;">
+                    Het is een gerichte, filosofische bevraging van wat een groep als vanzelfsprekend is gaan beschouwen. Totdat dat weer zichtbaar wordt.
+                </p>
+                <p style="font-size: 1.125rem; line-height: 1.6; color: rgba(26, 26, 26, 0.7); font-weight: 300;">
+                    Ik werk als betrokken buitenstaander: onafhankelijk, zonder belang bij een specifieke uitkomst, nabij genoeg om te zien wat speelt.
+                </p>
+                <p style="font-size: 1.125rem; line-height: 1.6; color: rgba(26, 26, 26, 0.7); font-weight: 300; font-style: italic;">
+                    Geen training. Geen consultancytraject. Eén gesprek is vaak genoeg om te merken of dit werkt.
+                </p>
+            </div>
+
+            <div style="padding-top: 4rem; border-top: 1px solid rgba(0, 0, 0, 0.1); max-width: 32rem;">
+                <div class="form-container">
+                    <div id="form-content">
+                        <p class="form-label">Verkennend gesprek</p>
+                        <form name="congres" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="handleFormSubmit(event)">
+                            <input type="hidden" name="form-name" value="congres">
+                            <p style="display:none;"><input name="bot-field"></p>
+                            <div class="form-group">
+                                <label for="name">Naam</label>
+                                <input id="name" name="name" type="text" required placeholder="Uw naam">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">E-mailadres</label>
+                                <input id="email" name="email" type="email" required placeholder="uw@email.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="message">Wie u bent, en wat er speelt <span style="text-transform: none; letter-spacing: normal; font-style: italic;">(optioneel)</span></label>
+                                <p class="form-hint">Mag u overslaan. Een paar zinnen is al voldoende.</p>
+                                <textarea id="message" name="message" rows="3" placeholder="..."></textarea>
+                            </div>
+                            <button type="submit" class="form-submit">Vraag een verkennend gesprek aan</button>
+                            <p style="font-size: 0.75rem; color: var(--muted); font-style: italic; margin-top: 1.5rem; text-align: center;">
+                                Vrijblijvend. Ik neem dan contact met u op.
+                            </p>
+                        </form>
+                    </div>
+                    <div id="success-message" style="display: none;">
+                        <div class="success-inner">
+                            <p class="success-title">Uw aanvraag is verstuurd.</p>
+                            <p class="success-sub">Ik neem persoonlijk contact met u op.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 3rem; text-align: center;">
+                    <p class="section-label italic">Of direct</p>
+                    <a href="mailto:anderevragen@proton.me" style="font-size: 1.25rem; font-family: var(--font-serif); font-style: italic; color: rgba(26, 26, 26, 0.8);">anderevragen@proton.me</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-bottom" style="border-top: 1px solid var(--border); padding: 2rem 1.5rem;">
+            <p>© 2026 Andere Vragen. Alle rechten voorbehouden.</p>
+            <p class="italic">anderevragen@proton.me</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
