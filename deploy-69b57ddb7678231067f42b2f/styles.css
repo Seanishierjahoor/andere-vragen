@@ -1099,6 +1099,23 @@ a {
 }
 
 /* =====================
+   Bewerk-modus
+   ===================== */
+
+.editing-target {
+    outline: 1px dashed transparent;
+    outline-offset: 2px;
+    cursor: text;
+    transition: outline-color 0.15s, background-color 0.15s;
+}
+
+.editing-target:hover,
+.editing-target:focus {
+    outline-color: rgba(74, 93, 78, 0.55);
+    background-color: rgba(74, 93, 78, 0.05);
+}
+
+/* =====================
    Scroll Animations
    ===================== */
 
