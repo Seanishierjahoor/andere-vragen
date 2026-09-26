@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Beheer samenkomsten - Andere Vragen</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #fcfaf7;
+            color: #1a1a1a;
+            max-width: 52rem;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 6rem;
+            line-height: 1.5;
+        }
+        h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+        .sub { color: #5a5a5a; font-size: 0.875rem; margin-bottom: 2rem; }
+        .locked { padding: 3rem 0; text-align: center; }
+        button {
+            font-family: inherit;
+            font-size: 0.8125rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: #1a1a1a;
+            color: #fcfaf7;
+            border: none;
+            padding: 0.75rem 1.5rem;
+        }
+        .btn-secondary {
+            background: transparent;
+            color: #1a1a1a;
+            border: 1px solid rgba(0,0,0,0.2);
+            padding: 0.75rem 1.5rem;
+        }
+        .btn-danger {
+            background: transparent;
+            color: #8a3b2f;
+            border: 1px solid rgba(138,59,47,0.3);
+            padding: 0.4rem 0.9rem;
+        }
+        .event-row {
+            border: 1px solid rgba(0,0,0,0.1);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .event-row .field { display: flex; flex-direction: column; gap: 0.25rem; }
+        .event-row .field.full { grid-column: 1 / -1; }
+        label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #5a5a5a; }
+        input[type="datetime-local"], input[type="number"], input[type="text"] {
+            font-family: inherit;
+            font-size: 0.9375rem;
+            padding: 0.5rem;
+            border: 1px solid rgba(0,0,0,0.15);
+            background: #fff;
+        }
+        .row-footer {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .add-row {
+            margin: 1rem 0 2.5rem;
+        }
+        .settings {
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding-top: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+        .settings label { display: flex; align-items: center; gap: 0.6rem; text-transform: none; font-size: 0.9375rem; color: #1a1a1a; }
+        .settings .hint { font-size: 0.8125rem; color: #5a5a5a; margin-top: 0.4rem; margin-left: 1.6rem; text-transform: none; }
+        .save-bar { display: flex; align-items: center; gap: 1rem; }
+        #status { font-size: 0.8125rem; color: #5a5a5a; }
+        #status.error { color: #8a3b2f; }
+        #status.ok { color: #3f5c3f; }
+        @media (max-width: 560px) {
+            .event-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Beheer samenkomsten</h1>
+    <p class="sub">Data en instellingen voor de aanmeldpagina. Wijzigingen worden gecommit naar GitHub — publiceer daarna zoals gebruikelijk de nieuwe deploy in Netlify.</p>
+
+    <div id="locked" class="locked">
+        <button type="button" class="btn-primary" id="unlock-btn">Ontgrendelen</button>
+    </div>
+
+    <div id="editor" style="display:none;">
+        <div id="events"></div>
+        <div class="add-row">
+            <button type="button" class="btn-secondary" id="add-event-btn">+ Nieuwe datum</button>
+        </div>
+
+        <div class="settings">
+            <label>
+                <input type="checkbox" id="een-per-keer">
+                Max één actieve aanmelding tegelijk per e-mailadres
+            </label>
+            <p class="hint">Voorkomt dat dezelfde mensen zich alvast voor meerdere komende data inschrijven. Uitzetten kan hier.</p>
+        </div>
+
+        <div class="save-bar">
+            <button type="button" class="btn-primary" id="save-btn">Opslaan</button>
+            <span id="status"></span>
+        </div>
+    </div>
+
+    <script>
+    (function () {
+        var password = null;
+        var samenkomsten = [];
+        var instellingen = { eenPerKeer: true };
+
+        var lockedEl = document.getElementById('locked');
+        var editorEl = document.getElementById('editor');
+        var eventsEl = document.getElementById('events');
+        var statusEl = document.getElementById('status');
+        var eenPerKeerEl = document.getElementById('een-per-keer');
+
+        function setStatus(text, kind) {
+            statusEl.textContent = text || '';
+            statusEl.className = kind || '';
+        }
+
+        // Geeft de UTC-offset (+02:00 / +01:00) van Europe/Amsterdam terug voor een gegeven instant.
+        function amsterdamOffset(refDate) {
+            var fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Amsterdam', timeZoneName: 'shortOffset' });
+            var parts = fmt.formatToParts(refDate);
+            var tzPart = parts.find(function (p) { return p.type === 'timeZoneName'; });
+            var match = /GMT([+-]\d+)/.exec(tzPart ? tzPart.value : '');
+            var hours = match ? parseInt(match[1], 10) : 1;
+            var sign = hours >= 0 ? '+' : '-';
+            var abs = String(Math.abs(hours)).padStart(2, '0');
+            return sign + abs + ':00';
+        }
+
+        // "2026-10-08T19:00" (Amsterdamse wandklok-tijd, uit een datetime-local input) -> ISO met offset.
+        function localInputToIso(value) {
+            if (!value) return '';
+            var naiveUtc = new Date(value + ':00Z');
+            var offset = amsterdamOffset(naiveUtc);
+            return value + ':00' + offset;
+        }
+
+        // ISO met offset -> "2026-10-08T19:00" weergegeven in Europe/Amsterdam, voor een datetime-local input.
+        function isoToLocalInput(iso) {
+            var date = new Date(iso);
+            if (isNaN(date.getTime())) return '';
+            var fmt = new Intl.DateTimeFormat('en-CA', {
+                timeZone: 'Europe/Amsterdam', hour12: false,
+                year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+            });
+            var parts = fmt.formatToParts(date);
+            var map = {};
+            parts.forEach(function (p) { map[p.type] = p.value; });
+            return map.year + '-' + map.month + '-' + map.day + 'T' + map.hour + ':' + map.minute;
+        }
+
+        function newId() {
+            return 'sk-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        }
+
+        function renderEvents() {
+            eventsEl.innerHTML = '';
+            samenkomsten.forEach(function (event, index) {
+                var row = document.createElement('div');
+                row.className = 'event-row';
+                row.innerHTML =
+                    '<div class="field">' +
+                        '<label>Datum en tijd</label>' +
+                        '<input type="datetime-local" data-field="start" value="' + isoToLocalInput(event.start) + '">' +
+                    '</div>' +
+                    '<div class="field">' +
+                        '<label>Duur (minuten)</label>' +
+                        '<input type="number" min="1" data-field="duurMinuten" value="' + event.duurMinuten + '">' +
+                    '</div>' +
+                    '<div class="field full">' +
+                        '<label>Locatie</label>' +
+                        '<input type="text" data-field="locatie" value="' + escapeAttr(event.locatie) + '">' +
+                    '</div>' +
+                    '<div class="field">' +
+                        '<label>Capaciteit</label>' +
+                        '<input type="number" min="1" data-field="capaciteit" value="' + event.capaciteit + '">' +
+                    '</div>' +
+                    '<div class="row-footer">' +
+                        '<button type="button" class="btn-danger" data-action="remove">Verwijderen</button>' +
+                    '</div>';
+
+                row.querySelectorAll('[data-field]').forEach(function (input) {
+                    input.addEventListener('input', function () {
+                        var field = input.getAttribute('data-field');
+                        if (field === 'start') {
+                            samenkomsten[index].start = localInputToIso(input.value);
+                        } else if (field === 'duurMinuten' || field === 'capaciteit') {
+                            samenkomsten[index][field] = parseInt(input.value, 10) || 0;
+                        } else {
+                            samenkomsten[index][field] = input.value;
+                        }
+                    });
+                });
+
+                row.querySelector('[data-action="remove"]').addEventListener('click', function () {
+                    if (!window.confirm('Deze samenkomst verwijderen? Bestaande aanmeldingen blijven bewaard maar tonen dan niet meer.')) return;
+                    samenkomsten.splice(index, 1);
+                    renderEvents();
+                });
+
+                eventsEl.appendChild(row);
+            });
+        }
+
+        function escapeAttr(value) {
+            return String(value == null ? '' : value).replace(/"/g, '&quot;');
+        }
+
+        document.getElementById('add-event-btn').addEventListener('click', function () {
+            var last = samenkomsten[samenkomsten.length - 1];
+            samenkomsten.push({
+                id: newId(),
+                start: '',
+                duurMinuten: last ? last.duurMinuten : 120,
+                locatie: last ? last.locatie : '',
+                capaciteit: last ? last.capaciteit : 15
+            });
+            renderEvents();
+        });
+
+        document.getElementById('unlock-btn').addEventListener('click', function () {
+            var input = window.prompt('Wachtwoord:');
+            if (!input) return;
+            setStatus('Laden...', '');
+            fetch('/.netlify/functions/get-beheer-samenkomsten', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: input })
+            })
+                .then(function (r) { return r.json().then(function (data) { return { ok: r.ok, data: data }; }); })
+                .then(function (result) {
+                    if (!result.ok || !result.data.ok) {
+                        setStatus((result.data && result.data.error) || 'Onbekende fout.', 'error');
+                        return;
+                    }
+                    password = input;
+                    samenkomsten = result.data.samenkomsten || [];
+                    instellingen = result.data.instellingen || { eenPerKeer: true };
+                    eenPerKeerEl.checked = !!instellingen.eenPerKeer;
+                    renderEvents();
+                    lockedEl.style.display = 'none';
+                    editorEl.style.display = 'block';
+                    setStatus('', '');
+                })
+                .catch(function () {
+                    setStatus('Kon niet laden. Controleer je verbinding.', 'error');
+                });
+        });
+
+        document.getElementById('save-btn').addEventListener('click', function () {
+            instellingen.eenPerKeer = eenPerKeerEl.checked;
+
+            for (var i = 0; i < samenkomsten.length; i++) {
+                var e = samenkomsten[i];
+                if (!e.start || !e.locatie || !e.capaciteit) {
+                    setStatus('Vul bij elke samenkomst datum/tijd, locatie en capaciteit in.', 'error');
+                    return;
+                }
+            }
+
+            setStatus('Opslaan...', '');
+            fetch('/.netlify/functions/save-beheer-samenkomsten', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: password, samenkomsten: samenkomsten, instellingen: instellingen })
+            })
+                .then(function (r) { return r.json().then(function (data) { return { ok: r.ok, data: data }; }); })
+                .then(function (result) {
+                    if (!result.ok || !result.data.ok) {
+                        setStatus((result.data && result.data.error) || 'Onbekende fout.', 'error');
+                        return;
+                    }
+                    setStatus('Opgeslagen op GitHub. Publiceer de nieuwe deploy in Netlify om het live te zetten.', 'ok');
+                })
+                .catch(function () {
+                    setStatus('Fout bij opslaan. Controleer je verbinding en probeer opnieuw.', 'error');
+                });
+        });
+    })();
+    </script>
+</body>
+</html>

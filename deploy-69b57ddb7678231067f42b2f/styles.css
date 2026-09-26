@@ -832,6 +832,100 @@ a {
     margin-top: 0.5rem;
 }
 
+/* Date picker (samenkomsten) */
+.date-picker {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 3rem;
+}
+
+@media (min-width: 640px) {
+    .date-picker {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.date-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: left;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    background-color: white;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+.date-card:hover {
+    border-color: rgba(26, 26, 26, 0.3);
+}
+
+.date-card.selected {
+    border-color: var(--foreground);
+    background-color: rgba(217, 210, 197, 0.15);
+}
+
+.date-card-date {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 1.125rem;
+    color: rgba(26, 26, 26, 0.9);
+}
+
+.date-card-time {
+    font-size: 0.8125rem;
+    color: var(--muted);
+    font-weight: 300;
+}
+
+.date-card-status {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--moss);
+}
+
+.date-card.full {
+    background-color: rgba(217, 210, 197, 0.05);
+}
+
+.date-picker-loading,
+.date-picker-empty {
+    font-size: 0.875rem;
+    color: var(--muted);
+    font-style: italic;
+}
+
+.form-error {
+    font-size: 0.8125rem;
+    color: #8a3b2f;
+    margin-bottom: 2rem;
+    display: none;
+}
+
+.success-calendar {
+    display: none;
+    margin: 0 auto 1.5rem;
+    width: fit-content;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(26, 26, 26, 0.2);
+    padding: 0 0 2px 0;
+    margin-bottom: 1.5rem;
+    transition: color 0.3s, border-color 0.3s;
+}
+
+.success-calendar:hover {
+    color: var(--foreground);
+    border-color: var(--foreground);
+}
+
 /* Success message */
 .success-inner {
     padding: 4rem 2rem;
