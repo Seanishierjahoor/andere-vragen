@@ -28,7 +28,9 @@
   to = "/organisaties.html"
   status = 301
 
+# Paden hieronder zijn relatief aan de base directory.
 [build]
+  base = "deploy-69b57ddb7678231067f42b2f"
   publish = "."
   functions = "netlify/functions"
   # Zonder build command slaat Netlify de build-stap over en worden functies nooit gebundeld.
