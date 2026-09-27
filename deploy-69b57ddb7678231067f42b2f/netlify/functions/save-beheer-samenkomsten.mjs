@@ -5,6 +5,8 @@
 // Na het opslaan bouwt Netlify een nieuwe deploy; die moet je zoals gebruikelijk
 // handmatig publiceren voor de wijziging live gaat.
 
+import { wachtwoordKlopt } from "./lib/wachtwoord.mjs";
+
 const OWNER = "Seanishierjahoor";
 const REPO = "andere-vragen";
 const BRANCH = "main";
@@ -29,7 +31,7 @@ export default async (req) => {
       );
     }
 
-    if (password !== EDITOR_PASSWORD) {
+    if (!wachtwoordKlopt(password, EDITOR_PASSWORD)) {
       return new Response(JSON.stringify({ ok: false, error: "Onjuist wachtwoord." }), {
         status: 401,
         headers: { "Content-Type": "application/json" },

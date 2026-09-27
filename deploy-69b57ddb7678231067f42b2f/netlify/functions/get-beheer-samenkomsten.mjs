@@ -2,6 +2,7 @@
 // beheerscherm (/beheer-samenkomsten.html). Wachtwoord vereist — deze data bevat
 // de capaciteit én de namenlijsten, die nooit publiek zichtbaar mogen zijn.
 
+import { wachtwoordKlopt } from "./lib/wachtwoord.mjs";
 import { getStore } from "@netlify/blobs";
 import samenkomsten from "./data/samenkomsten.mjs";
 import instellingen from "./data/instellingen.mjs";
@@ -22,7 +23,7 @@ export default async (req) => {
       );
     }
 
-    if (password !== EDITOR_PASSWORD) {
+    if (!wachtwoordKlopt(password, EDITOR_PASSWORD)) {
       return new Response(JSON.stringify({ ok: false, error: "Onjuist wachtwoord." }), {
         status: 401,
         headers: { "Content-Type": "application/json" },

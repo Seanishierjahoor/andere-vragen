@@ -2,6 +2,7 @@
 // van de wachtlijst naar bevestigd (mag capaciteit overschrijden — bewuste keuze van
 // de beheerder). Schrijft de bijgewerkte lijst(en) terug naar Blobs.
 
+import { wachtwoordKlopt } from "./lib/wachtwoord.mjs";
 import { getStore } from "@netlify/blobs";
 import samenkomsten from "./data/samenkomsten.mjs";
 
@@ -20,7 +21,7 @@ export default async (req) => {
         { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
-    if (password !== EDITOR_PASSWORD) {
+    if (!wachtwoordKlopt(password, EDITOR_PASSWORD)) {
       return new Response(JSON.stringify({ ok: false, error: "Onjuist wachtwoord." }), {
         status: 401,
         headers: { "Content-Type": "application/json" },
