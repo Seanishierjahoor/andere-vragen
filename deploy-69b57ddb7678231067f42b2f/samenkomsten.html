@@ -48,109 +48,112 @@
         </ul>
     </div>
 
-    <main class="main-content">
-        <div class="page-container">
-            <div class="page-grid">
-                <aside class="page-sidebar">
-                    <p class="section-label italic">Samenkomsten</p>
-                    <h1 style="font-size: clamp(2.25rem, 6vw, 3.75rem); font-family: var(--font-serif); line-height: 1.2; font-style: italic; margin-bottom: 1rem;">Filosofische gesprekken</h1>
-                    <p style="font-size: 1.125rem; font-family: var(--font-serif); font-style: italic; color: rgba(26, 26, 26, 0.6); margin-bottom: 3rem;">Denken is een gezamenlijke activiteit.</p>
-                    <div style="width: 3rem; height: 1px; background-color: rgba(26, 26, 26, 0.1); margin-bottom: 3rem;"></div>
-                </aside>
+    <main class="main-content sk">
+        <div class="sk-container">
+            <header class="sk-intro">
+                <p class="sk-label">Samenkomsten</p>
+                <h1 class="sk-title">Filosofische gesprekken</h1>
+                <p class="sk-lead">
+                    Om de twee weken praat een kleine groep in Rotterdam twee uur lang over één vraag.
+                    Je hoeft niets te weten of voor te bereiden. Nieuwsgierigheid is genoeg.
+                </p>
+            </header>
 
-                <article class="page-content">
-                    <div style="max-width: 42rem;">
-                        <p style="font-size: 1.25rem; line-height: 1.6; color: rgba(26, 26, 26, 0.8); font-weight: 300;">
-                            Elke twee weken kom je met een groep mensen samen in Rotterdam om na te denken over wat blijft terugkomen. Niet om ergens uit te komen. Om te merken wat er gebeurt wanneer een vraag echt gesteld wordt, en er ruimte is om erbij stil te staan.
-                        </p>
-                    </div>
-
-                    <div class="space-y-8" style="max-width: 38rem;">
-                        <p style="font-size: 1.125rem; line-height: 1.6; color: rgba(26, 26, 26, 0.7); font-weight: 300;">
-                            Een samenkomst begint met een vraag — soms meegebracht, vaker ter plekke ontstaan — en volgt de socratische methode: samen uitvouwen wat die vraag eigenlijk vraagt. Voorbereiding is niet nodig. Filosofische kennis is geen voorwaarde, aandacht wel.
-                        </p>
-                        <p style="font-style: italic; font-family: var(--font-serif); font-size: 1.5rem; color: rgba(26, 26, 26, 0.8); margin-top: 2rem; line-height: 1.6;">
-                            "Ik geloof niet dat denken iets is wat je alleen doet."
-                        </p>
-                    </div>
-
-                    <section style="padding-top: 4rem; border-top: 1px solid var(--border);">
-                        <p class="section-label">Praktisch</p>
-                        <div class="two-col-grid">
-                            <div class="space-y-12">
-                                <div class="space-y-4">
-                                    <h4 style="font-size: 1.25rem; font-family: var(--font-serif); font-style: italic;">Ritme</h4>
-                                    <p style="font-size: 1rem; color: rgba(26, 26, 26, 0.7); font-weight: 300; line-height: 1.6;">
-                                        Elke twee weken, in Rotterdam. Kies hieronder een datum.
-                                    </p>
-                                </div>
-                                <div class="space-y-4">
-                                    <h4 style="font-size: 1.25rem; font-family: var(--font-serif); font-style: italic;">Voor wie</h4>
-                                    <p style="font-size: 1rem; color: rgba(26, 26, 26, 0.7); font-weight: 300; line-height: 1.6;">
-                                        Voor iedereen die tijd wil nemen om te denken. Geen voorkennis nodig.
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="space-y-12">
-                                <div class="space-y-4">
-                                    <h4 style="font-size: 1.25rem; font-family: var(--font-serif); font-style: italic;">Bijdrage</h4>
-                                    <!-- TODO: bijdrage/prijs invullen -->
-                                    <p style="font-size: 1rem; color: rgba(26, 26, 26, 0.7); font-weight: 300; line-height: 1.6;">
-                                        <em>[gratis / bedrag / vrije bijdrage, nog in te vullen]</em>.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+            <div class="sk-grid">
+                <div class="sk-info">
+                    <section class="sk-block">
+                        <h2 class="sk-heading">In het kort</h2>
+                        <dl class="sk-facts">
+                            <div><dt>Wanneer</dt><dd>Om de twee weken, 's avonds. Data staan bij het aanmelden.</dd></div>
+                            <div><dt>Hoe lang</dt><dd>Twee uur</dd></div>
+                            <div><dt>Waar</dt><dd>Social Art Platform (SAP), Rotterdam</dd></div>
+                            <div><dt>Groep</dt><dd>Klein, zodat iedereen aan bod kan komen</dd></div>
+                            <div><dt>Kosten</dt><dd><!-- TODO: bijdrage/prijs invullen --><em>Nog in te vullen</em></dd></div>
+                            <div><dt>Voorkennis</dt><dd>Niet nodig</dd></div>
+                        </dl>
                     </section>
 
-                    <section style="padding-top: 4rem;">
-                        <p class="section-label">Kies een datum</p>
-                        <div id="date-picker" class="date-picker">
-                            <p class="date-picker-loading">Data laden…</p>
+                    <section class="sk-block">
+                        <h2 class="sk-heading">Zo gaat een avond</h2>
+                        <ol class="sk-steps">
+                            <li><strong>Een vraag.</strong> Soms neemt iemand er een mee, vaker ontstaat hij ter plekke. Het kan een grote vraag zijn of iets uit je eigen week.</li>
+                            <li><strong>Samen onderzoeken.</strong> We volgen de socratische methode: wat vragen we eigenlijk, welk voorbeeld uit ons eigen leven past erbij, en waar lopen we vast?</li>
+                            <li><strong>Iemand begeleidt.</strong> Een gespreksleider houdt het tempo laag en zorgt dat het gesprek bij de vraag blijft. Je denkt mee op je eigen manier; luisteren hoort er ook bij.</li>
+                        </ol>
+                        <p class="sk-quote">"Ik geloof niet dat denken iets is wat je alleen doet."</p>
+                    </section>
+
+                    <section class="sk-block">
+                        <h2 class="sk-heading">Veelgestelde vragen</h2>
+                        <div class="sk-faq">
+                            <details>
+                                <summary>Moet ik iets van filosofie weten?</summary>
+                                <p>Nee. We werken met voorbeelden uit je eigen ervaring, niet met boeken of namen van filosofen.</p>
+                            </details>
+                            <details>
+                                <summary>Kan ik alleen komen?</summary>
+                                <p>Ja. Niemand hoeft elkaar vooraf te kennen.</p>
+                            </details>
+                            <details>
+                                <summary>Moet ik bij elke samenkomst zijn?</summary>
+                                <p>Nee. Je meldt je per keer aan, dus je kiest zelf welke avonden je komt.</p>
+                            </details>
+                            <details>
+                                <summary>Wat als een avond vol is?</summary>
+                                <p>Dan kom je op de wachtlijst. Komt er een plek vrij, dan krijg je bericht.</p>
+                            </details>
+                            <details>
+                                <summary>Ik kan toch niet. Wat nu?</summary>
+                                <p>Mail even naar anderevragen@proton.me. Dan kan iemand van de wachtlijst je plek krijgen.</p>
+                            </details>
                         </div>
                     </section>
-                </article>
-            </div>
-
-            <div style="max-width: 32rem; margin: 8rem auto 0;">
-                <div class="form-container">
-                    <div id="form-content">
-                        <p class="form-label">Aanmelden</p>
-                        <form name="samenkomst" id="samenkomst-form">
-                            <input type="hidden" name="event_id" id="event_id" value="">
-                            <p style="display:none;"><input name="bot-field"></p>
-                            <p id="form-error" class="form-error"></p>
-                            <div class="form-group">
-                                <label for="name">Naam</label>
-                                <input id="name" name="name" type="text" required placeholder="Je naam">
-                            </div>
-                            <div class="form-group">
-                                <label for="email">E-mailadres</label>
-                                <input id="email" name="email" type="email" required placeholder="jij@email.com">
-                            </div>
-                            <div class="form-group">
-                                <label for="message">Opmerking</label>
-                                <p class="form-hint">Optioneel.</p>
-                                <textarea id="message" name="message" rows="3" placeholder="..."></textarea>
-                            </div>
-                            <div class="form-group form-check">
-                                <label class="check-label">
-                                    <input type="checkbox" name="newsletter" value="ja" checked>
-                                    <span>Ja, ik ontvang graag af en toe een bericht van Andere Vragen.</span>
-                                </label>
-                            </div>
-                            <button type="submit" class="form-submit">Aanmelden</button>
-                        </form>
-                    </div>
-                    <div id="success-message" style="display: none;">
-                        <div class="success-inner">
-                            <p class="success-title">Je aanmelding is verstuurd.</p>
-                            <p class="success-sub">Je ontvangt een bevestiging per e-mail.</p>
-                            <a href="#" target="_blank" rel="noopener" class="success-calendar">Voeg toe aan Google Calendar</a>
-                            <button type="button" id="reset-button" class="success-reset">Nog een keer aanmelden</button>
-                        </div>
-                    </div>
                 </div>
+
+                <aside class="sk-signup" id="aanmelden">
+                    <div class="form-container sk-form">
+                        <div id="form-content">
+                            <p class="sk-label">Aanmelden</p>
+                            <p class="sk-step">1. Kies een datum</p>
+                            <div id="date-picker" class="date-picker">
+                                <p class="date-picker-loading">Data laden…</p>
+                            </div>
+                            <p class="sk-step">2. Je gegevens</p>
+                            <form name="samenkomst" id="samenkomst-form">
+                                <input type="hidden" name="event_id" id="event_id" value="">
+                                <p style="display:none;"><input name="bot-field"></p>
+                                <p id="form-error" class="form-error"></p>
+                                <div class="form-group">
+                                    <label for="name">Naam</label>
+                                    <input id="name" name="name" type="text" required placeholder="Je naam">
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">E-mailadres</label>
+                                    <input id="email" name="email" type="email" required placeholder="jij@email.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="message">Opmerking <span class="sk-optional">(optioneel)</span></label>
+                                    <textarea id="message" name="message" rows="2" placeholder="..."></textarea>
+                                </div>
+                                <div class="form-group form-check">
+                                    <label class="check-label">
+                                        <input type="checkbox" name="newsletter" value="ja" checked>
+                                        <span>Ja, ik ontvang graag af en toe een bericht van Andere Vragen.</span>
+                                    </label>
+                                </div>
+                                <button type="submit" class="form-submit">Aanmelden</button>
+                            </form>
+                        </div>
+                        <div id="success-message" style="display: none;">
+                            <div class="success-inner">
+                                <p class="success-title">Je aanmelding is verstuurd.</p>
+                                <p class="success-sub">Je ontvangt een bevestiging per e-mail.</p>
+                                <a href="#" target="_blank" rel="noopener" class="success-calendar">Voeg toe aan Google Calendar</a>
+                                <button type="button" id="reset-button" class="success-reset">Nog een keer aanmelden</button>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
             </div>
         </div>
     </main>
@@ -220,7 +223,7 @@
             var end = new Date(start.getTime() + ev.duurMinuten * 60000);
             var params = new URLSearchParams({
                 action: 'TEMPLATE',
-                text: 'Filosofische gesprekken — Andere Vragen',
+                text: 'Filosofische gesprekken, Andere Vragen',
                 dates: toIcsUtc(start) + '/' + toIcsUtc(end),
                 details: 'Filosofisch gesprek volgens de socratische methode. https://andere-vragen.nl/samenkomsten.html',
                 location: ev.locatie
@@ -251,9 +254,9 @@
                 btn.type = 'button';
                 btn.className = 'date-card' + (ev.status === 'vol' ? ' full' : '');
                 var html = '<span class="date-card-date">' + parts.datum + '</span>' +
-                    '<span class="date-card-time">' + parts.tijd + ' — ' + ev.locatie + '</span>';
+                    '<span class="date-card-time">' + parts.tijd + ' uur · ' + ev.locatie + '</span>';
                 if (ev.status === 'vol') {
-                    html += '<span class="date-card-status">Vol — plaatsing op wachtlijst</span>';
+                    html += '<span class="date-card-status">Vol, je komt op de wachtlijst</span>';
                 }
                 btn.innerHTML = html;
                 btn.addEventListener('click', function () {
@@ -266,6 +269,7 @@
                 });
                 datePicker.appendChild(btn);
             });
+            if (events.length === 1) datePicker.querySelector('.date-card').click();
         }
 
         fetch('/.netlify/functions/get-samenkomsten')

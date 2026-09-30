@@ -58,7 +58,7 @@ export default async (req) => {
         return new Response(
           JSON.stringify({
             error: "already_registered",
-            message: `Je bent al aangemeld voor de samenkomst op ${formatDatumTijdNL(conflict.start)}. Voor nu kun je maar voor één samenkomst tegelijk inschrijven — kom een volgende keer opnieuw langs.`,
+            message: `Je bent al aangemeld voor de samenkomst op ${formatDatumTijdNL(conflict.start)}. Voor nu kun je maar voor één samenkomst tegelijk inschrijven. Kom een volgende keer opnieuw langs.`,
           }),
           { status: 409 }
         );
@@ -175,7 +175,7 @@ function buildIcs(event) {
     `DTSTAMP:${toIcsUtc(new Date())}`,
     `DTSTART:${toIcsUtc(start)}`,
     `DTEND:${toIcsUtc(end)}`,
-    `SUMMARY:${escapeIcsText("Filosofische gesprekken — Andere Vragen")}`,
+    `SUMMARY:${escapeIcsText("Filosofische gesprekken, Andere Vragen")}`,
     `LOCATION:${escapeIcsText(event.locatie)}`,
     `DESCRIPTION:${escapeIcsText("Filosofisch gesprek volgens de socratische methode. https://andere-vragen.nl/samenkomsten.html")}`,
     "END:VEVENT",
@@ -189,7 +189,7 @@ function buildGoogleCalendarUrl(event) {
   const end = new Date(start.getTime() + event.duurMinuten * 60 * 1000);
   const params = new URLSearchParams({
     action: "TEMPLATE",
-    text: "Filosofische gesprekken — Andere Vragen",
+    text: "Filosofische gesprekken, Andere Vragen",
     dates: `${toIcsUtc(start)}/${toIcsUtc(end)}`,
     details: "Filosofisch gesprek volgens de socratische methode. https://andere-vragen.nl/samenkomsten.html",
     location: event.locatie,
@@ -203,7 +203,7 @@ async function sendNotification({ RESEND_API_KEY, name, email, message, newslett
     dateStyle: "full",
     timeStyle: "short",
   });
-  const title = isWaitlist ? "WACHTLIJST — nieuwe aanmelding samenkomst" : "Nieuwe aanmelding samenkomst";
+  const title = isWaitlist ? "WACHTLIJST: nieuwe aanmelding samenkomst" : "Nieuwe aanmelding samenkomst";
   const wanneer = formatDatumTijdNL(event.start);
 
   const html = `
@@ -213,10 +213,10 @@ async function sendNotification({ RESEND_API_KEY, name, email, message, newslett
         <p style="color: #5a5a5a; font-size: 13px; margin-top: 8px;">${submittedAt}</p>
       </div>
       <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
-        <tr><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; width: 120px; vertical-align: top;">Naam</td><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8;">${name || "—"}</td></tr>
-        <tr><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; vertical-align: top;">E-mail</td><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8;"><a href="mailto:${email}" style="color: #1a1a1a;">${email || "—"}</a></td></tr>
-        <tr><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; vertical-align: top;">Samenkomst</td><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8;">${wanneer} — ${event.locatie}</td></tr>
-        <tr><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; vertical-align: top;">Opmerking</td><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; white-space: pre-wrap;">${message || "—"}</td></tr>
+        <tr><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; width: 120px; vertical-align: top;">Naam</td><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8;">${name || "-"}</td></tr>
+        <tr><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; vertical-align: top;">E-mail</td><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8;"><a href="mailto:${email}" style="color: #1a1a1a;">${email || "-"}</a></td></tr>
+        <tr><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; vertical-align: top;">Samenkomst</td><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8;">${wanneer}, ${event.locatie}</td></tr>
+        <tr><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; vertical-align: top;">Opmerking</td><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; white-space: pre-wrap;">${message || "-"}</td></tr>
         <tr><td style="padding: 12px 0; color: #5a5a5a; vertical-align: top;">Nieuwsbrief</td><td style="padding: 12px 0;">${newsletter ? "Ja, wil zich aanmelden" : "Nee"}</td></tr>
       </table>
       <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e2dd;">
@@ -224,7 +224,7 @@ async function sendNotification({ RESEND_API_KEY, name, email, message, newslett
       </div>
     </div>
   `;
-  const text = `${title}\n${submittedAt}\n\nNaam: ${name || "—"}\nE-mail: ${email || "—"}\nSamenkomst: ${wanneer} — ${event.locatie}\nOpmerking: ${message || "—"}\nNieuwsbrief: ${newsletter ? "Ja" : "Nee"}`;
+  const text = `${title}\n${submittedAt}\n\nNaam: ${name || "-"}\nE-mail: ${email || "-"}\nSamenkomst: ${wanneer}, ${event.locatie}\nOpmerking: ${message || "-"}\nNieuwsbrief: ${newsletter ? "Ja" : "Nee"}`;
 
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -232,7 +232,7 @@ async function sendNotification({ RESEND_API_KEY, name, email, message, newslett
     body: JSON.stringify({
       from: "Andere Vragen <onboarding@resend.dev>",
       to: ["anderevragen@proton.me"],
-      subject: `${title} — ${name || "onbekend"}`,
+      subject: `${title}: ${name || "onbekend"}`,
       html,
       text,
       reply_to: email || undefined,
@@ -248,7 +248,7 @@ async function sendConfirmation({ RESEND_API_KEY, name, email, event, isWaitlist
   const paragraphs = isWaitlist
     ? [
         `Dank voor je aanmelding voor de samenkomst op ${wanneer}.`,
-        "Deze datum is op dit moment vol. Je staat op de wachtlijst — ik laat het weten zodra er een plek vrijkomt.",
+        "Deze datum is op dit moment vol. Je staat op de wachtlijst. Ik laat het weten zodra er een plek vrijkomt.",
         "Met vriendelijke groet,\nAndere Vragen",
       ]
     : [
@@ -265,7 +265,7 @@ async function sendConfirmation({ RESEND_API_KEY, name, email, event, isWaitlist
   const payload = {
     from: "Andere Vragen <onboarding@resend.dev>",
     to: [email],
-    subject: isWaitlist ? "Je staat op de wachtlijst — Andere Vragen" : "Je aanmelding is bevestigd — Andere Vragen",
+    subject: isWaitlist ? "Je staat op de wachtlijst | Andere Vragen" : "Je aanmelding is bevestigd | Andere Vragen",
     html,
     text,
   };

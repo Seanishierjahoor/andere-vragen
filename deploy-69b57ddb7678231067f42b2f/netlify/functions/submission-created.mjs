@@ -25,7 +25,7 @@ export default async (req) => {
 
     const labels = FORM_LABELS[formName];
     if (!labels) {
-      return new Response("Skipped — unknown form submission", { status: 200 });
+      return new Response("Skipped: unknown form submission", { status: 200 });
     }
 
     // Bevestigingsmail aan de aanvrager zelf — alleen voor formulieren die dat nodig hebben.
@@ -65,12 +65,12 @@ export default async (req) => {
         <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
           <tr>
             <td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; width: 100px; vertical-align: top;">Naam</td>
-            <td style="padding: 12px 0; border-bottom: 1px solid #f0ede8;">${name || "—"}</td>
+            <td style="padding: 12px 0; border-bottom: 1px solid #f0ede8;">${name || "-"}</td>
           </tr>
           <tr>
             <td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; vertical-align: top;">E-mail</td>
             <td style="padding: 12px 0; border-bottom: 1px solid #f0ede8;">
-              <a href="mailto:${email}" style="color: #1a1a1a;">${email || "—"}</a>
+              <a href="mailto:${email}" style="color: #1a1a1a;">${email || "-"}</a>
             </td>
           </tr>
           ${onderwerp ? `<tr>
@@ -79,7 +79,7 @@ export default async (req) => {
           </tr>` : ""}
           <tr>
             <td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; vertical-align: top;">${labels.messageLabel}</td>
-            <td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; white-space: pre-wrap;">${message || "—"}</td>
+            <td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; white-space: pre-wrap;">${message || "-"}</td>
           </tr>
           <tr>
             <td style="padding: 12px 0; color: #5a5a5a; vertical-align: top;">Nieuwsbrief</td>
@@ -100,7 +100,7 @@ export default async (req) => {
       </div>
     `;
 
-    const textBody = `${labels.title} via Andere Vragen\n${submittedAt}\n\nNaam: ${name || "—"}\nE-mail: ${email || "—"}${onderwerp ? `\nOnderwerp: ${onderwerp}` : ""}\n${labels.messageLabel}: ${message || "—"}\nNieuwsbrief: ${newsletter === "ja" ? "Ja" : "Nee"}\n\nBeantwoord via: mailto:${email}`;
+    const textBody = `${labels.title} via Andere Vragen\n${submittedAt}\n\nNaam: ${name || "-"}\nE-mail: ${email || "-"}${onderwerp ? `\nOnderwerp: ${onderwerp}` : ""}\n${labels.messageLabel}: ${message || "-"}\nNieuwsbrief: ${newsletter === "ja" ? "Ja" : "Nee"}\n\nBeantwoord via: mailto:${email}`;
 
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -111,7 +111,7 @@ export default async (req) => {
       body: JSON.stringify({
         from: "Andere Vragen <onboarding@resend.dev>",
         to: ["anderevragen@proton.me"],
-        subject: `${labels.subject} ${name || "onbekend"} — Andere Vragen`,
+        subject: `${labels.subject} ${name || "onbekend"} | Andere Vragen`,
         html: htmlBody,
         text: textBody,
         reply_to: email || undefined,
