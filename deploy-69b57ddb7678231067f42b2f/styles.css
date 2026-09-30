@@ -1319,12 +1319,12 @@ h4.animate-subpage.is-visible {
 .sk-container {
     max-width: 1120px;
     margin: 0 auto;
-    padding: 2.5rem 1.5rem 4rem;
+    padding: 2rem 1.5rem 4rem;
 }
 
 @media (min-width: 768px) {
     .sk-container {
-        padding: 4rem 2rem 5rem;
+        padding: 2.5rem 2rem 5rem;
     }
 }
 
@@ -1337,8 +1337,7 @@ h4.animate-subpage.is-visible {
 }
 
 .sk-intro {
-    max-width: 44rem;
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.75rem;
 }
 
 .sk-title {
@@ -1373,7 +1372,7 @@ h4.animate-subpage.is-visible {
 
     .sk-signup {
         position: sticky;
-        top: 6.5rem;
+        top: 6rem;
     }
 }
 
@@ -1386,6 +1385,7 @@ h4.animate-subpage.is-visible {
     padding-top: 0;
     border-top: none;
 }
+
 
 .sk-heading {
     font-family: var(--font-serif);
@@ -1507,14 +1507,32 @@ h4.animate-subpage.is-visible {
 }
 
 .sk-form {
-    padding: 1.75rem;
+    padding: 1.5rem;
     background-color: white;
+    border: 1px solid rgba(26, 26, 26, 0.35);
+    box-shadow: 0 1px 0 rgba(26, 26, 26, 0.04), 0 12px 32px -20px rgba(26, 26, 26, 0.25);
+}
+
+.sk-form .form-group label {
+    margin-bottom: 0.35rem;
+}
+
+.sk-form .form-check {
+    margin-bottom: 1rem;
+}
+
+.sk-form .check-label span {
+    font-size: 0.8125rem;
+}
+
+.sk-form .form-submit {
+    padding: 0.9rem 1.5rem;
 }
 
 .sk-step {
     font-size: 0.8125rem;
     color: var(--foreground);
-    margin: 1.25rem 0 0.75rem;
+    margin: 1rem 0 0.5rem;
 }
 
 .sk-form .sk-label + .sk-step {
@@ -1533,12 +1551,12 @@ h4.animate-subpage.is-visible {
 }
 
 .sk-form .form-group {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
 }
 
 .sk-form .form-group input,
 .sk-form .form-group textarea {
-    padding-bottom: 0.5rem;
+    padding-bottom: 0.4rem;
 }
 
 .sk-optional {
