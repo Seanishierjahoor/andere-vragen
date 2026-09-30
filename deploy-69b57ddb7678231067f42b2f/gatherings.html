@@ -256,7 +256,10 @@
                 var btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'date-card' + (ev.status === 'vol' ? ' full' : '');
-                var html = '<span class="date-card-date">' + parts.datum + '</span>' +
+                var thema = document.createElement('span');
+                thema.className = 'date-card-thema' + (ev.thema ? '' : ' leeg');
+                thema.textContent = ev.thema || 'Theme to be announced';
+                var html = '<span class="date-card-date">' + parts.datum + '</span>' + thema.outerHTML +
                     '<span class="date-card-time">' + parts.tijd + ' · ' + ev.locatie + '</span>';
                 if (ev.status === 'vol') {
                     html += '<span class="date-card-status">Full, you\'ll go on the waiting list</span>';

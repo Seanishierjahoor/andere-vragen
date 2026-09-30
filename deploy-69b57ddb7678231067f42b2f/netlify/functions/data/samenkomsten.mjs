@@ -8,6 +8,7 @@
 //          anders wordt het tijdstip op sommige apparaten verkeerd omgerekend
 // - duurMinuten: gebruikt voor de agenda-uitnodiging (ics/Google Calendar)
 // - locatie: vrije tekst
+// - thema: vrije tekst, mag leeg zijn (dan toont de site "wordt nog aangekondigd")
 // - capaciteit: aantal plekken; wordt nooit als getal getoond, alleen gebruikt om
 //   "open"/"vol" te bepalen
 
@@ -17,6 +18,7 @@ export default [
     start: "2026-10-08T19:00:00+02:00",
     duurMinuten: 120,
     locatie: "Social Art Platform (SAP), Rotterdam",
+    thema: "",
     capaciteit: 15,
   },
 ];

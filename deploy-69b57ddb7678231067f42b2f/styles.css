@@ -1593,3 +1593,15 @@ h4.animate-subpage.is-visible {
         margin-left: 2.5rem;
     }
 }
+
+.date-card-thema {
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    color: var(--foreground);
+}
+
+.date-card-thema.leeg {
+    font-style: italic;
+    color: var(--muted);
+    font-weight: 300;
+}

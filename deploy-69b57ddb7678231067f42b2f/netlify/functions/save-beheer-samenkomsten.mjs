@@ -2,8 +2,7 @@
 // data/samenkomsten.mjs en data/instellingen.mjs opnieuw weg als commit naar GitHub.
 // Zelfde mechanisme als de bewerk-modus (save-edit.mjs): EDITOR_PASSWORD + GITHUB_TOKEN.
 //
-// Na het opslaan bouwt Netlify een nieuwe deploy; die moet je zoals gebruikelijk
-// handmatig publiceren voor de wijziging live gaat.
+// Na het opslaan bouwt Netlify een nieuwe deploy, die automatisch live gaat.
 
 import { wachtwoordKlopt } from "./lib/wachtwoord.mjs";
 
@@ -93,6 +92,9 @@ function validate(samenkomsten, instellingen) {
     if (typeof event.locatie !== "string" || !event.locatie.trim()) {
       return `Locatie ontbreekt bij ${event.id}.`;
     }
+    if (event.thema != null && (typeof event.thema !== "string" || event.thema.length > 120)) {
+      return `Thema bij ${event.id} is te lang (max. 120 tekens).`;
+    }
     if (typeof event.capaciteit !== "number" || event.capaciteit <= 0 || !Number.isInteger(event.capaciteit)) {
       return `Ongeldige capaciteit bij ${event.id}.`;
     }
@@ -113,17 +115,19 @@ function serializeSamenkomsten(samenkomsten) {
 // - start: ISO-datumtijd MET UTC-offset (+02:00 zomertijd / +01:00 wintertijd)
 // - duurMinuten: gebruikt voor de agenda-uitnodiging (ics/Google Calendar)
 // - locatie: vrije tekst
+// - thema: vrije tekst, mag leeg zijn (dan toont de site "wordt nog aangekondigd")
 // - capaciteit: aantal plekken; wordt nooit als getal getoond, alleen gebruikt om
 //   "open"/"vol" te bepalen
 
 `;
   // Alleen de planningsvelden serialiseren — confirmed/wachtlijst (indien meegestuurd
   // door een client die ze ook toont) leven in Blobs, niet in dit bronbestand.
-  const planning = samenkomsten.map(({ id, start, duurMinuten, locatie, capaciteit }) => ({
+  const planning = samenkomsten.map(({ id, start, duurMinuten, locatie, thema, capaciteit }) => ({
     id,
     start,
     duurMinuten,
     locatie,
+    thema: (thema || "").trim(),
     capaciteit,
   }));
   return header + "export default " + JSON.stringify(planning, null, 2) + ";\n";

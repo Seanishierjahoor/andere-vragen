@@ -184,6 +184,10 @@
                         '<input type="number" min="1" data-field="duurMinuten" value="' + event.duurMinuten + '">' +
                     '</div>' +
                     '<div class="field full">' +
+                        '<label>Thema</label>' +
+                        '<input type="text" data-field="thema" maxlength="120" placeholder="Leeg laten = wordt nog aangekondigd" value="' + escapeAttr(event.thema) + '">' +
+                    '</div>' +
+                    '<div class="field full">' +
                         '<label>Locatie</label>' +
                         '<input type="text" data-field="locatie" value="' + escapeAttr(event.locatie) + '">' +
                     '</div>' +
@@ -229,6 +233,7 @@
                 start: '',
                 duurMinuten: last ? last.duurMinuten : 120,
                 locatie: last ? last.locatie : '',
+                thema: '',
                 capaciteit: last ? last.capaciteit : 15
             });
             renderEvents();
@@ -286,7 +291,7 @@
                         setStatus((result.data && result.data.error) || 'Onbekende fout.', 'error');
                         return;
                     }
-                    setStatus('Opgeslagen op GitHub. Publiceer de nieuwe deploy in Netlify om het live te zetten.', 'ok');
+                    setStatus('Opgeslagen. De site is binnen een minuut bijgewerkt.', 'ok');
                 })
                 .catch(function () {
                     setStatus('Fout bij opslaan. Controleer je verbinding en probeer opnieuw.', 'error');

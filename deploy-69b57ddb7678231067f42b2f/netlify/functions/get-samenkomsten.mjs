@@ -20,6 +20,7 @@ export default async () => {
             start: event.start,
             duurMinuten: event.duurMinuten,
             locatie: event.locatie,
+            thema: (event.thema || "").trim(),
             status: confirmedCount >= event.capaciteit ? "vol" : "open",
           };
         })
