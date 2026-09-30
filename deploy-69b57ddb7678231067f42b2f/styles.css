@@ -1370,9 +1370,9 @@ h4.animate-subpage.is-visible {
         gap: 4rem;
     }
 
+    /* Meeschuiven tijdens scrollen gebeurt in samenkomsten.js */
     .sk-signup {
-        position: sticky;
-        top: 6rem;
+        will-change: transform;
     }
 }
 

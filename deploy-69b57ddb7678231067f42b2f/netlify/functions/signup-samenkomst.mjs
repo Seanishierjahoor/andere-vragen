@@ -16,7 +16,7 @@ const TEKSTEN = {
       `Je bent al aangemeld voor de samenkomst op ${wanneer}. Voor nu kun je je maar voor één samenkomst tegelijk inschrijven. Kom een volgende keer gerust opnieuw langs.`,
     serverError: "Er ging iets mis. Probeer het later opnieuw.",
     calendarTitle: "Filosofische gesprekken, Andere Vragen",
-    calendarDetails: "Filosofisch gesprek volgens de socratische methode. https://andere-vragen.nl/samenkomsten.html",
+    calendarDetails: "Filosofisch gesprek in een kleine groep. https://andere-vragen.nl/samenkomsten.html",
     subjectConfirmed: "Je aanmelding is bevestigd | Andere Vragen",
     subjectWaitlist: "Je staat op de wachtlijst | Andere Vragen",
     mailConfirmed: (wanneer, locatie) => [
@@ -37,7 +37,7 @@ const TEKSTEN = {
       `You're already signed up for the gathering on ${wanneer}. For now you can only sign up for one gathering at a time. Feel free to come back after that one.`,
     serverError: "Something went wrong. Please try again later.",
     calendarTitle: "Philosophical conversations, Andere Vragen",
-    calendarDetails: "Philosophical conversation following the Socratic method. https://andere-vragen.nl/gatherings.html",
+    calendarDetails: "Philosophical conversation in a small group. https://andere-vragen.nl/gatherings.html",
     subjectConfirmed: "You're signed up | Andere Vragen",
     subjectWaitlist: "You're on the waiting list | Andere Vragen",
     mailConfirmed: (wanneer, locatie) => [
@@ -244,7 +244,7 @@ function buildGoogleCalendarUrl(event) {
     action: "TEMPLATE",
     text: "Filosofische gesprekken, Andere Vragen",
     dates: `${toIcsUtc(start)}/${toIcsUtc(end)}`,
-    details: "Filosofisch gesprek volgens de socratische methode. https://andere-vragen.nl/samenkomsten.html",
+    details: "Filosofisch gesprek in een kleine groep. https://andere-vragen.nl/samenkomsten.html",
     location: event.locatie,
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;

@@ -62,17 +62,16 @@
                             Every two weeks, a small group of us meets in Rotterdam to spend two hours on a single question.
                             You don't need to know anything or prepare. Feeling like thinking along is enough.
                         </p>
+                        <p class="sk-quote">"I don't believe thinking is something you do alone."</p>
                     </header>
 
                     <section class="sk-block">
                         <h2 class="sk-heading">At a glance</h2>
                         <dl class="sk-facts">
-                            <div><dt>When</dt><dd>Every other week, in the evening. Pick a date on the right.</dd></div>
-                            <div><dt>How long</dt><dd>Two hours</dd></div>
+                            <div><dt>When</dt><dd>Every other week, from 19:00 to 21:00. Pick a date on the right.</dd></div>
                             <div><dt>Where</dt><dd>Social Art Platform (SAP), Rotterdam</dd></div>
-                            <div><dt>Group</dt><dd>Small, so everyone gets a chance to speak</dd></div>
                             <div><dt>Cost</dt><dd>Voluntary contribution, on the night</dd></div>
-                            <div><dt>Background</dt><dd>None needed, really</dd></div>
+                            <div><dt>Background</dt><dd>None needed</dd></div>
                             <div><dt>Language</dt><dd>Dutch, and we switch to English when English speakers join</dd></div>
                         </dl>
                     </section>
@@ -81,10 +80,9 @@
                         <h2 class="sk-heading">How an evening goes</h2>
                         <ol class="sk-steps">
                             <li><strong>We start with a question.</strong> Sometimes someone brings one, often it just comes up on the spot. It can be a big question, or something that's been on your mind this week.</li>
-                            <li><strong>We unpack it together.</strong> We follow the Socratic method. What are we actually asking? Which example from your own life fits? And where do we get stuck?</li>
-                            <li><strong>Someone keeps an eye on things.</strong> A facilitator watches the pace and keeps the conversation on the question. You join in your own way, and listening is part of it too.</li>
+                            <li><strong>We unpack it together.</strong> We take the answers that come up seriously. We unfold them further, until you can see what's in them. It's about understanding each other. Being right doesn't matter.</li>
+                            <li><strong>Someone keeps an eye on things.</strong> We're a small group, so everyone gets a chance to speak. A facilitator watches the pace and keeps the conversation on the question. You join in your own way, and listening is part of it too.</li>
                         </ol>
-                        <p class="sk-quote">"I don't believe thinking is something you do alone."</p>
                     </section>
 
                     <section class="sk-block">
@@ -199,6 +197,7 @@
     </footer>
 
     <script src="script.js"></script>
+    <script src="samenkomsten.js"></script>
     <script src="editor.js"></script>
     <script>
     (function () {
@@ -229,7 +228,7 @@
                 action: 'TEMPLATE',
                 text: 'Philosophical conversations, Andere Vragen',
                 dates: toIcsUtc(start) + '/' + toIcsUtc(end),
-                details: 'Philosophical conversation following the Socratic method. https://andere-vragen.nl/gatherings.html',
+                details: 'Philosophical conversation in a small group. https://andere-vragen.nl/gatherings.html',
                 location: ev.locatie
             });
             return 'https://calendar.google.com/calendar/render?' + params.toString();
