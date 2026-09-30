@@ -28,6 +28,69 @@
   to = "/organisaties.html"
   status = 301
 
+# --- Tijdelijk (pivot, sept 2026): alleen samenkomsten (en congres) zijn in gebruik. ---
+# Kopie van de volledige site: git tag `launch-sept-2026`. Verwijder dit blok om terug te gaan.
+
+[[redirects]]
+  from = "/"
+  to = "/samenkomsten.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/index.html"
+  to = "/"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/organisaties"
+  to = "/onder-constructie.html"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/organisaties.html"
+  to = "/onder-constructie.html"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/praktijk"
+  to = "/onder-constructie.html"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/praktijk.html"
+  to = "/onder-constructie.html"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/over-mij"
+  to = "/onder-constructie.html"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/over-mij.html"
+  to = "/onder-constructie.html"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/contact"
+  to = "/onder-constructie.html"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/contact.html"
+  to = "/onder-constructie.html"
+  status = 302
+  force = true
+
 # Paden hieronder zijn relatief aan de base directory.
 [build]
   base = "deploy-69b57ddb7678231067f42b2f"

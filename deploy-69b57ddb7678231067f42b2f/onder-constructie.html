@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onder constructie - Andere Vragen</title>
+    <meta name="robots" content="noindex">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon"><span>AV</span></div>
+                <span class="logo-text">Andere Vragen</span>
+            </a>
+            <ul class="nav-desktop">
+                <li><a href="samenkomsten.html">Samenkomsten</a></li>
+                <li><a href="organisaties.html">Voor organisaties</a></li>
+                <li><a href="praktijk.html">De praktijk</a></li>
+                <li><a href="over-mij.html">Over mij</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menu openen">
+                <svg id="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+                <svg id="close-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </nav>
+    </header>
+
+    <div id="mobile-menu" class="mobile-menu">
+        <ul>
+            <li><a href="samenkomsten.html">Samenkomsten</a></li>
+            <li><a href="organisaties.html">Voor organisaties</a></li>
+            <li><a href="praktijk.html">De praktijk</a></li>
+            <li><a href="over-mij.html">Over mij</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </div>
+
+    <main class="main-content">
+        <div class="page-container" style="min-height: 60vh; display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center; max-width: 32rem;">
+                <p class="section-label italic">Onder constructie</p>
+                <h1 style="font-size: clamp(2rem, 5vw, 3rem); font-family: var(--font-serif); font-style: italic; line-height: 1.2; margin-bottom: 2rem;">
+                    Andere Vragen krijgt een nieuwe vorm.
+                </h1>
+                <p style="font-size: 1.125rem; color: var(--muted); font-weight: 300; line-height: 1.6; margin-bottom: 3rem;">
+                    Deze pagina wordt opnieuw opgebouwd. De filosofische samenkomsten gaan gewoon door.
+                </p>
+                <div style="width: 1px; height: 4rem; background: rgba(26,26,26,0.1); margin: 0 auto 3rem;"></div>
+                <a href="samenkomsten.html" class="btn-secondary">Naar de samenkomsten</a>
+                <p style="margin-top: 2.5rem; font-size: 0.95rem; color: var(--muted); font-weight: 300;">
+                    Vragen? Mail naar anderevragen@proton.me
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
