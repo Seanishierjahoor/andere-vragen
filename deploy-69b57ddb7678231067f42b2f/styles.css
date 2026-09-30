@@ -1566,3 +1566,30 @@ h4.animate-subpage.is-visible {
     text-transform: none;
     letter-spacing: 0;
 }
+
+/* Taalknop (NL/EN) in de header */
+.lang-switch {
+    margin-left: auto;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--foreground);
+    border: 1px solid rgba(26, 26, 26, 0.25);
+    padding: 0.4rem 0.75rem;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+.lang-switch:hover {
+    border-color: var(--foreground);
+    background-color: rgba(217, 210, 197, 0.2);
+}
+
+.nav-container:has(.lang-switch) .nav-desktop {
+    margin-left: auto;
+}
+
+@media (min-width: 768px) {
+    .lang-switch {
+        margin-left: 2.5rem;
+    }
+}

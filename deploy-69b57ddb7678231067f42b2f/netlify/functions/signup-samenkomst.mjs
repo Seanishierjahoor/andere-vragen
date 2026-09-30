@@ -7,6 +7,52 @@ import { getStore } from "@netlify/blobs";
 import samenkomsten from "./data/samenkomsten.mjs";
 import instellingen from "./data/instellingen.mjs";
 
+// Teksten die de aanmelder te zien krijgt (foutmeldingen en bevestigingsmail), per taal.
+const TEKSTEN = {
+  nl: {
+    missingFields: "Naam, e-mail en een gekozen datum zijn verplicht.",
+    unknownEvent: "Deze samenkomst bestaat niet (meer).",
+    alreadyRegistered: (wanneer) =>
+      `Je bent al aangemeld voor de samenkomst op ${wanneer}. Voor nu kun je je maar voor één samenkomst tegelijk inschrijven. Kom een volgende keer gerust opnieuw langs.`,
+    serverError: "Er ging iets mis. Probeer het later opnieuw.",
+    calendarTitle: "Filosofische gesprekken, Andere Vragen",
+    calendarDetails: "Filosofisch gesprek volgens de socratische methode. https://andere-vragen.nl/samenkomsten.html",
+    subjectConfirmed: "Je aanmelding is bevestigd | Andere Vragen",
+    subjectWaitlist: "Je staat op de wachtlijst | Andere Vragen",
+    mailConfirmed: (wanneer, locatie) => [
+      `Leuk dat je komt! Je staat genoteerd voor ${wanneer}, bij ${locatie}.`,
+      "Tot dan.",
+      "Hartelijke groet,\nAndere Vragen",
+    ],
+    mailWaitlist: (wanneer) => [
+      `Dank voor je aanmelding voor de samenkomst op ${wanneer}.`,
+      "Deze datum is op dit moment vol, dus je staat op de wachtlijst. Ik laat het je weten zodra er een plek vrijkomt.",
+      "Hartelijke groet,\nAndere Vragen",
+    ],
+  },
+  en: {
+    missingFields: "Name, email and a chosen date are required.",
+    unknownEvent: "This gathering no longer exists.",
+    alreadyRegistered: (wanneer) =>
+      `You're already signed up for the gathering on ${wanneer}. For now you can only sign up for one gathering at a time. Feel free to come back after that one.`,
+    serverError: "Something went wrong. Please try again later.",
+    calendarTitle: "Philosophical conversations, Andere Vragen",
+    calendarDetails: "Philosophical conversation following the Socratic method. https://andere-vragen.nl/gatherings.html",
+    subjectConfirmed: "You're signed up | Andere Vragen",
+    subjectWaitlist: "You're on the waiting list | Andere Vragen",
+    mailConfirmed: (wanneer, locatie) => [
+      `Great that you're coming! You're signed up for ${wanneer}, at ${locatie}.`,
+      "See you then.",
+      "Warm regards,\nAndere Vragen",
+    ],
+    mailWaitlist: (wanneer) => [
+      `Thanks for signing up for the gathering on ${wanneer}.`,
+      "This date is full at the moment, so you're on the waiting list. I'll let you know as soon as a spot opens up.",
+      "Warm regards,\nAndere Vragen",
+    ],
+  },
+};
+
 export default async (req) => {
   try {
     if (req.method !== "POST") {
@@ -19,6 +65,8 @@ export default async (req) => {
     const message = (body.message || "").trim();
     const newsletter = body.newsletter === "ja";
     const eventId = body.event_id;
+    const lang = body.lang === "en" ? "en" : "nl";
+    const t = TEKSTEN[lang];
 
     if (body["bot-field"]) {
       // Spambot: doe alsof het gelukt is, zonder iets te verwerken.
@@ -27,7 +75,7 @@ export default async (req) => {
 
     if (!name || !email || !eventId) {
       return new Response(
-        JSON.stringify({ error: "missing_fields", message: "Naam, e-mail en een gekozen datum zijn verplicht." }),
+        JSON.stringify({ error: "missing_fields", message: t.missingFields }),
         { status: 400 }
       );
     }
@@ -35,7 +83,7 @@ export default async (req) => {
     const event = samenkomsten.find((e) => e.id === eventId);
     if (!event || new Date(event.start).getTime() <= Date.now()) {
       return new Response(
-        JSON.stringify({ error: "unknown_event", message: "Deze samenkomst bestaat niet (meer)." }),
+        JSON.stringify({ error: "unknown_event", message: t.unknownEvent }),
         { status: 400 }
       );
     }
@@ -58,7 +106,7 @@ export default async (req) => {
         return new Response(
           JSON.stringify({
             error: "already_registered",
-            message: `Je bent al aangemeld voor de samenkomst op ${formatDatumTijdNL(conflict.start)}. Voor nu kun je maar voor één samenkomst tegelijk inschrijven. Kom een volgende keer opnieuw langs.`,
+            message: t.alreadyRegistered(formatDatumTijd(conflict.start, lang)),
           }),
           { status: 409 }
         );
@@ -80,8 +128,8 @@ export default async (req) => {
 
     const RESEND_API_KEY = Netlify.env.get("RESEND_API_KEY");
     if (RESEND_API_KEY) {
-      await sendNotification({ RESEND_API_KEY, name, email, message, newsletter, event, isWaitlist });
-      await sendConfirmation({ RESEND_API_KEY, name, email, event, isWaitlist });
+      await sendNotification({ RESEND_API_KEY, name, email, message, newsletter, event, isWaitlist, lang });
+      await sendConfirmation({ RESEND_API_KEY, name, email, event, isWaitlist, lang });
     } else {
       console.log("RESEND_API_KEY not configured. Signup received:", JSON.stringify({ name, email, event: event.id, isWaitlist }));
     }
@@ -116,7 +164,7 @@ export default async (req) => {
   } catch (error) {
     console.error("Error in signup-samenkomst:", error);
     return new Response(
-      JSON.stringify({ error: "server_error", message: "Er ging iets mis. Probeer het later opnieuw." }),
+      JSON.stringify({ error: "server_error", message: TEKSTEN.nl.serverError + " / " + TEKSTEN.en.serverError }),
       { status: 500 }
     );
   }
@@ -138,19 +186,24 @@ async function findActiveRegistrationElsewhere(store, currentEventId, email) {
 }
 
 function formatDatumTijdNL(startISO) {
+  return formatDatumTijd(startISO, "nl");
+}
+
+function formatDatumTijd(startISO, lang) {
+  const locale = lang === "en" ? "en-GB" : "nl-NL";
   const date = new Date(startISO);
-  const datum = date.toLocaleDateString("nl-NL", {
+  const datum = date.toLocaleDateString(locale, {
     timeZone: "Europe/Amsterdam",
     weekday: "long",
     day: "numeric",
     month: "long",
   });
-  const tijd = date.toLocaleTimeString("nl-NL", {
+  const tijd = date.toLocaleTimeString(locale, {
     timeZone: "Europe/Amsterdam",
     hour: "2-digit",
     minute: "2-digit",
   });
-  return `${datum} om ${tijd}`;
+  return lang === "en" ? `${datum} at ${tijd}` : `${datum} om ${tijd}`;
 }
 
 function toIcsUtc(date) {
@@ -161,7 +214,7 @@ function escapeIcsText(text) {
   return String(text).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
 }
 
-function buildIcs(event) {
+function buildIcs(event, lang = "nl") {
   const start = new Date(event.start);
   const end = new Date(start.getTime() + event.duurMinuten * 60 * 1000);
   const lines = [
@@ -175,9 +228,9 @@ function buildIcs(event) {
     `DTSTAMP:${toIcsUtc(new Date())}`,
     `DTSTART:${toIcsUtc(start)}`,
     `DTEND:${toIcsUtc(end)}`,
-    `SUMMARY:${escapeIcsText("Filosofische gesprekken, Andere Vragen")}`,
+    `SUMMARY:${escapeIcsText(TEKSTEN[lang].calendarTitle)}`,
     `LOCATION:${escapeIcsText(event.locatie)}`,
-    `DESCRIPTION:${escapeIcsText("Filosofisch gesprek volgens de socratische methode. https://andere-vragen.nl/samenkomsten.html")}`,
+    `DESCRIPTION:${escapeIcsText(TEKSTEN[lang].calendarDetails)}`,
     "END:VEVENT",
     "END:VCALENDAR",
   ];
@@ -197,13 +250,13 @@ function buildGoogleCalendarUrl(event) {
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
-async function sendNotification({ RESEND_API_KEY, name, email, message, newsletter, event, isWaitlist }) {
+async function sendNotification({ RESEND_API_KEY, name, email, message, newsletter, event, isWaitlist, lang }) {
   const submittedAt = new Date().toLocaleString("nl-NL", {
     timeZone: "Europe/Amsterdam",
     dateStyle: "full",
     timeStyle: "short",
   });
-  const title = isWaitlist ? "WACHTLIJST: nieuwe aanmelding samenkomst" : "Nieuwe aanmelding samenkomst";
+  const title = (isWaitlist ? "WACHTLIJST: nieuwe aanmelding samenkomst" : "Nieuwe aanmelding samenkomst") + (lang === "en" ? " (Engelstalig)" : "");
   const wanneer = formatDatumTijdNL(event.start);
 
   const html = `
@@ -243,19 +296,10 @@ async function sendNotification({ RESEND_API_KEY, name, email, message, newslett
   }
 }
 
-async function sendConfirmation({ RESEND_API_KEY, name, email, event, isWaitlist }) {
-  const wanneer = formatDatumTijdNL(event.start);
-  const paragraphs = isWaitlist
-    ? [
-        `Dank voor je aanmelding voor de samenkomst op ${wanneer}.`,
-        "Deze datum is op dit moment vol. Je staat op de wachtlijst. Ik laat het weten zodra er een plek vrijkomt.",
-        "Met vriendelijke groet,\nAndere Vragen",
-      ]
-    : [
-        `Dank voor je aanmelding. Je staat genoteerd voor ${wanneer}, bij ${event.locatie}.`,
-        "Tot dan.",
-        "Met vriendelijke groet,\nAndere Vragen",
-      ];
+async function sendConfirmation({ RESEND_API_KEY, name, email, event, isWaitlist, lang = "nl" }) {
+  const t = TEKSTEN[lang];
+  const wanneer = formatDatumTijd(event.start, lang);
+  const paragraphs = isWaitlist ? t.mailWaitlist(wanneer) : t.mailConfirmed(wanneer, event.locatie);
 
   const html = `<div style="font-family: Georgia, 'Times New Roman', serif; max-width: 600px; margin: 0 auto; color: #1a1a1a;">${paragraphs
     .map((p) => `<p style="font-size: 15px; line-height: 1.6; white-space: pre-line;">${p}</p>`)
@@ -265,13 +309,13 @@ async function sendConfirmation({ RESEND_API_KEY, name, email, event, isWaitlist
   const payload = {
     from: "Andere Vragen <onboarding@resend.dev>",
     to: [email],
-    subject: isWaitlist ? "Je staat op de wachtlijst | Andere Vragen" : "Je aanmelding is bevestigd | Andere Vragen",
+    subject: isWaitlist ? t.subjectWaitlist : t.subjectConfirmed,
     html,
     text,
   };
 
   if (!isWaitlist) {
-    const ics = buildIcs(event);
+    const ics = buildIcs(event, lang);
     payload.attachments = [
       {
         filename: "filosofische-gesprekken.ics",

@@ -38,6 +38,11 @@
   force = true
 
 [[redirects]]
+  from = "/en"
+  to = "/gatherings.html"
+  status = 301
+
+[[redirects]]
   from = "/index.html"
   to = "/"
   status = 302
