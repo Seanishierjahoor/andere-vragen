@@ -265,7 +265,7 @@
             events.forEach(function (ev) {
                 var option = document.createElement('option');
                 option.value = ev.id;
-                option.textContent = formatDatumTijd(ev.start).datum + (ev.status === 'vol' ? ' (vol, wachtlijst)' : '');
+                option.textContent = formatDatumTijd(ev.start).datum + (ev.status === 'vol' ? ' · WACHTLIJST' : '');
                 select.appendChild(option);
             });
 
@@ -276,6 +276,11 @@
             function toonDetails() {
                 var ev = events.filter(function (e) { return e.id === select.value; })[0];
                 eventIdInput.value = ev ? ev.id : '';
+                var wachtlijst = !!ev && ev.status === 'vol';
+                select.classList.toggle('wachtlijst', wachtlijst);
+                details.classList.toggle('wachtlijst', wachtlijst);
+                var submitBtn = form && form.querySelector('.form-submit');
+                if (submitBtn) submitBtn.textContent = wachtlijst ? 'Op de wachtlijst' : 'Aanmelden';
                 if (!ev) {
                     details.hidden = true;
                     return;
@@ -293,7 +298,7 @@
                 if (ev.status === 'vol') {
                     var status = document.createElement('span');
                     status.className = 'date-card-status';
-                    status.textContent = 'Vol, je komt op de wachtlijst';
+                    status.textContent = 'Wachtlijst: deze avond is vol. Meld je aan, dan hoor je het zodra er een plek vrijkomt.';
                     details.appendChild(status);
                 }
                 details.hidden = false;

@@ -265,7 +265,7 @@
             events.forEach(function (ev) {
                 var option = document.createElement('option');
                 option.value = ev.id;
-                option.textContent = formatDatumTijd(ev.start).datum + (ev.status === 'vol' ? ' (full, waiting list)' : '');
+                option.textContent = formatDatumTijd(ev.start).datum + (ev.status === 'vol' ? ' · WAITING LIST' : '');
                 select.appendChild(option);
             });
 
@@ -276,6 +276,11 @@
             function toonDetails() {
                 var ev = events.filter(function (e) { return e.id === select.value; })[0];
                 eventIdInput.value = ev ? ev.id : '';
+                var wachtlijst = !!ev && ev.status === 'vol';
+                select.classList.toggle('wachtlijst', wachtlijst);
+                details.classList.toggle('wachtlijst', wachtlijst);
+                var submitBtn = form && form.querySelector('.form-submit');
+                if (submitBtn) submitBtn.textContent = wachtlijst ? 'Join the waiting list' : 'Sign up';
                 if (!ev) {
                     details.hidden = true;
                     return;
@@ -293,7 +298,7 @@
                 if (ev.status === 'vol') {
                     var status = document.createElement('span');
                     status.className = 'date-card-status';
-                    status.textContent = 'Full, you\'ll go on the waiting list';
+                    status.textContent = 'Waiting list: this evening is full. Sign up and you\'ll hear as soon as a spot opens up.';
                     details.appendChild(status);
                 }
                 details.hidden = false;
