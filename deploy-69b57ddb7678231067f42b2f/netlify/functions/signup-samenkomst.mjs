@@ -7,6 +7,7 @@ import { getStore } from "@netlify/blobs";
 import { isProductie, storeNaam } from "./lib/omgeving.mjs";
 import { AFZENDER, ANTWOORD_ADRES } from "./lib/mail.mjs";
 import { bevestigingsMail, wachtlijstMail } from "./lib/mails.mjs";
+import { icsBijlage } from "./lib/agenda.mjs";
 import samenkomsten from "./data/samenkomsten.mjs";
 import instellingen from "./data/instellingen.mjs";
 
@@ -18,8 +19,6 @@ const TEKSTEN = {
     alreadyRegistered: (wanneer) =>
       `Je bent al aangemeld voor de samenkomst op ${wanneer}. Voor nu kun je je maar voor één samenkomst tegelijk inschrijven. Kom een volgende keer gerust opnieuw langs.`,
     serverError: "Er ging iets mis. Probeer het later opnieuw.",
-    calendarTitle: "Filosofische gesprekken, Andere Vragen",
-    calendarDetails: "Filosofisch gesprek in een kleine groep. https://andere-vragen.nl/samenkomsten.html",
   },
   en: {
     missingFields: "Name, email and a chosen date are required.",
@@ -27,8 +26,6 @@ const TEKSTEN = {
     alreadyRegistered: (wanneer) =>
       `You're already signed up for the gathering on ${wanneer}. For now you can only sign up for one gathering at a time. Feel free to come back after that one.`,
     serverError: "Something went wrong. Please try again later.",
-    calendarTitle: "Philosophical conversations, Andere Vragen",
-    calendarDetails: "Philosophical conversation in a small group. https://andere-vragen.nl/gatherings.html",
   },
 };
 
@@ -197,54 +194,6 @@ function formatDatumTijd(startISO, lang) {
   return lang === "en" ? `${datum} at ${tijd}` : `${datum} om ${tijd}`;
 }
 
-function volledigeLocatie(event) {
-  return event.adres ? `${event.locatie}, ${event.adres}` : event.locatie;
-}
-
-function toIcsUtc(date) {
-  return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-}
-
-function escapeIcsText(text) {
-  return String(text).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
-}
-
-function buildIcs(event, lang = "nl") {
-  const start = new Date(event.start);
-  const end = new Date(start.getTime() + event.duurMinuten * 60 * 1000);
-  const lines = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//Andere Vragen//Samenkomsten//NL",
-    "CALSCALE:GREGORIAN",
-    "METHOD:PUBLISH",
-    "BEGIN:VEVENT",
-    `UID:${event.id}@andere-vragen.nl`,
-    `DTSTAMP:${toIcsUtc(new Date())}`,
-    `DTSTART:${toIcsUtc(start)}`,
-    `DTEND:${toIcsUtc(end)}`,
-    `SUMMARY:${escapeIcsText(TEKSTEN[lang].calendarTitle)}`,
-    `LOCATION:${escapeIcsText(volledigeLocatie(event))}`,
-    `DESCRIPTION:${escapeIcsText(TEKSTEN[lang].calendarDetails)}`,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ];
-  return lines.join("\r\n");
-}
-
-function buildGoogleCalendarUrl(event) {
-  const start = new Date(event.start);
-  const end = new Date(start.getTime() + event.duurMinuten * 60 * 1000);
-  const params = new URLSearchParams({
-    action: "TEMPLATE",
-    text: "Filosofische gesprekken, Andere Vragen",
-    dates: `${toIcsUtc(start)}/${toIcsUtc(end)}`,
-    details: "Filosofisch gesprek in een kleine groep. https://andere-vragen.nl/samenkomsten.html",
-    location: volledigeLocatie(event),
-  });
-  return `https://calendar.google.com/calendar/render?${params.toString()}`;
-}
-
 async function sendNotification({ RESEND_API_KEY, name, email, message, newsletter, eten, event, isWaitlist, lang, prefix = "" }) {
   const submittedAt = new Date().toLocaleString("nl-NL", {
     timeZone: "Europe/Amsterdam",
@@ -310,13 +259,7 @@ async function sendConfirmation({ RESEND_API_KEY, name, email, eten, event, isWa
   };
 
   if (!isWaitlist) {
-    const ics = buildIcs(event, lang);
-    payload.attachments = [
-      {
-        filename: "filosofische-gesprekken.ics",
-        content: Buffer.from(ics, "utf-8").toString("base64"),
-      },
-    ];
+    payload.attachments = [icsBijlage(event, lang)];
   }
 
   const response = await fetch("https://api.resend.com/emails", {

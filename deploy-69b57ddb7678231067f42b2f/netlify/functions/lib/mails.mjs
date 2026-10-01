@@ -40,6 +40,18 @@ const T = {
       afsluiting: "Hartelijke groet,",
     },
 
+    plek: {
+      onderwerp: (datum) => `Er is een plek vrij voor ${datum} | Andere Vragen`,
+      titel: "Er is een plek vrij!",
+      intro: "Goed nieuws: er is een plek vrijgekomen, en die is voor jou. Je staat nu op de deelnemerslijst.",
+      alineas: (eten) => [
+        ...(eten ? [] : [`Zin om mee te eten? We eten om 18:00. Mail dan even naar ${CONTACT}.`]),
+        "In de bijlage zit een agenda-uitnodiging.",
+        `Kun je toch niet komen? Mail dan even naar ${CONTACT}, dan geven we de plek door aan de volgende.`,
+      ],
+      afsluiting: "Tot dan!",
+    },
+
     herinnering: {
       onderwerp: () => "Morgen: filosofisch gesprek | Andere Vragen",
       titel: "Morgen is het zover!",
@@ -84,6 +96,18 @@ const T = {
         "If a spot opens up, you'll hear right away.",
       ],
       afsluiting: "Warm regards,",
+    },
+
+    plek: {
+      onderwerp: (datum) => `A spot opened up for ${datum} | Andere Vragen`,
+      titel: "A spot opened up!",
+      intro: "Good news: a spot has opened up, and it's yours. You're now on the list of participants.",
+      alineas: (eten) => [
+        ...(eten ? [] : [`Feel like joining for dinner? We eat at 18:00. Just email ${CONTACT}.`]),
+        "A calendar invite is attached.",
+        `Can't make it after all? Just email ${CONTACT}, so we can pass the spot on to the next person.`,
+      ],
+      afsluiting: "See you then!",
     },
 
     herinnering: {
@@ -203,7 +227,7 @@ function maak(soort, { naam, eten, event, lang }) {
     titel: s.titel,
     aanhef: t.hoi(voornaam(naam)),
     intro: s.intro,
-    rijen: metInfo ? infoRijen(t, event, eten, soort === "bevestiging") : [],
+    rijen: metInfo ? infoRijen(t, event, eten, soort === "bevestiging" || soort === "plek") : [],
     alineas: s.alineas(eten),
     afsluiting: s.afsluiting,
     ondertekening: t.ondertekening,
@@ -214,3 +238,4 @@ function maak(soort, { naam, eten, event, lang }) {
 export const bevestigingsMail = (gegevens) => maak("bevestiging", gegevens);
 export const wachtlijstMail = (gegevens) => maak("wachtlijst", gegevens);
 export const herinneringsMail = (gegevens) => maak("herinnering", gegevens);
+export const plekVrijMail = (gegevens) => maak("plek", gegevens);
