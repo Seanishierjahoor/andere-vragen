@@ -5,14 +5,15 @@
 // Na het opslaan bouwt Netlify een nieuwe deploy, die automatisch live gaat.
 
 import { wachtwoordKlopt } from "./lib/wachtwoord.mjs";
+import { gitBranch } from "./lib/omgeving.mjs";
 
 const OWNER = "Seanishierjahoor";
 const REPO = "andere-vragen";
-const BRANCH = "main";
 const SAMENKOMSTEN_PATH = "deploy-69b57ddb7678231067f42b2f/netlify/functions/data/samenkomsten.mjs";
 const INSTELLINGEN_PATH = "deploy-69b57ddb7678231067f42b2f/netlify/functions/data/instellingen.mjs";
 
-export default async (req) => {
+export default async (req, context) => {
+  const BRANCH = gitBranch(context);
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ ok: false, error: "Method not allowed" }), { status: 405 });
   }
@@ -52,20 +53,19 @@ export default async (req) => {
       Accept: "application/vnd.github+json",
     };
 
-    await commitFile({
+    // Beide bestanden in één commit, en alleen als er echt iets veranderd is: elke
+    // commit start een Netlify-build, en builds kosten credits.
+    const resultaat = await commitAlsGewijzigd({
       headers,
-      path: SAMENKOMSTEN_PATH,
-      content: serializeSamenkomsten(samenkomsten),
+      branch: BRANCH,
       message: "Beheerscherm: update samenkomsten",
-    });
-    await commitFile({
-      headers,
-      path: INSTELLINGEN_PATH,
-      content: serializeInstellingen(instellingen),
-      message: "Beheerscherm: update instellingen",
+      bestanden: [
+        { path: SAMENKOMSTEN_PATH, content: serializeSamenkomsten(samenkomsten) },
+        { path: INSTELLINGEN_PATH, content: serializeInstellingen(instellingen) },
+      ],
     });
 
-    return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ ok: true, ongewijzigd: resultaat.ongewijzigd }), { status: 200, headers: { "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Error in save-beheer-samenkomsten:", error);
     return new Response(JSON.stringify({ ok: false, error: error.message || "Interne fout." }), {
@@ -92,6 +92,9 @@ function validate(samenkomsten, instellingen) {
     if (typeof event.locatie !== "string" || !event.locatie.trim()) {
       return `Locatie ontbreekt bij ${event.id}.`;
     }
+    if (event.adres != null && (typeof event.adres !== "string" || event.adres.length > 200)) {
+      return `Adres bij ${event.id} is te lang (max. 200 tekens).`;
+    }
     if (event.thema != null && (typeof event.thema !== "string" || event.thema.length > 120)) {
       return `Thema bij ${event.id} is te lang (max. 120 tekens).`;
     }
@@ -115,6 +118,7 @@ function serializeSamenkomsten(samenkomsten) {
 // - start: ISO-datumtijd MET UTC-offset (+02:00 zomertijd / +01:00 wintertijd)
 // - duurMinuten: gebruikt voor de agenda-uitnodiging (ics/Google Calendar)
 // - locatie: vrije tekst
+// - adres: straat, postcode en plaats; wordt een klikbare kaartlink op site en in mails
 // - thema: vrije tekst, mag leeg zijn (dan toont de site "wordt nog aangekondigd")
 // - capaciteit: aantal plekken; wordt nooit als getal getoond, alleen gebruikt om
 //   "open"/"vol" te bepalen
@@ -122,11 +126,12 @@ function serializeSamenkomsten(samenkomsten) {
 `;
   // Alleen de planningsvelden serialiseren — confirmed/wachtlijst (indien meegestuurd
   // door een client die ze ook toont) leven in Blobs, niet in dit bronbestand.
-  const planning = samenkomsten.map(({ id, start, duurMinuten, locatie, thema, capaciteit }) => ({
+  const planning = samenkomsten.map(({ id, start, duurMinuten, locatie, adres, thema, capaciteit }) => ({
     id,
     start,
     duurMinuten,
     locatie,
+    adres: (adres || "").trim(),
     thema: (thema || "").trim(),
     capaciteit,
   }));
@@ -141,29 +146,43 @@ function serializeInstellingen(instellingen) {
   return header + "export default " + JSON.stringify(instellingen, null, 2) + ";\n";
 }
 
-async function commitFile({ headers, path, content, message }) {
-  const apiUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
-
-  const currentRes = await fetch(`${apiUrl}?ref=${BRANCH}`, { headers });
-  if (!currentRes.ok) {
-    throw new Error(`Bestand niet gevonden op GitHub: ${path} (${currentRes.status}).`);
+async function gh(headers, url, options = {}) {
+  const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}${url}`, { headers, ...options });
+  if (!res.ok) {
+    const fout = await res.text();
+    console.error("GitHub API error:", url, res.status, fout);
+    throw new Error(`GitHub weigerde de opdracht (${res.status}).`);
   }
-  const current = await currentRes.json();
+  return res.json();
+}
 
-  const putRes = await fetch(apiUrl, {
-    method: "PUT",
-    headers,
+async function commitAlsGewijzigd({ headers, branch, message, bestanden }) {
+  // Huidige inhoud ophalen en vergelijken
+  const gewijzigd = [];
+  for (const bestand of bestanden) {
+    const huidig = await gh(headers, `/contents/${bestand.path}?ref=${branch}`);
+    const oud = Buffer.from(huidig.content, "base64").toString("utf-8");
+    if (oud !== bestand.content) gewijzigd.push(bestand);
+  }
+  if (!gewijzigd.length) return { ongewijzigd: true };
+
+  // Eén commit met alle gewijzigde bestanden (Git Data API)
+  const ref = await gh(headers, `/git/ref/heads/${branch}`);
+  const parent = await gh(headers, `/git/commits/${ref.object.sha}`);
+  const tree = await gh(headers, "/git/trees", {
+    method: "POST",
     body: JSON.stringify({
-      message,
-      content: Buffer.from(content, "utf-8").toString("base64"),
-      sha: current.sha,
-      branch: BRANCH,
+      base_tree: parent.tree.sha,
+      tree: gewijzigd.map((b) => ({ path: b.path, mode: "100644", type: "blob", content: b.content })),
     }),
   });
-
-  if (!putRes.ok) {
-    const err = await putRes.text();
-    console.error("GitHub API error:", err);
-    throw new Error(`GitHub weigerde de commit voor ${path}.`);
-  }
+  const commit = await gh(headers, "/git/commits", {
+    method: "POST",
+    body: JSON.stringify({ message, tree: tree.sha, parents: [ref.object.sha] }),
+  });
+  await gh(headers, `/git/refs/heads/${branch}`, {
+    method: "PATCH",
+    body: JSON.stringify({ sha: commit.sha }),
+  });
+  return { ongewijzigd: false };
 }
