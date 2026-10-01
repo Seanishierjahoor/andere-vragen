@@ -330,7 +330,7 @@
                 details.innerHTML = '';
                 var thema = document.createElement('span');
                 thema.className = 'date-card-thema' + (ev.thema ? '' : ' leeg');
-                thema.textContent = ev.thema || 'Theme to be announced';
+                thema.textContent = ev.thema ? 'Theme: ' + ev.thema : 'Theme to be announced';
                 var tijd = document.createElement('span');
                 tijd.className = 'date-card-time';
                 tijd.textContent = parts.tijd + ' · ' + ev.locatie;
