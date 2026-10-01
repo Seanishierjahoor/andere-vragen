@@ -17,7 +17,15 @@ export default [
     "start": "2026-10-08T19:00:00+02:00",
     "duurMinuten": 120,
     "locatie": "Social Art Platform (SAP), Rotterdam",
-    "thema": "SIMPEL",
+    "thema": "Thema: 'Herhaling'",
+    "capaciteit": 15
+  },
+  {
+    "id": "sk-mupicjscf3tv",
+    "start": "2026-10-22T19:00:00+02:00",
+    "duurMinuten": 120,
+    "locatie": "Social Art Platform (SAP), Rotterdam",
+    "thema": "",
     "capaciteit": 15
   }
 ];
