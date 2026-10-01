@@ -148,7 +148,7 @@ export default async (req, context) => {
         ok: true,
         status: isWaitlist ? "waitlist" : "confirmed",
         event: { id: event.id, start: event.start, duurMinuten: event.duurMinuten, locatie: event.locatie, adres: event.adres || "" },
-        ...(isProductie(context) ? {} : { test: { nieuwsbrief, mail: mailStatus, store: storeNaam(context) } }),
+        ...(isProductie(context) ? {} : { test: { nieuwsbrief, mail: mailStatus, store: storeNaam(context), deploy: context?.deploy?.id, context: context?.deploy?.context, resendGezien: Boolean(Netlify.env.get("RESEND_API_KEY")), bekendeSleutels: ["RESEND_API_KEY", "BUTTONDOWN_API_KEY", "EDITOR_PASSWORD", "GITHUB_TOKEN"].filter((k) => Netlify.env.has(k)) } }),
       }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
