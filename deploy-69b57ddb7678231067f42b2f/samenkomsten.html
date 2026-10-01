@@ -289,7 +289,7 @@
                 details.innerHTML = '';
                 var thema = document.createElement('span');
                 thema.className = 'date-card-thema' + (ev.thema ? '' : ' leeg');
-                thema.textContent = ev.thema || 'Thema wordt nog aangekondigd';
+                thema.textContent = ev.thema ? 'Thema: ' + ev.thema : 'Thema wordt nog aangekondigd';
                 var tijd = document.createElement('span');
                 tijd.className = 'date-card-time';
                 tijd.textContent = parts.tijd + ' uur · ' + ev.locatie;
