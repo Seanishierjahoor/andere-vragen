@@ -107,10 +107,12 @@ export default async (req, context) => {
     }
 
     const RESEND_API_KEY = Netlify.env.get("RESEND_API_KEY");
+    let mailStatus = "geen RESEND_API_KEY op deze site";
     if (RESEND_API_KEY) {
       const prefix = isProductie(context) ? "" : "[TEST] ";
-      await sendNotification({ RESEND_API_KEY, name, email, message, newsletter, eten, event, isWaitlist, lang, prefix });
-      await sendConfirmation({ RESEND_API_KEY, name, email, eten, event, isWaitlist, lang, prefix });
+      const melding = await sendNotification({ RESEND_API_KEY, name, email, message, newsletter, eten, event, isWaitlist, lang, prefix });
+      const bevestiging = await sendConfirmation({ RESEND_API_KEY, name, email, eten, event, isWaitlist, lang, prefix });
+      mailStatus = { melding, bevestiging };
     } else {
       console.log("RESEND_API_KEY not configured. Signup received:", JSON.stringify({ name, email, event: event.id, isWaitlist }));
     }
@@ -146,7 +148,7 @@ export default async (req, context) => {
         ok: true,
         status: isWaitlist ? "waitlist" : "confirmed",
         event: { id: event.id, start: event.start, duurMinuten: event.duurMinuten, locatie: event.locatie, adres: event.adres || "" },
-        ...(isProductie(context) ? {} : { test: { nieuwsbrief, store: storeNaam(context) } }),
+        ...(isProductie(context) ? {} : { test: { nieuwsbrief, mail: mailStatus, store: storeNaam(context) } }),
       }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
@@ -286,8 +288,11 @@ async function sendNotification({ RESEND_API_KEY, name, email, message, newslett
     }),
   });
   if (!response.ok) {
-    console.error("Resend API error (melding):", await response.text());
+    const fout = await response.text();
+    console.error("Resend API error (melding):", fout);
+    return `fout ${response.status}: ${fout.slice(0, 200)}`;
   }
+  return "verstuurd";
 }
 
 async function sendConfirmation({ RESEND_API_KEY, name, email, eten, event, isWaitlist, lang = "nl", prefix = "" }) {
@@ -320,6 +325,9 @@ async function sendConfirmation({ RESEND_API_KEY, name, email, eten, event, isWa
     body: JSON.stringify(payload),
   });
   if (!response.ok) {
-    console.error("Resend API error (bevestiging):", await response.text());
+    const fout = await response.text();
+    console.error("Resend API error (bevestiging):", fout);
+    return `fout ${response.status}: ${fout.slice(0, 200)}`;
   }
+  return "verstuurd";
 }
