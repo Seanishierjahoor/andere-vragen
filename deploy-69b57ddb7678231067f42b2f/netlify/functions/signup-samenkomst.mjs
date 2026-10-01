@@ -194,6 +194,14 @@ function formatDatumTijd(startISO, lang) {
   return lang === "en" ? `${datum} at ${tijd}` : `${datum} om ${tijd}`;
 }
 
+// De herinnering gaat de dag voor de samenkomst om 10:00 (NL-tijd). Wie zich daarna
+// aanmeldt, krijgt hem niet meer; dan noemt de bevestiging hem ook niet.
+function herinneringNogTeVersturen(event) {
+  const offset = event.start.slice(-6); // bv. "+02:00"
+  const dagErvoor = new Date(new Date(event.start).getTime() - 24 * 60 * 60 * 1000).toLocaleDateString("sv-SE", { timeZone: "Europe/Amsterdam" });
+  return Date.now() < new Date(`${dagErvoor}T10:00:00${offset}`).getTime();
+}
+
 async function sendNotification({ RESEND_API_KEY, name, email, message, newsletter, eten, event, isWaitlist, lang, prefix = "" }) {
   const submittedAt = new Date().toLocaleString("nl-NL", {
     timeZone: "Europe/Amsterdam",
@@ -245,7 +253,7 @@ async function sendNotification({ RESEND_API_KEY, name, email, message, newslett
 }
 
 async function sendConfirmation({ RESEND_API_KEY, name, email, eten, event, isWaitlist, lang = "nl", prefix = "" }) {
-  const mail = (isWaitlist ? wachtlijstMail : bevestigingsMail)({ naam: name, eten, event, lang });
+  const mail = (isWaitlist ? wachtlijstMail : bevestigingsMail)({ naam: name, eten, event, lang, herinneringKomt: herinneringNogTeVersturen(event) });
   const html = mail.html;
   const text = mail.text;
 

@@ -1704,3 +1704,11 @@ h4.animate-subpage.is-visible {
     border-color: var(--foreground);
     background-color: rgba(217, 210, 197, 0.2);
 }
+
+.sk-privacy {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: var(--muted);
+    font-weight: 300;
+}

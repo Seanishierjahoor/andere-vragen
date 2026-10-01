@@ -21,13 +21,25 @@ const T = {
     bevestiging: {
       onderwerp: (datum) => `Je bent aangemeld voor ${datum} | Andere Vragen`,
       titel: "Leuk dat je komt!",
-      alineas: (eten) => [
+      alineas: (eten, { herinneringKomt }) => [
         "Je hoeft niets voor te bereiden. Kom zoals je bent, zin om mee te denken is genoeg.",
         ...(eten ? [] : [`Toch zin om mee te eten? We eten om 18:00. Mail dan even naar ${CONTACT}.`]),
-        "In de bijlage zit een agenda-uitnodiging. De dag van tevoren krijg je nog een herinnering.",
+        herinneringKomt
+          ? "In de bijlage zit een agenda-uitnodiging. De dag van tevoren krijg je nog een herinnering."
+          : "In de bijlage zit een agenda-uitnodiging.",
         `Kun je toch niet komen? Mail dan even naar ${CONTACT}, dan kan iemand van de wachtlijst je plek krijgen.`,
       ],
       afsluiting: "Tot dan!",
+    },
+
+    afmelding: {
+      onderwerp: (datum) => `Je afmelding voor ${datum} is verwerkt | Andere Vragen`,
+      titel: "Je afmelding is verwerkt",
+      alineas: (eten, { datumTekst }) => [
+        `Je bent afgemeld voor ${datumTekst}. Jammer dat je er niet bij kunt zijn!`,
+        "Hopelijk tot een volgende keer. Op de site zie je wanneer de volgende samenkomsten zijn.",
+      ],
+      afsluiting: "Hartelijke groet,",
     },
 
     wachtlijst: {
@@ -79,13 +91,23 @@ const T = {
     bevestiging: {
       onderwerp: (datum) => `You're signed up for ${datum} | Andere Vragen`,
       titel: "Great that you're coming!",
-      alineas: (eten) => [
+      alineas: (eten, { herinneringKomt }) => [
         "You don't need to prepare anything. Come as you are, feeling like thinking along is enough.",
         ...(eten ? [] : [`Feel like joining for dinner after all? We eat at 18:00. Just email ${CONTACT}.`]),
-        "A calendar invite is attached. You'll get a reminder the day before.",
+        herinneringKomt ? "A calendar invite is attached. You'll get a reminder the day before." : "A calendar invite is attached.",
         `Can't make it after all? Just email ${CONTACT}, so someone on the waiting list can take your spot.`,
       ],
       afsluiting: "See you then!",
+    },
+
+    afmelding: {
+      onderwerp: (datum) => `Your cancellation for ${datum} is confirmed | Andere Vragen`,
+      titel: "Your cancellation is confirmed",
+      alineas: (eten, { datumTekst }) => [
+        `You're no longer signed up for ${datumTekst}. A pity you can't make it!`,
+        "Hopefully see you another time. The site shows when the next gatherings are.",
+      ],
+      afsluiting: "Warm regards,",
     },
 
     wachtlijst: {
@@ -209,8 +231,7 @@ ${p(afsluiting, "margin-top:24px;")}
     aanhef,
     ...(intro ? ["", intro] : []),
     "",
-    ...rijen.map(([label, , tekst]) => `${label}: ${tekst}`),
-    "",
+    ...(rijen.length ? [...rijen.map(([label, , tekst]) => `${label}: ${tekst}`), ""] : []),
     ...alineas.flatMap((a) => [a, ""]),
     afsluiting,
     ...ondertekening,
@@ -219,16 +240,16 @@ ${p(afsluiting, "margin-top:24px;")}
   return { html, text };
 }
 
-function maak(soort, { naam, eten, event, lang }) {
+function maak(soort, { naam, eten, event, lang, herinneringKomt = true }) {
   const t = T[lang] || T.nl;
   const s = t[soort];
-  const metInfo = soort !== "wachtlijst";
+  const metInfo = soort !== "wachtlijst" && soort !== "afmelding";
   const { html, text } = opmaak({
     titel: s.titel,
     aanhef: t.hoi(voornaam(naam)),
     intro: s.intro,
     rijen: metInfo ? infoRijen(t, event, eten, soort === "bevestiging" || soort === "plek") : [],
-    alineas: s.alineas(eten),
+    alineas: s.alineas(eten, { herinneringKomt, datumTekst: datum(event.start, t.locale) }),
     afsluiting: s.afsluiting,
     ondertekening: t.ondertekening,
   });
@@ -239,3 +260,4 @@ export const bevestigingsMail = (gegevens) => maak("bevestiging", gegevens);
 export const wachtlijstMail = (gegevens) => maak("wachtlijst", gegevens);
 export const herinneringsMail = (gegevens) => maak("herinnering", gegevens);
 export const plekVrijMail = (gegevens) => maak("plek", gegevens);
+export const afmeldMail = (gegevens) => maak("afmelding", gegevens);
