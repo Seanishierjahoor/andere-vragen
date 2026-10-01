@@ -55,12 +55,13 @@
                             Je hoeft niets te weten of voor te bereiden. Zin om mee te denken is genoeg.
                         </p>
                         <p class="sk-quote">"Ik geloof niet dat denken iets is wat je alleen doet."</p>
+                        <a href="#aanmelden" class="sk-naar-aanmelden">Aanmelden</a>
                     </header>
 
                     <section class="sk-block">
                         <h2 class="sk-heading">In het kort</h2>
                         <dl class="sk-facts">
-                            <div><dt>Wanneer</dt><dd>Om de twee weken, van 19:00 tot 21:00. Kies hiernaast een datum.</dd></div>
+                            <div><dt>Wanneer</dt><dd>Om de twee weken, van 19:00 tot 21:00. Kies je datum bij het aanmelden.</dd></div>
                             <div><dt>Waar</dt><dd>Social Art Platform (SAP)<br><a href="https://www.google.com/maps/search/?api=1&query=Willem+Buytewechstraat+61A%2C+3024+BM+Rotterdam" target="_blank" rel="noopener" class="sk-maplink">Willem Buytewechstraat 61A, 3024 BM Rotterdam</a></dd></div>
                             <div><dt>Eten</dt><dd>Om 18:00 eten we samen, vegetarisch en met een vrijwillige bijdrage. Geef het aan bij het aanmelden.</dd></div>
                             <div><dt>Kosten</dt><dd>Vrijwillige bijdrage, ter plekke</dd></div>
@@ -144,6 +145,18 @@
                                 </div>
                                 <button type="submit" class="form-submit">Aanmelden</button>
                                 <p class="sk-privacy">We gebruiken je naam en e-mailadres alleen om je aanmelding te regelen en je over deze samenkomst te mailen. We delen ze met niemand.</p>
+                            </form>
+                        </div>
+                        <div class="sk-nieuwsbrief">
+                            <button type="button" class="sk-nieuwsbrief-toggle" aria-expanded="false" aria-controls="nieuwsbrief-form">Alleen de nieuwsbrief?</button>
+                            <form id="nieuwsbrief-form" class="sk-nieuwsbrief-form" hidden>
+                                <p>Kun je nu niet, maar wil je op de hoogte blijven van nieuwe data en thema's? Schrijf je dan alleen in voor de nieuwsbrief.</p>
+                                <p style="display:none;"><input name="bot-field" tabindex="-1" autocomplete="off"></p>
+                                <div class="sk-nieuwsbrief-rij">
+                                    <input type="email" name="email" required placeholder="jij@email.com" aria-label="E-mail">
+                                    <button type="submit">Inschrijven</button>
+                                </div>
+                                <p class="sk-nieuwsbrief-melding" role="status"></p>
                             </form>
                         </div>
                         <div id="success-message" style="display: none;">
@@ -435,6 +448,54 @@
                 hideError();
             });
         }
+    })();
+    </script>
+
+    <script>
+    (function () {
+        var toggle = document.querySelector('.sk-nieuwsbrief-toggle');
+        var form = document.getElementById('nieuwsbrief-form');
+        if (!toggle || !form) return;
+        var melding = form.querySelector('.sk-nieuwsbrief-melding');
+        var knop = form.querySelector('button[type=submit]');
+
+        toggle.addEventListener('click', function () {
+            form.hidden = !form.hidden;
+            toggle.setAttribute('aria-expanded', String(!form.hidden));
+            if (!form.hidden) form.querySelector('input[name=email]').focus();
+        });
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            melding.className = 'sk-nieuwsbrief-melding';
+            melding.textContent = 'Bezig...';
+            knop.disabled = true;
+            fetch('/.netlify/functions/nieuwsbrief-inschrijven', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: form.email.value,
+                    lang: 'nl',
+                    'bot-field': form.querySelector('[name=bot-field]').value
+                })
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    knop.disabled = false;
+                    if (!data.ok) {
+                        melding.className = 'sk-nieuwsbrief-melding fout';
+                        melding.textContent = data.message || 'Er ging iets mis. Probeer het later opnieuw.';
+                        return;
+                    }
+                    melding.textContent = data.alIngeschreven ? 'Je stond al op de lijst voor de nieuwsbrief. Fijn!' : 'Gelukt! Je staat op de lijst voor de nieuwsbrief.';
+                    form.email.value = '';
+                })
+                .catch(function () {
+                    knop.disabled = false;
+                    melding.className = 'sk-nieuwsbrief-melding fout';
+                    melding.textContent = 'Er ging iets mis. Probeer het later opnieuw.';
+                });
+        });
     })();
     </script>
 </body>

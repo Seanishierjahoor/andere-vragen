@@ -58,6 +58,7 @@
         btn = document.createElement('button');
         btn.type = 'button';
         btn.textContent = 'Bewerken';
+        btn.className = 'editor-knop';
         btn.setAttribute('aria-label', 'Bewerk-modus aan- of uitzetten');
         btn.style.cssText = 'position:fixed;bottom:1rem;right:1rem;z-index:9999;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;padding:0.75rem 1.25rem;background:#1a1a1a;color:#fcfaf7;border:none;cursor:pointer;opacity:0.85;font-family:system-ui,sans-serif;';
         btn.addEventListener('click', function () { setEditing(!editing); });

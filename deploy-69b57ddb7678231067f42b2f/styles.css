@@ -1712,3 +1712,116 @@ h4.animate-subpage.is-visible {
     color: var(--muted);
     font-weight: 300;
 }
+
+/* Alleen de nieuwsbrief (samenkomsten) */
+.sk-nieuwsbrief {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.sk-nieuwsbrief-toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-size: 0.875rem;
+    color: var(--foreground);
+    text-decoration: underline;
+    text-decoration-color: rgba(26, 26, 26, 0.3);
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.sk-nieuwsbrief-toggle:hover {
+    text-decoration-color: var(--foreground);
+}
+
+.sk-nieuwsbrief-form {
+    margin-top: 0.75rem;
+}
+
+.sk-nieuwsbrief-form p {
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+}
+
+.sk-nieuwsbrief-rij {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.sk-nieuwsbrief-rij input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    border-bottom: 1px solid rgba(26, 26, 26, 0.2);
+    padding: 0.4rem 0;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    font-style: italic;
+    color: var(--foreground);
+    border-radius: 0;
+}
+
+.sk-nieuwsbrief-rij input:focus {
+    outline: none;
+    border-bottom-color: var(--foreground);
+}
+
+.sk-nieuwsbrief-rij button {
+    border: 1px solid rgba(26, 26, 26, 0.35);
+    background: white;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--foreground);
+    cursor: pointer;
+}
+
+.sk-nieuwsbrief-rij button:hover {
+    border-color: var(--foreground);
+}
+
+.sk-nieuwsbrief-melding {
+    margin-top: 0.6rem;
+    font-size: 0.8125rem;
+    color: var(--moss);
+}
+
+.sk-nieuwsbrief-melding.fout {
+    color: #a0522d;
+}
+
+/* Mobiel: knop naar het aanmeldblok, bewerkknop verbergen */
+.sk-naar-aanmelden {
+    display: block;
+    margin-top: 1.5rem;
+    padding: 0.9rem 1.5rem;
+    background-color: var(--foreground);
+    color: var(--background);
+    text-align: center;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+}
+
+.sk-signup {
+    scroll-margin-top: 96px;
+}
+
+@media (min-width: 960px) {
+    .sk-naar-aanmelden {
+        display: none;
+    }
+}
+
+@media (max-width: 767px) {
+    .editor-knop {
+        display: none;
+    }
+}
