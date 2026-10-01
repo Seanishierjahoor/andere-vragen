@@ -5,14 +5,15 @@
 // Na het opslaan bouwt Netlify een nieuwe deploy, die automatisch live gaat.
 
 import { wachtwoordKlopt } from "./lib/wachtwoord.mjs";
+import { gitBranch } from "./lib/omgeving.mjs";
 
 const OWNER = "Seanishierjahoor";
 const REPO = "andere-vragen";
-const BRANCH = "main";
 const SAMENKOMSTEN_PATH = "deploy-69b57ddb7678231067f42b2f/netlify/functions/data/samenkomsten.mjs";
 const INSTELLINGEN_PATH = "deploy-69b57ddb7678231067f42b2f/netlify/functions/data/instellingen.mjs";
 
-export default async (req) => {
+export default async (req, context) => {
+  const BRANCH = gitBranch(context);
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ ok: false, error: "Method not allowed" }), { status: 405 });
   }
@@ -57,12 +58,14 @@ export default async (req) => {
       path: SAMENKOMSTEN_PATH,
       content: serializeSamenkomsten(samenkomsten),
       message: "Beheerscherm: update samenkomsten",
+      branch: BRANCH,
     });
     await commitFile({
       headers,
       path: INSTELLINGEN_PATH,
       content: serializeInstellingen(instellingen),
       message: "Beheerscherm: update instellingen",
+      branch: BRANCH,
     });
 
     return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { "Content-Type": "application/json" } });
@@ -141,10 +144,10 @@ function serializeInstellingen(instellingen) {
   return header + "export default " + JSON.stringify(instellingen, null, 2) + ";\n";
 }
 
-async function commitFile({ headers, path, content, message }) {
+async function commitFile({ headers, path, content, message, branch }) {
   const apiUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
 
-  const currentRes = await fetch(`${apiUrl}?ref=${BRANCH}`, { headers });
+  const currentRes = await fetch(`${apiUrl}?ref=${branch}`, { headers });
   if (!currentRes.ok) {
     throw new Error(`Bestand niet gevonden op GitHub: ${path} (${currentRes.status}).`);
   }
@@ -157,7 +160,7 @@ async function commitFile({ headers, path, content, message }) {
       message,
       content: Buffer.from(content, "utf-8").toString("base64"),
       sha: current.sha,
-      branch: BRANCH,
+      branch,
     }),
   });
 

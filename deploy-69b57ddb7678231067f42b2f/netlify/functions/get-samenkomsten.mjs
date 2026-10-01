@@ -2,11 +2,12 @@
 // nooit een aantal plekken, zodat de widget die informatie niet kan tonen.
 
 import { getStore } from "@netlify/blobs";
+import { storeNaam } from "./lib/omgeving.mjs";
 import samenkomsten from "./data/samenkomsten.mjs";
 
-export default async () => {
+export default async (req, context) => {
   try {
-    const store = getStore("samenkomsten");
+    const store = getStore(storeNaam(context));
     const nu = Date.now();
 
     const events = await Promise.all(

@@ -4,6 +4,7 @@
 // bevestigde plek), en schrijft desgewenst direct in bij de nieuwsbrief.
 
 import { getStore } from "@netlify/blobs";
+import { isProductie, storeNaam } from "./lib/omgeving.mjs";
 import samenkomsten from "./data/samenkomsten.mjs";
 import instellingen from "./data/instellingen.mjs";
 
@@ -53,7 +54,7 @@ const TEKSTEN = {
   },
 };
 
-export default async (req) => {
+export default async (req, context) => {
   try {
     if (req.method !== "POST") {
       return new Response(JSON.stringify({ error: "method_not_allowed" }), { status: 405 });
@@ -88,7 +89,7 @@ export default async (req) => {
       );
     }
 
-    const store = getStore("samenkomsten");
+    const store = getStore(storeNaam(context));
     const confirmedKey = `${event.id}::confirmed`;
     const waitlistKey = `${event.id}::wachtlijst`;
 
@@ -135,6 +136,7 @@ export default async (req) => {
     }
 
     const BUTTONDOWN_API_KEY = Netlify.env.get("BUTTONDOWN_API_KEY");
+    let nieuwsbrief = newsletter ? (BUTTONDOWN_API_KEY ? "onbekend" : "geen BUTTONDOWN_API_KEY") : "niet aangevinkt";
     if (newsletter && BUTTONDOWN_API_KEY) {
       try {
         const bdResponse = await fetch("https://api.buttondown.com/v1/subscribers", {
@@ -143,12 +145,18 @@ export default async (req) => {
             Authorization: `Token ${BUTTONDOWN_API_KEY}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ email, tags: ["samenkomsten"] }),
+          body: JSON.stringify({ email_address: email, tags: isProductie(context) ? ["samenkomsten"] : ["samenkomsten", "test"] }),
         });
-        if (!bdResponse.ok) {
-          console.error("Buttondown API error:", await bdResponse.text());
+        if (bdResponse.ok) {
+          nieuwsbrief = "ingeschreven";
+        } else {
+          const tekst = await bdResponse.text();
+          // Al ingeschreven is geen fout.
+          nieuwsbrief = /already|exists|bestaat/i.test(tekst) ? "was al ingeschreven" : `fout ${bdResponse.status}: ${tekst.slice(0, 200)}`;
+          if (!nieuwsbrief.startsWith("was al")) console.error("Buttondown API error:", tekst);
         }
       } catch (bdError) {
+        nieuwsbrief = `fout: ${bdError.message}`;
         console.error("Fout bij Buttondown-inschrijving:", bdError);
       }
     }
@@ -158,6 +166,7 @@ export default async (req) => {
         ok: true,
         status: isWaitlist ? "waitlist" : "confirmed",
         event: { id: event.id, start: event.start, duurMinuten: event.duurMinuten, locatie: event.locatie },
+        ...(isProductie(context) ? {} : { test: { nieuwsbrief, store: storeNaam(context) } }),
       }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );

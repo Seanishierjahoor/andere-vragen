@@ -4,10 +4,11 @@
 
 import { wachtwoordKlopt } from "./lib/wachtwoord.mjs";
 import { getStore } from "@netlify/blobs";
+import { storeNaam } from "./lib/omgeving.mjs";
 import samenkomsten from "./data/samenkomsten.mjs";
 import instellingen from "./data/instellingen.mjs";
 
-export default async (req) => {
+export default async (req, context) => {
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ ok: false, error: "Method not allowed" }), { status: 405 });
   }
@@ -30,7 +31,7 @@ export default async (req) => {
       });
     }
 
-    const store = getStore("samenkomsten");
+    const store = getStore(storeNaam(context));
     const samenkomstenMetAanmeldingen = await Promise.all(
       samenkomsten.map(async (event) => {
         const [confirmed, wachtlijst] = await Promise.all([

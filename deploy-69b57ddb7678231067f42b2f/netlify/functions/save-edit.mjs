@@ -8,12 +8,13 @@
 // De browser stuurt nooit de GITHUB_TOKEN zelf; die blijft hier op de server.
 
 import { wachtwoordKlopt } from "./lib/wachtwoord.mjs";
+import { gitBranch } from "./lib/omgeving.mjs";
 
 const OWNER = "Seanishierjahoor";
 const REPO = "andere-vragen";
-const BRANCH = "main";
 
-export default async (req) => {
+export default async (req, context) => {
+  const BRANCH = gitBranch(context);
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
   }
