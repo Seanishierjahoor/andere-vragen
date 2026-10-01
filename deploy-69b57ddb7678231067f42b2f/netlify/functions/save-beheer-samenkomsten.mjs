@@ -53,22 +53,19 @@ export default async (req, context) => {
       Accept: "application/vnd.github+json",
     };
 
-    await commitFile({
+    // Beide bestanden in één commit, en alleen als er echt iets veranderd is: elke
+    // commit start een Netlify-build, en builds kosten credits.
+    const resultaat = await commitAlsGewijzigd({
       headers,
-      path: SAMENKOMSTEN_PATH,
-      content: serializeSamenkomsten(samenkomsten),
+      branch: BRANCH,
       message: "Beheerscherm: update samenkomsten",
-      branch: BRANCH,
-    });
-    await commitFile({
-      headers,
-      path: INSTELLINGEN_PATH,
-      content: serializeInstellingen(instellingen),
-      message: "Beheerscherm: update instellingen",
-      branch: BRANCH,
+      bestanden: [
+        { path: SAMENKOMSTEN_PATH, content: serializeSamenkomsten(samenkomsten) },
+        { path: INSTELLINGEN_PATH, content: serializeInstellingen(instellingen) },
+      ],
     });
 
-    return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ ok: true, ongewijzigd: resultaat.ongewijzigd }), { status: 200, headers: { "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Error in save-beheer-samenkomsten:", error);
     return new Response(JSON.stringify({ ok: false, error: error.message || "Interne fout." }), {
@@ -149,29 +146,43 @@ function serializeInstellingen(instellingen) {
   return header + "export default " + JSON.stringify(instellingen, null, 2) + ";\n";
 }
 
-async function commitFile({ headers, path, content, message, branch }) {
-  const apiUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
-
-  const currentRes = await fetch(`${apiUrl}?ref=${branch}`, { headers });
-  if (!currentRes.ok) {
-    throw new Error(`Bestand niet gevonden op GitHub: ${path} (${currentRes.status}).`);
+async function gh(headers, url, options = {}) {
+  const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}${url}`, { headers, ...options });
+  if (!res.ok) {
+    const fout = await res.text();
+    console.error("GitHub API error:", url, res.status, fout);
+    throw new Error(`GitHub weigerde de opdracht (${res.status}).`);
   }
-  const current = await currentRes.json();
+  return res.json();
+}
 
-  const putRes = await fetch(apiUrl, {
-    method: "PUT",
-    headers,
+async function commitAlsGewijzigd({ headers, branch, message, bestanden }) {
+  // Huidige inhoud ophalen en vergelijken
+  const gewijzigd = [];
+  for (const bestand of bestanden) {
+    const huidig = await gh(headers, `/contents/${bestand.path}?ref=${branch}`);
+    const oud = Buffer.from(huidig.content, "base64").toString("utf-8");
+    if (oud !== bestand.content) gewijzigd.push(bestand);
+  }
+  if (!gewijzigd.length) return { ongewijzigd: true };
+
+  // Eén commit met alle gewijzigde bestanden (Git Data API)
+  const ref = await gh(headers, `/git/ref/heads/${branch}`);
+  const parent = await gh(headers, `/git/commits/${ref.object.sha}`);
+  const tree = await gh(headers, "/git/trees", {
+    method: "POST",
     body: JSON.stringify({
-      message,
-      content: Buffer.from(content, "utf-8").toString("base64"),
-      sha: current.sha,
-      branch,
+      base_tree: parent.tree.sha,
+      tree: gewijzigd.map((b) => ({ path: b.path, mode: "100644", type: "blob", content: b.content })),
     }),
   });
-
-  if (!putRes.ok) {
-    const err = await putRes.text();
-    console.error("GitHub API error:", err);
-    throw new Error(`GitHub weigerde de commit voor ${path}.`);
-  }
+  const commit = await gh(headers, "/git/commits", {
+    method: "POST",
+    body: JSON.stringify({ message, tree: tree.sha, parents: [ref.object.sha] }),
+  });
+  await gh(headers, `/git/refs/heads/${branch}`, {
+    method: "PATCH",
+    body: JSON.stringify({ sha: commit.sha }),
+  });
+  return { ongewijzigd: false };
 }
