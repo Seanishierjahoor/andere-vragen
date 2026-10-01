@@ -37,7 +37,8 @@ const T = {
       titel: "Je afmelding is verwerkt",
       alineas: (eten, { datumTekst }) => [
         `Je bent afgemeld voor ${datumTekst}. Jammer dat je er niet bij kunt zijn!`,
-        "Hopelijk tot een volgende keer. Op de site zie je wanneer de volgende samenkomsten zijn.",
+        "Hopelijk tot een volgende keer. Op de site zie je wanneer de volgende samenkomsten zijn:",
+        knop("Bekijk de volgende samenkomsten", "https://andere-vragen.nl/"),
       ],
       afsluiting: "Hartelijke groet,",
     },
@@ -105,7 +106,8 @@ const T = {
       titel: "Your cancellation is confirmed",
       alineas: (eten, { datumTekst }) => [
         `You're no longer signed up for ${datumTekst}. A pity you can't make it!`,
-        "Hopefully see you another time. The site shows when the next gatherings are.",
+        "Hopefully see you another time. The site shows when the next gatherings are:",
+        knop("See the next gatherings", "https://andere-vragen.nl/gatherings.html"),
       ],
       afsluiting: "Warm regards,",
     },
@@ -146,6 +148,14 @@ const T = {
     },
   },
 };
+
+// Een knop in de mail. In de platte-tekstversie wordt het "tekst: url".
+function knop(tekst, url) {
+  return {
+    html: `<p style="margin:8px 0 20px;"><a href="${url}" style="display:inline-block;padding:12px 22px;border:1px solid #1a1a1a;color:#1a1a1a;text-decoration:none;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;font-family:Helvetica,Arial,sans-serif;">${esc(tekst)}</a></p>`,
+    text: `${tekst}: ${url}`,
+  };
+}
 
 export function voornaam(naam) {
   return String(naam || "").trim().split(/\s+/)[0] || "";
@@ -218,7 +228,7 @@ function opmaak({ titel, aanhef, intro, rijen, alineas, afsluiting, ondertekenin
 ${p(aanhef)}
 ${intro ? p(intro) : ""}
 ${info}
-${alineas.map((a) => p(a)).join("\n")}
+${alineas.map((a) => (typeof a === "object" ? a.html : p(a))).join("\n")}
 ${p(afsluiting, "margin-top:24px;")}
 <p style="margin:0;font-size:15px;line-height:1.5;color:#1a1a1a;">${ondertekening.map(esc).join("<br>")}</p>
 </td></tr></table>
@@ -232,7 +242,7 @@ ${p(afsluiting, "margin-top:24px;")}
     ...(intro ? ["", intro] : []),
     "",
     ...(rijen.length ? [...rijen.map(([label, , tekst]) => `${label}: ${tekst}`), ""] : []),
-    ...alineas.flatMap((a) => [a, ""]),
+    ...alineas.flatMap((a) => [typeof a === "object" ? a.text : a, ""]),
     afsluiting,
     ...ondertekening,
   ].join("\n");
