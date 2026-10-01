@@ -111,6 +111,20 @@
         <div class="save-bar">
             <button type="button" class="btn-primary" id="save-btn">Opslaan</button>
             <span id="status"></span>
+    
+        <div class="settings" id="herinnering-test">
+            <p><strong>Herinneringsmail testen</strong></p>
+            <p class="hint">De echte herinnering gaat automatisch de dag van tevoren om 10:00. Hier kun je een voorbeeld naar jezelf sturen.</p>
+            <p>
+                <select id="hr-event"></select>
+                <input type="email" id="hr-naar" placeholder="jouw e-mailadres">
+                <label><input type="checkbox" id="hr-eten"> als mee-eter</label>
+            </p>
+            <p>
+                <button type="button" class="btn-secondary" id="hr-voorbeeld">Stuur voorbeeld</button>
+                <button type="button" class="btn-secondary" id="hr-nu" title="Alleen op de testsite">Verstuur herinneringen nu (testsite)</button>
+            </p>
+            <p id="hr-status" class="hint"></p>
         </div>
     </div>
 
@@ -264,6 +278,7 @@
                     instellingen = result.data.instellingen || { eenPerKeer: true };
                     eenPerKeerEl.checked = !!instellingen.eenPerKeer;
                     renderEvents();
+                    vulHerinneringEvents();
                     lockedEl.style.display = 'none';
                     editorEl.style.display = 'block';
                     setStatus('', '');
@@ -301,6 +316,48 @@
                 .catch(function () {
                     setStatus('Fout bij opslaan. Controleer je verbinding en probeer opnieuw.', 'error');
                 });
+        });
+
+        // --- herinnering testen ---
+        var hrEvent = document.getElementById('hr-event');
+        var hrStatus = document.getElementById('hr-status');
+
+        function vulHerinneringEvents() {
+            hrEvent.innerHTML = '';
+            samenkomsten.forEach(function (e) {
+                var o = document.createElement('option');
+                o.value = e.id;
+                o.textContent = e.id + (e.thema ? ' · ' + e.thema : '');
+                hrEvent.appendChild(o);
+            });
+        }
+
+        function testHerinnering(extra) {
+            hrStatus.textContent = 'Bezig...';
+            var body = Object.assign({ password: password, eventId: hrEvent.value }, extra);
+            fetch('/.netlify/functions/test-herinnering', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data.ok) { hrStatus.textContent = data.error || 'Onbekende fout.'; return; }
+                    if (data.verstuurdNaar) { hrStatus.textContent = 'Voorbeeld verstuurd naar ' + data.verstuurdNaar + '.'; return; }
+                    hrStatus.textContent = data.resultaat.map(function (r) {
+                        return r.id + ': ' + r.verstuurd.length + ' verstuurd, ' + r.alEerder + ' al eerder' + (r.fouten.length ? ', ' + r.fouten.length + ' mislukt' : '');
+                    }).join(' | ');
+                })
+                .catch(function () { hrStatus.textContent = 'Fout. Controleer je verbinding.'; });
+        }
+
+        document.getElementById('hr-voorbeeld').addEventListener('click', function () {
+            var naar = document.getElementById('hr-naar').value.trim();
+            if (!naar) { hrStatus.textContent = 'Vul je e-mailadres in.'; return; }
+            testHerinnering({ naar: naar, eten: document.getElementById('hr-eten').checked });
+        });
+        document.getElementById('hr-nu').addEventListener('click', function () {
+            testHerinnering({ verstuur: true });
         });
     })();
     </script>
