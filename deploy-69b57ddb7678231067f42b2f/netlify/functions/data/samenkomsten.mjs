@@ -17,7 +17,7 @@ export default [
     "start": "2026-10-08T19:00:00+02:00",
     "duurMinuten": 120,
     "locatie": "Social Art Platform (SAP), Rotterdam",
-    "thema": "Thema: 'Herhaling'",
+    "thema": "Herhaling",
     "capaciteit": 15
   },
   {
