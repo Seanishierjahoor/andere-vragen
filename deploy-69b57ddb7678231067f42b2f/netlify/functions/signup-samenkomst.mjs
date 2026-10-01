@@ -5,6 +5,7 @@
 
 import { getStore } from "@netlify/blobs";
 import { isProductie, storeNaam } from "./lib/omgeving.mjs";
+import { AFZENDER, ANTWOORD_ADRES } from "./lib/mail.mjs";
 import samenkomsten from "./data/samenkomsten.mjs";
 import instellingen from "./data/instellingen.mjs";
 
@@ -134,8 +135,9 @@ export default async (req, context) => {
 
     const RESEND_API_KEY = Netlify.env.get("RESEND_API_KEY");
     if (RESEND_API_KEY) {
-      await sendNotification({ RESEND_API_KEY, name, email, message, newsletter, eten, event, isWaitlist, lang });
-      await sendConfirmation({ RESEND_API_KEY, name, email, eten, event, isWaitlist, lang });
+      const prefix = isProductie(context) ? "" : "[TEST] ";
+      await sendNotification({ RESEND_API_KEY, name, email, message, newsletter, eten, event, isWaitlist, lang, prefix });
+      await sendConfirmation({ RESEND_API_KEY, name, email, eten, event, isWaitlist, lang, prefix });
     } else {
       console.log("RESEND_API_KEY not configured. Signup received:", JSON.stringify({ name, email, event: event.id, isWaitlist }));
     }
@@ -277,7 +279,7 @@ function buildGoogleCalendarUrl(event) {
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
-async function sendNotification({ RESEND_API_KEY, name, email, message, newsletter, eten, event, isWaitlist, lang }) {
+async function sendNotification({ RESEND_API_KEY, name, email, message, newsletter, eten, event, isWaitlist, lang, prefix = "" }) {
   const submittedAt = new Date().toLocaleString("nl-NL", {
     timeZone: "Europe/Amsterdam",
     dateStyle: "full",
@@ -311,9 +313,9 @@ async function sendNotification({ RESEND_API_KEY, name, email, message, newslett
     method: "POST",
     headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: "Andere Vragen <onboarding@resend.dev>",
-      to: ["anderevragen@proton.me"],
-      subject: `${title}: ${name || "onbekend"}`,
+      from: AFZENDER,
+      to: [ANTWOORD_ADRES],
+      subject: `${prefix}${title}: ${name || "onbekend"}`,
       html,
       text,
       reply_to: email || undefined,
@@ -324,7 +326,7 @@ async function sendNotification({ RESEND_API_KEY, name, email, message, newslett
   }
 }
 
-async function sendConfirmation({ RESEND_API_KEY, name, email, eten, event, isWaitlist, lang = "nl" }) {
+async function sendConfirmation({ RESEND_API_KEY, name, email, eten, event, isWaitlist, lang = "nl", prefix = "" }) {
   const t = TEKSTEN[lang];
   const wanneer = formatDatumTijd(event.start, lang);
   const adresLink = event.adres ? `<a href="${mapsUrl(event.adres)}" style="color: #1a1a1a;">${event.adres}</a>` : "";
@@ -336,9 +338,10 @@ async function sendConfirmation({ RESEND_API_KEY, name, email, eten, event, isWa
   const text = paragraphs.map(alsPlatteTekst).join("\n\n");
 
   const payload = {
-    from: "Andere Vragen <onboarding@resend.dev>",
+    from: AFZENDER,
     to: [email],
-    subject: isWaitlist ? t.subjectWaitlist : t.subjectConfirmed,
+    reply_to: ANTWOORD_ADRES,
+    subject: prefix + (isWaitlist ? t.subjectWaitlist : t.subjectConfirmed),
     html,
     text,
   };

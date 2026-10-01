@@ -5,11 +5,9 @@
 // Required environment variable:
 //   RESEND_API_KEY — Get a free key at https://resend.com (100 emails/day free)
 //
-// LET OP: onboarding@resend.dev is Resend's sandbox-afzender. Zolang er geen eigen
-// domein (bv. anderevragen.nl) geverifieerd is in het Resend-dashboard, levert Resend
-// de bevestigingsmail aan de aanvrager mogelijk niet af — sandbox-verzending werkt
-// doorgaans alleen naar het eigen accountadres. Verifieer het domein bij Resend
-// (DNS-records toevoegen) en wijzig de "from"-adressen hieronder voor dit werkt.
+// Afzender en antwoordadres staan in lib/mail.mjs (domein geverifieerd bij Resend).
+
+import { AFZENDER, ANTWOORD_ADRES } from "./lib/mail.mjs";
 
 export default async (req) => {
   try {
@@ -109,7 +107,7 @@ export default async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Andere Vragen <onboarding@resend.dev>",
+        from: AFZENDER,
         to: ["anderevragen@proton.me"],
         subject: `${labels.subject} ${name || "onbekend"} | Andere Vragen`,
         html: htmlBody,
@@ -144,8 +142,9 @@ export default async (req) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "Andere Vragen <onboarding@resend.dev>",
+            from: AFZENDER,
             to: [email],
+            reply_to: ANTWOORD_ADRES,
             subject: confirmation.subject,
             html: confirmHtml,
             text: confirmText,
