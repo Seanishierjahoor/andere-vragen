@@ -256,12 +256,7 @@
             var select = document.createElement('select');
             select.className = 'date-select';
             select.setAttribute('aria-label', 'Pick a date');
-            if (events.length > 1) {
-                var placeholder = document.createElement('option');
-                placeholder.value = '';
-                placeholder.textContent = 'Pick a date…';
-                select.appendChild(placeholder);
-            }
+            // De eerstvolgende datum staat standaard geselecteerd (events zijn op datum gesorteerd).
             events.forEach(function (ev) {
                 var option = document.createElement('option');
                 option.value = ev.id;
