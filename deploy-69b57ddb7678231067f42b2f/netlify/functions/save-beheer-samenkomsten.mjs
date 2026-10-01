@@ -95,6 +95,9 @@ function validate(samenkomsten, instellingen) {
     if (typeof event.locatie !== "string" || !event.locatie.trim()) {
       return `Locatie ontbreekt bij ${event.id}.`;
     }
+    if (event.adres != null && (typeof event.adres !== "string" || event.adres.length > 200)) {
+      return `Adres bij ${event.id} is te lang (max. 200 tekens).`;
+    }
     if (event.thema != null && (typeof event.thema !== "string" || event.thema.length > 120)) {
       return `Thema bij ${event.id} is te lang (max. 120 tekens).`;
     }
@@ -118,6 +121,7 @@ function serializeSamenkomsten(samenkomsten) {
 // - start: ISO-datumtijd MET UTC-offset (+02:00 zomertijd / +01:00 wintertijd)
 // - duurMinuten: gebruikt voor de agenda-uitnodiging (ics/Google Calendar)
 // - locatie: vrije tekst
+// - adres: straat, postcode en plaats; wordt een klikbare kaartlink op site en in mails
 // - thema: vrije tekst, mag leeg zijn (dan toont de site "wordt nog aangekondigd")
 // - capaciteit: aantal plekken; wordt nooit als getal getoond, alleen gebruikt om
 //   "open"/"vol" te bepalen
@@ -125,11 +129,12 @@ function serializeSamenkomsten(samenkomsten) {
 `;
   // Alleen de planningsvelden serialiseren — confirmed/wachtlijst (indien meegestuurd
   // door een client die ze ook toont) leven in Blobs, niet in dit bronbestand.
-  const planning = samenkomsten.map(({ id, start, duurMinuten, locatie, thema, capaciteit }) => ({
+  const planning = samenkomsten.map(({ id, start, duurMinuten, locatie, adres, thema, capaciteit }) => ({
     id,
     start,
     duurMinuten,
     locatie,
+    adres: (adres || "").trim(),
     thema: (thema || "").trim(),
     capaciteit,
   }));

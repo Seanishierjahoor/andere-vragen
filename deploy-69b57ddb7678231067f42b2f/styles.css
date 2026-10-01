@@ -1664,3 +1664,29 @@ h4.animate-subpage.is-visible {
     margin-top: 0.35rem;
     font-weight: 500;
 }
+
+/* Agenda-knoppen na het aanmelden */
+.success-calendars {
+    display: none;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.success-calendars .success-calendar {
+    display: inline-block;
+    margin: 0;
+    cursor: pointer;
+}
+
+.sk-maplink {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: rgba(26, 26, 26, 0.3);
+    text-underline-offset: 3px;
+}
+
+.sk-maplink:hover {
+    text-decoration-color: var(--foreground);
+}

@@ -191,6 +191,10 @@
                         '<label>Locatie</label>' +
                         '<input type="text" data-field="locatie" value="' + escapeAttr(event.locatie) + '">' +
                     '</div>' +
+                    '<div class="field full">' +
+                        '<label>Adres</label>' +
+                        '<input type="text" data-field="adres" maxlength="200" placeholder="Straat, postcode en plaats" value="' + escapeAttr(event.adres) + '">' +
+                    '</div>' +
                     '<div class="field">' +
                         '<label>Capaciteit</label>' +
                         '<input type="number" min="1" data-field="capaciteit" value="' + event.capaciteit + '">' +
@@ -233,6 +237,7 @@
                 start: '',
                 duurMinuten: last ? last.duurMinuten : 120,
                 locatie: last ? last.locatie : '',
+                adres: last ? last.adres : '',
                 thema: '',
                 capaciteit: last ? last.capaciteit : 15
             });

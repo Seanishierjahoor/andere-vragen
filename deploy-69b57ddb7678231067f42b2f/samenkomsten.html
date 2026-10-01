@@ -69,7 +69,8 @@
                         <h2 class="sk-heading">In het kort</h2>
                         <dl class="sk-facts">
                             <div><dt>Wanneer</dt><dd>Om de twee weken, van 19:00 tot 21:00. Kies hiernaast een datum.</dd></div>
-                            <div><dt>Waar</dt><dd>Social Art Platform (SAP), Rotterdam</dd></div>
+                            <div><dt>Waar</dt><dd>Social Art Platform (SAP)<br><a href="https://www.google.com/maps/search/?api=1&query=Willem+Buytewechstraat+61A%2C+3024+BM+Rotterdam" target="_blank" rel="noopener" class="sk-maplink">Willem Buytewechstraat 61A, 3024 BM Rotterdam</a></dd></div>
+                            <div><dt>Eten</dt><dd>Om 18:00 eten we samen, vegetarisch en met een vrijwillige bijdrage. Geef het aan bij het aanmelden.</dd></div>
                             <div><dt>Kosten</dt><dd>Vrijwillige bijdrage, ter plekke</dd></div>
                             <div><dt>Voorkennis</dt><dd>Niet nodig</dd></div>
                             <div><dt>Taal</dt><dd>Nederlands, en Engels als er Engelstaligen zijn</dd></div>
@@ -139,6 +140,12 @@
                                 </div>
                                 <div class="form-group form-check">
                                     <label class="check-label">
+                                        <input type="checkbox" name="eten" value="ja">
+                                        <span>Ik eet mee om 18:00 (vegetarisch, vrijwillige bijdrage). Wees op tijd!</span>
+                                    </label>
+                                </div>
+                                <div class="form-group form-check">
+                                    <label class="check-label">
                                         <input type="checkbox" name="newsletter" value="ja" checked>
                                         <span>Ja, ik ontvang graag af en toe een bericht van Andere Vragen (nieuwsbrief).</span>
                                     </label>
@@ -150,7 +157,10 @@
                             <div class="success-inner">
                                 <p class="success-title">Je aanmelding is verstuurd.</p>
                                 <p class="success-sub">Je ontvangt een bevestiging per e-mail.</p>
-                                <a href="#" target="_blank" rel="noopener" class="success-calendar">Voeg toe aan Google Calendar</a>
+                                <div class="success-calendars">
+                                    <a target="_blank" rel="noopener" class="success-calendar success-google">Google Agenda</a>
+                                    <a class="success-calendar success-ics" download="filosofische-gesprekken.ics">Apple / Outlook</a>
+                                </div>
                                 <button type="button" id="reset-button" class="success-reset">Nog een keer aanmelden</button>
                             </div>
                         </div>
@@ -229,9 +239,40 @@
                 text: 'Filosofische gesprekken, Andere Vragen',
                 dates: toIcsUtc(start) + '/' + toIcsUtc(end),
                 details: 'Filosofisch gesprek in een kleine groep. https://andere-vragen.nl/samenkomsten.html',
-                location: ev.locatie
+                location: volledigeLocatie(ev)
             });
             return 'https://calendar.google.com/calendar/render?' + params.toString();
+        }
+
+        function volledigeLocatie(ev) {
+            return ev.adres ? ev.locatie + ', ' + ev.adres : ev.locatie;
+        }
+
+        function icsTekst(text) {
+            return String(text).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+        }
+
+        function icsDataUrl(ev) {
+            var start = new Date(ev.start);
+            var end = new Date(start.getTime() + ev.duurMinuten * 60000);
+            var lines = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//Andere Vragen//Samenkomsten//NL',
+                'CALSCALE:GREGORIAN',
+                'METHOD:PUBLISH',
+                'BEGIN:VEVENT',
+                'UID:' + ev.id + '@andere-vragen.nl',
+                'DTSTAMP:' + toIcsUtc(new Date()),
+                'DTSTART:' + toIcsUtc(start),
+                'DTEND:' + toIcsUtc(end),
+                'SUMMARY:' + icsTekst('Filosofische gesprekken, Andere Vragen'),
+                'LOCATION:' + icsTekst(volledigeLocatie(ev)),
+                'DESCRIPTION:' + icsTekst('Filosofisch gesprek in een kleine groep. https://andere-vragen.nl/samenkomsten.html'),
+                'END:VEVENT',
+                'END:VCALENDAR'
+            ];
+            return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(lines.join('\r\n'));
         }
 
         function hideError() {
@@ -293,8 +334,18 @@
                 var tijd = document.createElement('span');
                 tijd.className = 'date-card-time';
                 tijd.textContent = parts.tijd + ' uur · ' + ev.locatie;
+                var adres = null;
+                if (ev.adres) {
+                    adres = document.createElement('a');
+                    adres.className = 'date-card-time sk-maplink';
+                    adres.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ev.adres);
+                    adres.target = '_blank';
+                    adres.rel = 'noopener';
+                    adres.textContent = ev.adres;
+                }
                 details.appendChild(thema);
                 details.appendChild(tijd);
+                if (adres) details.appendChild(adres);
                 if (ev.status === 'vol') {
                     var status = document.createElement('span');
                     status.className = 'date-card-status';
@@ -327,17 +378,20 @@
             var isWaitlist = data.status === 'waitlist';
             var titleEl = successMessage.querySelector('.success-title');
             var subEl = successMessage.querySelector('.success-sub');
-            var calendarLink = successMessage.querySelector('.success-calendar');
+            var calendars = successMessage.querySelector('.success-calendars');
+            var googleLink = successMessage.querySelector('.success-google');
+            var icsLink = successMessage.querySelector('.success-ics');
 
             if (titleEl) titleEl.textContent = isWaitlist ? 'Je staat op de wachtlijst.' : 'Top, je bent aangemeld!';
-            if (subEl) subEl.textContent = isWaitlist ? 'Je hoort het zodra er een plek vrijkomt.' : 'Je krijgt een bevestiging per mail, met een agenda-bijlage.';
+            if (subEl) subEl.textContent = isWaitlist ? 'Je hoort het zodra er een plek vrijkomt.' : 'Zet het meteen in je agenda:';
 
-            if (calendarLink) {
+            if (calendars) {
                 if (!isWaitlist && data.event) {
-                    calendarLink.href = googleCalendarUrl(data.event);
-                    calendarLink.style.display = 'block';
+                    googleLink.href = googleCalendarUrl(data.event);
+                    icsLink.href = icsDataUrl(data.event);
+                    calendars.style.display = 'flex';
                 } else {
-                    calendarLink.style.display = 'none';
+                    calendars.style.display = 'none';
                 }
             }
 

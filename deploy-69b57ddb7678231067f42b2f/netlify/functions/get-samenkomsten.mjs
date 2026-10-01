@@ -21,6 +21,7 @@ export default async (req, context) => {
             start: event.start,
             duurMinuten: event.duurMinuten,
             locatie: event.locatie,
+            adres: event.adres || "",
             thema: (event.thema || "").trim(),
             status: confirmedCount >= event.capaciteit ? "vol" : "open",
           };

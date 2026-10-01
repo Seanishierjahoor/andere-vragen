@@ -8,6 +8,7 @@
 //          anders wordt het tijdstip op sommige apparaten verkeerd omgerekend
 // - duurMinuten: gebruikt voor de agenda-uitnodiging (ics/Google Calendar)
 // - locatie: vrije tekst
+// - adres: straat, postcode en plaats; wordt een klikbare kaartlink op site en in mails
 // - thema: vrije tekst, mag leeg zijn (dan toont de site "wordt nog aangekondigd")
 // - capaciteit: aantal plekken; wordt nooit als getal getoond, alleen gebruikt om
 //   "open"/"vol" te bepalen
@@ -17,7 +18,8 @@ export default [
     id: "2026-10-08",
     start: "2026-10-08T19:00:00+02:00",
     duurMinuten: 120,
-    locatie: "Social Art Platform (SAP), Rotterdam",
+    locatie: "Social Art Platform (SAP)",
+    adres: "Willem Buytewechstraat 61A, 3024 BM Rotterdam",
     thema: "",
     capaciteit: 15,
   },

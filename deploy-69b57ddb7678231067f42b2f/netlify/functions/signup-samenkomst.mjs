@@ -20,8 +20,10 @@ const TEKSTEN = {
     calendarDetails: "Filosofisch gesprek in een kleine groep. https://andere-vragen.nl/samenkomsten.html",
     subjectConfirmed: "Je aanmelding is bevestigd | Andere Vragen",
     subjectWaitlist: "Je staat op de wachtlijst | Andere Vragen",
-    mailConfirmed: (wanneer, locatie) => [
+    mailConfirmed: (wanneer, locatie, adresLink, eten) => [
       `Leuk dat je komt! Je staat genoteerd voor ${wanneer}, bij ${locatie}.`,
+      ...(adresLink ? [`Adres: ${adresLink}`] : []),
+      ...(eten ? ["Je eet mee. We eten om 18:00, dus wees op tijd! Het eten is vegetarisch en werkt met een vrijwillige bijdrage."] : []),
       "Tot dan.",
       "Hartelijke groet,\nAndere Vragen",
     ],
@@ -41,8 +43,10 @@ const TEKSTEN = {
     calendarDetails: "Philosophical conversation in a small group. https://andere-vragen.nl/gatherings.html",
     subjectConfirmed: "You're signed up | Andere Vragen",
     subjectWaitlist: "You're on the waiting list | Andere Vragen",
-    mailConfirmed: (wanneer, locatie) => [
+    mailConfirmed: (wanneer, locatie, adresLink, eten) => [
       `Great that you're coming! You're signed up for ${wanneer}, at ${locatie}.`,
+      ...(adresLink ? [`Address: ${adresLink}`] : []),
+      ...(eten ? ["You're joining for dinner. We eat at 18:00, so please be on time! The food is vegetarian and works with a voluntary contribution."] : []),
       "See you then.",
       "Warm regards,\nAndere Vragen",
     ],
@@ -65,6 +69,7 @@ export default async (req, context) => {
     const email = (body.email || "").trim().toLowerCase();
     const message = (body.message || "").trim();
     const newsletter = body.newsletter === "ja";
+    const eten = body.eten === "ja";
     const eventId = body.event_id;
     const lang = body.lang === "en" ? "en" : "nl";
     const t = TEKSTEN[lang];
@@ -117,7 +122,7 @@ export default async (req, context) => {
     let isWaitlist = waitlistList.some((e) => e.email === email);
     if (!alreadyHere) {
       isWaitlist = confirmedList.length >= event.capaciteit;
-      const entry = { name, email, timestamp: new Date().toISOString() };
+      const entry = { name, email, eten, timestamp: new Date().toISOString() };
       if (isWaitlist) {
         waitlistList.push(entry);
         await store.setJSON(waitlistKey, waitlistList);
@@ -129,8 +134,8 @@ export default async (req, context) => {
 
     const RESEND_API_KEY = Netlify.env.get("RESEND_API_KEY");
     if (RESEND_API_KEY) {
-      await sendNotification({ RESEND_API_KEY, name, email, message, newsletter, event, isWaitlist, lang });
-      await sendConfirmation({ RESEND_API_KEY, name, email, event, isWaitlist, lang });
+      await sendNotification({ RESEND_API_KEY, name, email, message, newsletter, eten, event, isWaitlist, lang });
+      await sendConfirmation({ RESEND_API_KEY, name, email, eten, event, isWaitlist, lang });
     } else {
       console.log("RESEND_API_KEY not configured. Signup received:", JSON.stringify({ name, email, event: event.id, isWaitlist }));
     }
@@ -165,7 +170,7 @@ export default async (req, context) => {
       JSON.stringify({
         ok: true,
         status: isWaitlist ? "waitlist" : "confirmed",
-        event: { id: event.id, start: event.start, duurMinuten: event.duurMinuten, locatie: event.locatie },
+        event: { id: event.id, start: event.start, duurMinuten: event.duurMinuten, locatie: event.locatie, adres: event.adres || "" },
         ...(isProductie(context) ? {} : { test: { nieuwsbrief, store: storeNaam(context) } }),
       }),
       { status: 200, headers: { "Content-Type": "application/json" } }
@@ -215,6 +220,19 @@ function formatDatumTijd(startISO, lang) {
   return lang === "en" ? `${datum} at ${tijd}` : `${datum} om ${tijd}`;
 }
 
+function mapsUrl(adres) {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adres)}`;
+}
+
+function volledigeLocatie(event) {
+  return event.adres ? `${event.locatie}, ${event.adres}` : event.locatie;
+}
+
+// Voor de platte-tekstversie van een mail: links worden "tekst (url)".
+function alsPlatteTekst(html) {
+  return html.replace(/<a href="([^"]+)"[^>]*>([^<]+)<\/a>/g, "$2 ($1)").replace(/<[^>]+>/g, "");
+}
+
 function toIcsUtc(date) {
   return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
 }
@@ -238,7 +256,7 @@ function buildIcs(event, lang = "nl") {
     `DTSTART:${toIcsUtc(start)}`,
     `DTEND:${toIcsUtc(end)}`,
     `SUMMARY:${escapeIcsText(TEKSTEN[lang].calendarTitle)}`,
-    `LOCATION:${escapeIcsText(event.locatie)}`,
+    `LOCATION:${escapeIcsText(volledigeLocatie(event))}`,
     `DESCRIPTION:${escapeIcsText(TEKSTEN[lang].calendarDetails)}`,
     "END:VEVENT",
     "END:VCALENDAR",
@@ -254,12 +272,12 @@ function buildGoogleCalendarUrl(event) {
     text: "Filosofische gesprekken, Andere Vragen",
     dates: `${toIcsUtc(start)}/${toIcsUtc(end)}`,
     details: "Filosofisch gesprek in een kleine groep. https://andere-vragen.nl/samenkomsten.html",
-    location: event.locatie,
+    location: volledigeLocatie(event),
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
-async function sendNotification({ RESEND_API_KEY, name, email, message, newsletter, event, isWaitlist, lang }) {
+async function sendNotification({ RESEND_API_KEY, name, email, message, newsletter, eten, event, isWaitlist, lang }) {
   const submittedAt = new Date().toLocaleString("nl-NL", {
     timeZone: "Europe/Amsterdam",
     dateStyle: "full",
@@ -278,6 +296,7 @@ async function sendNotification({ RESEND_API_KEY, name, email, message, newslett
         <tr><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; width: 120px; vertical-align: top;">Naam</td><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8;">${name || "-"}</td></tr>
         <tr><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; vertical-align: top;">E-mail</td><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8;"><a href="mailto:${email}" style="color: #1a1a1a;">${email || "-"}</a></td></tr>
         <tr><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; vertical-align: top;">Samenkomst</td><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8;">${wanneer}, ${event.locatie}</td></tr>
+        <tr><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; vertical-align: top;">Eet mee</td><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8;">${eten ? "Ja (18:00)" : "Nee"}</td></tr>
         <tr><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; vertical-align: top;">Opmerking</td><td style="padding: 12px 0; border-bottom: 1px solid #f0ede8; white-space: pre-wrap;">${message || "-"}</td></tr>
         <tr><td style="padding: 12px 0; color: #5a5a5a; vertical-align: top;">Nieuwsbrief</td><td style="padding: 12px 0;">${newsletter ? "Ja, wil zich aanmelden" : "Nee"}</td></tr>
       </table>
@@ -286,7 +305,7 @@ async function sendNotification({ RESEND_API_KEY, name, email, message, newslett
       </div>
     </div>
   `;
-  const text = `${title}\n${submittedAt}\n\nNaam: ${name || "-"}\nE-mail: ${email || "-"}\nSamenkomst: ${wanneer}, ${event.locatie}\nOpmerking: ${message || "-"}\nNieuwsbrief: ${newsletter ? "Ja" : "Nee"}`;
+  const text = `${title}\n${submittedAt}\n\nNaam: ${name || "-"}\nE-mail: ${email || "-"}\nSamenkomst: ${wanneer}, ${event.locatie}\nEet mee: ${eten ? "Ja (18:00)" : "Nee"}\nOpmerking: ${message || "-"}\nNieuwsbrief: ${newsletter ? "Ja" : "Nee"}`;
 
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -305,15 +324,16 @@ async function sendNotification({ RESEND_API_KEY, name, email, message, newslett
   }
 }
 
-async function sendConfirmation({ RESEND_API_KEY, name, email, event, isWaitlist, lang = "nl" }) {
+async function sendConfirmation({ RESEND_API_KEY, name, email, eten, event, isWaitlist, lang = "nl" }) {
   const t = TEKSTEN[lang];
   const wanneer = formatDatumTijd(event.start, lang);
-  const paragraphs = isWaitlist ? t.mailWaitlist(wanneer) : t.mailConfirmed(wanneer, event.locatie);
+  const adresLink = event.adres ? `<a href="${mapsUrl(event.adres)}" style="color: #1a1a1a;">${event.adres}</a>` : "";
+  const paragraphs = isWaitlist ? t.mailWaitlist(wanneer) : t.mailConfirmed(wanneer, event.locatie, adresLink, eten);
 
   const html = `<div style="font-family: Georgia, 'Times New Roman', serif; max-width: 600px; margin: 0 auto; color: #1a1a1a;">${paragraphs
     .map((p) => `<p style="font-size: 15px; line-height: 1.6; white-space: pre-line;">${p}</p>`)
     .join("\n")}</div>`;
-  const text = paragraphs.join("\n\n");
+  const text = paragraphs.map(alsPlatteTekst).join("\n\n");
 
   const payload = {
     from: "Andere Vragen <onboarding@resend.dev>",
