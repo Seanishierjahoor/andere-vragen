@@ -6,6 +6,7 @@
 import { getStore } from "@netlify/blobs";
 import { isProductie, storeNaam } from "./lib/omgeving.mjs";
 import { AFZENDER, ANTWOORD_ADRES } from "./lib/mail.mjs";
+import { bevestigingsMail, wachtlijstMail } from "./lib/mails.mjs";
 import samenkomsten from "./data/samenkomsten.mjs";
 import instellingen from "./data/instellingen.mjs";
 
@@ -19,20 +20,6 @@ const TEKSTEN = {
     serverError: "Er ging iets mis. Probeer het later opnieuw.",
     calendarTitle: "Filosofische gesprekken, Andere Vragen",
     calendarDetails: "Filosofisch gesprek in een kleine groep. https://andere-vragen.nl/samenkomsten.html",
-    subjectConfirmed: "Je aanmelding is bevestigd | Andere Vragen",
-    subjectWaitlist: "Je staat op de wachtlijst | Andere Vragen",
-    mailConfirmed: (wanneer, locatie, adresLink, eten) => [
-      `Leuk dat je komt! Je staat genoteerd voor ${wanneer}, bij ${locatie}.`,
-      ...(adresLink ? [`Adres: ${adresLink}`] : []),
-      ...(eten ? ["Je eet mee. We eten om 18:00, dus wees op tijd! Het eten is vegetarisch en werkt met een vrijwillige bijdrage."] : []),
-      "Tot dan.",
-      "Hartelijke groet,\nAndere Vragen",
-    ],
-    mailWaitlist: (wanneer) => [
-      `Dank voor je aanmelding voor de samenkomst op ${wanneer}.`,
-      "Deze datum is op dit moment vol, dus je staat op de wachtlijst. Ik laat het je weten zodra er een plek vrijkomt.",
-      "Hartelijke groet,\nAndere Vragen",
-    ],
   },
   en: {
     missingFields: "Name, email and a chosen date are required.",
@@ -42,20 +29,6 @@ const TEKSTEN = {
     serverError: "Something went wrong. Please try again later.",
     calendarTitle: "Philosophical conversations, Andere Vragen",
     calendarDetails: "Philosophical conversation in a small group. https://andere-vragen.nl/gatherings.html",
-    subjectConfirmed: "You're signed up | Andere Vragen",
-    subjectWaitlist: "You're on the waiting list | Andere Vragen",
-    mailConfirmed: (wanneer, locatie, adresLink, eten) => [
-      `Great that you're coming! You're signed up for ${wanneer}, at ${locatie}.`,
-      ...(adresLink ? [`Address: ${adresLink}`] : []),
-      ...(eten ? ["You're joining for dinner. We eat at 18:00, so please be on time! The food is vegetarian and works with a voluntary contribution."] : []),
-      "See you then.",
-      "Warm regards,\nAndere Vragen",
-    ],
-    mailWaitlist: (wanneer) => [
-      `Thanks for signing up for the gathering on ${wanneer}.`,
-      "This date is full at the moment, so you're on the waiting list. I'll let you know as soon as a spot opens up.",
-      "Warm regards,\nAndere Vragen",
-    ],
   },
 };
 
@@ -123,7 +96,7 @@ export default async (req, context) => {
     let isWaitlist = waitlistList.some((e) => e.email === email);
     if (!alreadyHere) {
       isWaitlist = confirmedList.length >= event.capaciteit;
-      const entry = { name, email, eten, timestamp: new Date().toISOString() };
+      const entry = { name, email, eten, lang, timestamp: new Date().toISOString() };
       if (isWaitlist) {
         waitlistList.push(entry);
         await store.setJSON(waitlistKey, waitlistList);
@@ -222,17 +195,8 @@ function formatDatumTijd(startISO, lang) {
   return lang === "en" ? `${datum} at ${tijd}` : `${datum} om ${tijd}`;
 }
 
-function mapsUrl(adres) {
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adres)}`;
-}
-
 function volledigeLocatie(event) {
   return event.adres ? `${event.locatie}, ${event.adres}` : event.locatie;
-}
-
-// Voor de platte-tekstversie van een mail: links worden "tekst (url)".
-function alsPlatteTekst(html) {
-  return html.replace(/<a href="([^"]+)"[^>]*>([^<]+)<\/a>/g, "$2 ($1)").replace(/<[^>]+>/g, "");
 }
 
 function toIcsUtc(date) {
@@ -327,21 +291,15 @@ async function sendNotification({ RESEND_API_KEY, name, email, message, newslett
 }
 
 async function sendConfirmation({ RESEND_API_KEY, name, email, eten, event, isWaitlist, lang = "nl", prefix = "" }) {
-  const t = TEKSTEN[lang];
-  const wanneer = formatDatumTijd(event.start, lang);
-  const adresLink = event.adres ? `<a href="${mapsUrl(event.adres)}" style="color: #1a1a1a;">${event.adres}</a>` : "";
-  const paragraphs = isWaitlist ? t.mailWaitlist(wanneer) : t.mailConfirmed(wanneer, event.locatie, adresLink, eten);
-
-  const html = `<div style="font-family: Georgia, 'Times New Roman', serif; max-width: 600px; margin: 0 auto; color: #1a1a1a;">${paragraphs
-    .map((p) => `<p style="font-size: 15px; line-height: 1.6; white-space: pre-line;">${p}</p>`)
-    .join("\n")}</div>`;
-  const text = paragraphs.map(alsPlatteTekst).join("\n\n");
+  const mail = (isWaitlist ? wachtlijstMail : bevestigingsMail)({ naam: name, eten, event, lang });
+  const html = mail.html;
+  const text = mail.text;
 
   const payload = {
     from: AFZENDER,
     to: [email],
     reply_to: ANTWOORD_ADRES,
-    subject: prefix + (isWaitlist ? t.subjectWaitlist : t.subjectConfirmed),
+    subject: prefix + mail.onderwerp,
     html,
     text,
   };
