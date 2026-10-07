@@ -159,15 +159,8 @@ a:hover { text-decoration-thickness: 2px; }
     padding: clamp(2.5rem, 7vw, 5rem) 0 clamp(2rem, 5vw, 3.5rem);
 }
 
-.av-hero .av-wrap {
-    display: grid;
-    gap: 2rem;
-    align-items: center;
-}
+.av-hero .av-wrap > div { max-width: 44rem; }
 
-@media (min-width: 860px) {
-    .av-hero .av-wrap { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 3rem; }
-}
 
 .av-hero h1 { margin: 0.9rem 0 1.25rem; }
 
@@ -203,14 +196,6 @@ a:hover { text-decoration-thickness: 2px; }
     margin-top: 2rem;
 }
 
-.av-hero-beeld {
-    justify-self: center;
-    width: min(100%, 24rem);
-}
-
-@media (max-width: 859px) {
-    .av-hero-beeld { display: none; }
-}
 
 /* ---------- Knoppen ---------- */
 
@@ -269,14 +254,6 @@ a:hover { text-decoration-thickness: 2px; }
 
 .av-sectie h2 { margin-bottom: 1.5rem; }
 
-.av-sectie-kop {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-.av-sectie-kop h2 { margin: 0; }
-.av-sectie-kop img { width: 5.5rem; margin: -1.5rem 0; }
 
 /* In het kort */
 .av-feiten { margin: 0; border-top: 1px solid var(--av-lijn); }
@@ -516,7 +493,6 @@ a:hover { text-decoration-thickness: 2px; }
 /* Na het aanmelden */
 .av-gelukt { text-align: left; }
 .av-gelukt[hidden] { display: none; }
-.av-gelukt img { width: 6rem; margin: -0.5rem 0 0.5rem -0.5rem; }
 .av-gelukt h2 { margin-bottom: 0.5rem; }
 .av-agenda { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.25rem 0 1rem; }
 .av-agenda .av-knop { width: auto; flex: 1 1 9rem; margin: 0; }
@@ -574,7 +550,6 @@ a:hover { text-decoration-thickness: 2px; }
     text-align: center;
 }
 .av-los .av-wrap { max-width: 38rem; }
-.av-los img { width: 9rem; margin: 0 auto 1.5rem; }
 .av-los h1 { margin: 0.75rem 0 1.25rem; }
 .av-los p { margin-bottom: 1.5rem; }
 
