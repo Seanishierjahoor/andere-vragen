@@ -1,5 +1,6 @@
 // Levert de lijst van komende samenkomsten met status "open" of "vol" —
 // nooit een aantal plekken, zodat de widget die informatie niet kan tonen.
+// "engels" is true zodra er iemand met een Engelstalige aanmelding een plek heeft.
 
 import { getStore } from "@netlify/blobs";
 import { storeNaam } from "./lib/omgeving.mjs";
@@ -15,7 +16,8 @@ export default async (req, context) => {
         .filter((event) => new Date(event.start).getTime() > nu)
         .map(async (event) => {
           const raw = await store.get(`${event.id}::confirmed`, { type: "json" });
-          const confirmedCount = Array.isArray(raw) ? raw.length : 0;
+          const confirmed = Array.isArray(raw) ? raw : [];
+          const confirmedCount = confirmed.length;
           return {
             id: event.id,
             start: event.start,
@@ -24,6 +26,7 @@ export default async (req, context) => {
             adres: event.adres || "",
             thema: (event.thema || "").trim(),
             status: confirmedCount >= event.capaciteit ? "vol" : "open",
+            engels: confirmed.some((persoon) => persoon.lang === "en"),
           };
         })
     );

@@ -20,6 +20,8 @@
             geenThema: 'Thema wordt nog aangekondigd',
             uur: ' uur · ',
             vol: 'Wachtlijst: deze avond is vol. Meld je aan, dan hoor je het zodra er een plek vrijkomt.',
+            engels: 'Deze avond is in het Engels',
+            engelsOptie: ' · Engels',
             eerstDatum: 'Kies eerst een datum.',
             fout: 'Er ging iets mis. Probeer het later opnieuw.',
             foutMail: 'Er ging iets mis. Probeer het later opnieuw of mail naar ' + CONTACT + '.',
@@ -45,6 +47,8 @@
             geenThema: 'Theme to be announced',
             uur: ' · ',
             vol: 'Waiting list: this evening is full. Sign up and you\'ll hear as soon as a spot opens up.',
+            engels: 'This evening is in English',
+            engelsOptie: ' · English',
             eerstDatum: 'Please pick a date first.',
             fout: 'Something went wrong. Please try again later.',
             foutMail: 'Something went wrong. Please try again later or email ' + CONTACT + '.',
@@ -157,7 +161,7 @@
             select.setAttribute('aria-describedby', 'datum-details');
             // De eerstvolgende datum staat standaard geselecteerd (events zijn op datum gesorteerd).
             events.forEach(function (ev) {
-                var option = maak('option', '', formatDatumTijd(ev.start).datum + (ev.status === 'vol' ? T.wachtlijstOptie : ''));
+                var option = maak('option', '', formatDatumTijd(ev.start).datum + (ev.engels ? T.engelsOptie : '') + (ev.status === 'vol' ? T.wachtlijstOptie : ''));
                 option.value = ev.id;
                 select.appendChild(option);
             });
@@ -176,6 +180,7 @@
                     details.hidden = true;
                     return;
                 }
+                if (ev.engels) details.appendChild(maak('span', 'av-datum-taal', T.engels));
                 details.appendChild(maak('span', 'av-datum-thema' + (ev.thema ? '' : ' leeg'), ev.thema ? T.thema + ev.thema : T.geenThema));
                 details.appendChild(maak('span', '', formatDatumTijd(ev.start).tijd + T.uur + ev.locatie));
                 if (ev.adres) {

@@ -433,6 +433,15 @@ a:hover { text-decoration-thickness: 2px; }
     font-size: 0.9375rem;
 }
 .av-datumdetails[hidden] { display: none; }
+.av-datum-taal {
+    justify-self: start;
+    margin-bottom: 0.35rem;
+    padding: 0.15rem 0.6rem;
+    border: 1px solid var(--av-petrol);
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
 .av-datum-thema { font-weight: 600; }
 .av-datum-thema.leeg { font-weight: 400; font-style: italic; color: var(--av-petrol-zacht); }
 .av-datum-status {
