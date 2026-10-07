@@ -3,172 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Philosophical conversations - Andere Vragen</title>
+    <title>Philosophical conversations in Rotterdam | andere vragen</title>
+    <meta name="description" content="Every two weeks, a small group of us meets in Rotterdam to spend two hours on a single question. No background needed.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Philosophical conversations in Rotterdam | andere vragen">
+    <meta property="og:description" content="Every two weeks, a small group of us spends two hours on a single question. Feeling like thinking along is enough.">
+    <meta property="og:url" content="https://andere-vragen.nl/gatherings.html">
+    <meta property="og:image" content="https://andere-vragen.nl/beeld/deelbeeld.jpg">
+    <meta property="og:locale" content="en_GB">
+    <meta name="theme-color" content="#F3EFE6">
+    <link rel="icon" type="image/png" href="beeld/favicon.png">
+    <link rel="apple-touch-icon" href="beeld/apple-touch-icon.png">
+    <link rel="alternate" hreflang="nl" href="https://andere-vragen.nl/">
+    <link rel="alternate" hreflang="en" href="https://andere-vragen.nl/gatherings.html">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="alternate" hreflang="nl" href="https://andere-vragen.nl/samenkomsten.html">
-    <style>@media(max-width:1023px){.page-sidebar{position:relative;top:0;}}</style>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="huisstijl.css">
 </head>
 <body>
-    <header class="header">
-        <nav class="nav-container">
-            <a href="index.html" class="logo">
-                <div class="logo-icon"><span>AV</span></div>
-                <span class="logo-text">Andere Vragen</span>
-            </a>
-            <ul class="nav-desktop">
-                <li><a href="gatherings.html" class="active">Gatherings</a></li>
-            </ul>
-            <a href="samenkomsten.html" class="lang-switch" lang="nl" hreflang="nl">Nederlands</a>
-            <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Open menu">
-                <svg id="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="3" y1="12" x2="21" y2="12"></line>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <line x1="3" y1="18" x2="21" y2="18"></line>
-                </svg>
-                <svg id="close-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-        </nav>
+    <a class="av-skip" href="#sign-up">Skip to sign-up</a>
+
+    <header class="av-header">
+        <div class="av-wrap">
+            <a href="gatherings.html" class="av-woordmerk">andere vragen</a>
+            <nav class="av-nav" aria-label="Main menu">
+                <a href="gatherings.html" aria-current="page">Gatherings</a>
+                <a href="/" class="av-taal" lang="nl" hreflang="nl">Nederlands</a>
+            </nav>
+        </div>
     </header>
 
-    <div id="mobile-menu" class="mobile-menu">
-        <ul>
-            <li><a href="gatherings.html">Gatherings</a></li>
-        </ul>
-    </div>
-
-    <main class="main-content sk">
-        <div class="sk-container">
-
-            <div class="sk-grid">
-                <div class="sk-info">
-                    <header class="sk-intro">
-                        <p class="sk-label">Gatherings</p>
-                        <h1 class="sk-title">Philosophical conversations</h1>
-                        <p class="sk-lead">
-                            Every two weeks, a small group of us meets in Rotterdam to spend two hours on a single question.
-                            You don't need to know anything or prepare. Feeling like thinking along is enough.
-                        </p>
-                        <p class="sk-quote">"I don't believe thinking is something you do alone."</p>
-                        <a href="#sign-up" class="sk-naar-aanmelden">Sign up</a>
-                    </header>
-
-                    <section class="sk-block">
-                        <h2 class="sk-heading">At a glance</h2>
-                        <dl class="sk-facts">
-                            <div><dt>When</dt><dd>Every other week, from 19:00 to 21:00. Pick your date when you sign up.</dd></div>
-                            <div><dt>Where</dt><dd>Social Art Platform (SAP)<br><a href="https://www.google.com/maps/search/?api=1&query=Willem+Buytewechstraat+61A%2C+3024+BM+Rotterdam" target="_blank" rel="noopener" class="sk-maplink">Willem Buytewechstraat 61A, 3024 BM Rotterdam</a></dd></div>
-                            <div><dt>Dinner</dt><dd>At 18:00 we eat together, vegetarian, with a voluntary contribution. Let us know when you sign up.</dd></div>
-                            <div><dt>Cost</dt><dd>Voluntary contribution, on the night</dd></div>
-                            <div><dt>Background</dt><dd>None needed</dd></div>
-                            <div><dt>Language</dt><dd>Dutch, and we switch to English when English speakers join</dd></div>
-                        </dl>
-                    </section>
-
-                    <section class="sk-block">
-                        <h2 class="sk-heading">How an evening goes</h2>
-                        <ol class="sk-steps">
-                            <li><strong>We start with a question.</strong> Sometimes someone brings one, often it just comes up on the spot. It can be a big question, or something that's been on your mind this week.</li>
-                            <li><strong>We unpack it together.</strong> We take the answers that come up seriously. We unfold them further, until you can see what's in them. It's about understanding each other. Being right doesn't matter.</li>
-                            <li><strong>Someone keeps an eye on things.</strong> We're a small group, so everyone gets a chance to speak. A facilitator watches the pace and keeps the conversation on the question. You join in your own way, and listening is part of it too.</li>
-                        </ol>
-                    </section>
-
-                    <section class="sk-block">
-                        <h2 class="sk-heading">Questions</h2>
-                        <div class="sk-faq">
-                            <details>
-                                <summary>Do I need to know about philosophy?</summary>
-                                <p>Not at all. We work with examples from your own life. No books or famous philosophers required.</p>
-                            </details>
-                            <details>
-                                <summary>Can I come on my own?</summary>
-                                <p>Of course, nobody knows each other beforehand. And bringing someone along is lovely too! Just ask them to sign up themselves, so we can save them a spot.</p>
-                            </details>
-                            <details>
-                                <summary>Do I have to come every time?</summary>
-                                <p>No, you sign up per evening. So you choose which ones you join.</p>
-                            </details>
-                            <details>
-                                <summary>What if an evening is full?</summary>
-                                <p>Then you go on the waiting list. If a spot opens up, you'll hear right away.</p>
-                            </details>
-                            <details>
-                                <summary>I can't make it after all. What now?</summary>
-                                <p>No problem. Just send a quick email to anderevragen@proton.me, so someone on the waiting list can take your spot.</p>
-                            </details>
-                        </div>
-                    </section>
+    <main class="av-main">
+        <section class="av-hero">
+            <div class="av-wrap">
+                <div>
+                    <p class="av-label">Gatherings in Rotterdam</p>
+                    <h1><span class="av-onderstreept">Philosophical</span> conversations</h1>
+                    <p class="av-lead">
+                        Every two weeks, a small group of us meets in Rotterdam to spend two hours on a single question.
+                        You don't need to know anything or prepare. Feeling like thinking along is enough.
+                    </p>
+                    <p class="av-quote">"I don't believe thinking is something you do alone."</p>
+                    <div class="av-hero-acties">
+                        <a href="#sign-up" class="av-knop">Sign up</a>
+                        <a href="#how-an-evening-goes" class="av-knop av-knop-licht">How an evening goes</a>
+                    </div>
                 </div>
+                <img class="av-hero-beeld" src="beeld/logo.png" width="640" height="582" alt="The andere vragen logo: the words andere vragen, circled by a hand-drawn coral line.">
+            </div>
+        </section>
 
-                <aside class="sk-signup" id="sign-up">
-                    <div class="form-container sk-form">
+        <div class="av-wrap">
+            <div class="av-grid">
+                <section class="av-sectie av-kort" aria-labelledby="kop-kort">
+                    <h2 id="kop-kort">At a glance</h2>
+                    <dl class="av-feiten">
+                        <div><dt>When</dt><dd>Every other week, from 19:00 to 21:00. Pick your date when you sign up.</dd></div>
+                        <div><dt>Where</dt><dd>Social Art Platform (SAP)<br><a href="https://www.google.com/maps/search/?api=1&query=Willem+Buytewechstraat+61A%2C+3024+BM+Rotterdam" target="_blank" rel="noopener">Willem Buytewechstraat 61A, 3024 BM Rotterdam</a></dd></div>
+                        <div><dt>Dinner</dt><dd>At 18:00 we eat together, vegetarian, with a voluntary contribution. Let us know when you sign up.</dd></div>
+                        <div><dt>Cost</dt><dd>Voluntary contribution, on the night</dd></div>
+                        <div><dt>Background</dt><dd>None needed</dd></div>
+                        <div><dt>Language</dt><dd>Dutch, and we switch to English when English speakers join</dd></div>
+                    </dl>
+                </section>
+
+                <section class="av-sectie av-avond" id="how-an-evening-goes" aria-labelledby="kop-avond">
+                    <div class="av-sectie-kop">
+                        <h2 id="kop-avond">How an evening goes</h2>
+                        <img src="beeld/03_verbinding.png" width="1200" height="1200" alt="">
+                    </div>
+                    <ol class="av-stappen">
+                        <li><p><strong>We start with a question.</strong> Sometimes someone brings one, often it just comes up on the spot. It can be a big question, or something that's been on your mind this week.</p></li>
+                        <li><p><strong>We unpack it together.</strong> We take the answers that come up seriously. We unfold them further, until you can see what's in them. It's about understanding each other. Being right doesn't matter.</p></li>
+                        <li><p><strong>Someone keeps an eye on things.</strong> We're a small group, so everyone gets a chance to speak. A facilitator watches the pace and keeps the conversation on the question. You join in your own way, and listening is part of it too.</p></li>
+                    </ol>
+                </section>
+
+                <section class="av-sectie av-faq" aria-labelledby="kop-faq">
+                    <h2 id="kop-faq">Questions</h2>
+                    <div class="av-vragen">
+                        <details>
+                            <summary>Do I need to know about philosophy?</summary>
+                            <p>Not at all. We work with examples from your own life. No books or famous philosophers required.</p>
+                        </details>
+                        <details>
+                            <summary>Can I come on my own?</summary>
+                            <p>Of course, nobody knows each other beforehand. And bringing someone along is lovely too! Just ask them to sign up themselves, so we can save them a spot.</p>
+                        </details>
+                        <details>
+                            <summary>Do I have to come every time?</summary>
+                            <p>No, you sign up per evening. So you choose which ones you join.</p>
+                        </details>
+                        <details>
+                            <summary>What if an evening is full?</summary>
+                            <p>Then you go on the waiting list. If a spot opens up, you'll hear right away.</p>
+                        </details>
+                        <details>
+                            <summary>I can't make it after all. What now?</summary>
+                            <p>No problem. Just send a quick email to <a href="mailto:anderevragen@proton.me">anderevragen@proton.me</a>, so someone on the waiting list can take your spot.</p>
+                        </details>
+                    </div>
+                </section>
+
+                <aside class="av-aanmelden" id="sign-up" aria-labelledby="kop-aanmelden">
+                    <div class="av-kaart">
                         <div id="form-content">
-                            <p class="sk-label">Sign up</p>
-                            <p class="sk-step">1. Pick a date</p>
-                            <div id="date-picker" class="date-picker">
-                                <p class="date-picker-loading">Loading dates…</p>
-                            </div>
-                            <p class="sk-step">2. Your details</p>
+                            <h2 id="kop-aanmelden">Sign up</h2>
                             <form name="samenkomst" id="samenkomst-form">
+                                <label class="av-stap" for="datum">1. Pick a date</label>
+                                <div id="date-picker" class="av-datumkeuze">
+                                    <p class="av-datum-leeg">Loading dates…</p>
+                                </div>
+                                <p class="av-stap">2. Your details</p>
                                 <input type="hidden" name="event_id" id="event_id" value="">
-                                <p style="display:none;"><input name="bot-field"></p>
-                                <p id="form-error" class="form-error"></p>
-                                <div class="form-group">
+                                <p hidden><input name="bot-field" tabindex="-1" autocomplete="off"></p>
+                                <p id="form-error" class="av-fout" role="alert"></p>
+                                <div class="av-veld">
                                     <label for="name">Name</label>
-                                    <input id="name" name="name" type="text" required placeholder="Your name">
+                                    <input id="name" name="name" type="text" required autocomplete="name" placeholder="Your name">
                                 </div>
-                                <div class="form-group">
+                                <div class="av-veld">
                                     <label for="email">Email</label>
-                                    <input id="email" name="email" type="email" required placeholder="you@email.com">
+                                    <input id="email" name="email" type="email" required autocomplete="email" placeholder="you@email.com">
                                 </div>
-                                <div class="form-group">
-                                    <label for="message">Note <span class="sk-optional">(optional)</span></label>
-                                    <textarea id="message" name="message" rows="1" placeholder="..."></textarea>
+                                <div class="av-veld">
+                                    <label for="message">Note <span class="av-optioneel">(optional)</span></label>
+                                    <textarea id="message" name="message" rows="2"></textarea>
                                 </div>
-                                <div class="form-group form-check">
-                                    <label class="check-label">
-                                        <input type="checkbox" name="eten" value="ja">
-                                        <span>I&#39;ll join for dinner at 18:00 (vegetarian, voluntary contribution). Please be on time!</span>
-                                    </label>
-                                </div>
-                                <div class="form-group form-check">
-                                    <label class="check-label">
-                                        <input type="checkbox" name="newsletter" value="ja">
-                                        <span>Yes, I'd like to hear from Andere Vragen now and then (newsletter).</span>
-                                    </label>
-                                </div>
-                                <button type="submit" class="form-submit">Sign up</button>
-                                <p class="sk-privacy">We only use your name and email to handle your sign-up and to email you about this gathering. We don&#39;t share them with anyone.</p>
+                                <label class="av-check">
+                                    <input type="checkbox" name="eten" value="ja">
+                                    <span>I'll join for dinner at 18:00 (vegetarian, voluntary contribution). Please be on time!</span>
+                                </label>
+                                <label class="av-check">
+                                    <input type="checkbox" name="newsletter" value="ja">
+                                    <span>Yes, I'd like to hear from andere vragen now and then (newsletter).</span>
+                                </label>
+                                <button type="submit" class="av-knop">Sign up</button>
+                                <p class="av-klein">We only use your name and email to handle your sign-up and to email you about this gathering. We don't share them with anyone.</p>
                             </form>
-                        </div>
-                        <div class="sk-nieuwsbrief">
-                            <button type="button" class="sk-nieuwsbrief-toggle" aria-expanded="false" aria-controls="nieuwsbrief-form">Just want the newsletter for now?</button>
-                            <form id="nieuwsbrief-form" class="sk-nieuwsbrief-form" hidden>
-                                <p>Can&#39;t make it now, but want to hear about new dates and themes? Then just sign up for the newsletter.</p>
-                                <p style="display:none;"><input name="bot-field" tabindex="-1" autocomplete="off"></p>
-                                <div class="sk-nieuwsbrief-rij">
-                                    <input type="email" name="email" required placeholder="you@email.com" aria-label="E-mail">
-                                    <button type="submit">Subscribe</button>
-                                </div>
-                                <p class="sk-nieuwsbrief-melding" role="status"></p>
-                            </form>
-                        </div>
-                        <div id="success-message" style="display: none;">
-                            <div class="success-inner">
-                                <p class="success-title">You're signed up.</p>
-                                <p class="success-sub">You'll get a confirmation by email.</p>
-                                <div class="success-calendars">
-                                    <a target="_blank" rel="noopener" class="success-calendar success-google">Google Calendar</a>
-                                    <a class="success-calendar success-ics" download="philosophical-conversations.ics">Apple / Outlook</a>
-                                </div>
-                                <button type="button" id="reset-button" class="success-reset">Sign up again</button>
+                            <div class="av-nieuwsbrief-los">
+                                <button type="button" class="av-linkknop" data-toggle-nieuwsbrief aria-expanded="false" aria-controls="nieuwsbrief-los">Just want the newsletter for now?</button>
+                                <form id="nieuwsbrief-los" class="js-nieuwsbrief" hidden>
+                                    <p>Can't make it now, but want to hear about new dates and themes? Then just sign up for the newsletter.</p>
+                                    <p hidden><input name="bot-field" tabindex="-1" autocomplete="off"></p>
+                                    <div class="av-rij">
+                                        <input type="email" name="email" required autocomplete="email" placeholder="you@email.com" aria-label="Email for the newsletter">
+                                        <button type="submit" class="av-knop">Subscribe</button>
+                                    </div>
+                                    <p class="av-melding" role="status"></p>
+                                </form>
                             </div>
+                        </div>
+                        <div id="success-message" class="av-gelukt" hidden>
+                            <img src="beeld/01_vraaglus.png" width="1200" height="1200" alt="">
+                            <h2 class="av-gelukt-titel" tabindex="-1">You're signed up.</h2>
+                            <p class="av-gelukt-sub">You'll get a confirmation by email.</p>
+                            <div class="av-agenda" hidden>
+                                <a target="_blank" rel="noopener" class="av-knop av-agenda-google">Google Calendar</a>
+                                <a class="av-knop av-knop-licht av-agenda-ics" download="philosophical-conversations.ics">Apple / Outlook</a>
+                            </div>
+                            <button type="button" id="reset-button" class="av-linkknop">Sign up again</button>
                         </div>
                     </div>
                 </aside>
@@ -176,328 +171,28 @@
         </div>
     </main>
 
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-about">
-                <h3>Andere Vragen</h3>
-                <p>A philosophical and artistic practice. Thinking as a shared activity, in gatherings, in organisations and in leadership. Listening, looking and asking questions that open thinking up again.</p>
+    <footer class="av-footer">
+        <div class="av-wrap">
+            <div>
+                <a href="gatherings.html" class="av-woordmerk">andere vragen</a>
+                <div class="av-footer-lijn" aria-hidden="true"></div>
+                <p>Philosophical conversations in Rotterdam.</p>
+                <p><a href="mailto:anderevragen@proton.me">anderevragen@proton.me</a></p>
             </div>
-            <div class="footer-nav">
-                <h4>Navigation</h4>
-                <ul>
-                    <li><a href="gatherings.html">Gatherings</a></li>
-                    <li><a href="organisaties.html">For organisations</a></li>
-                    <li><a href="praktijk.html">The practice</a></li>
-                    <li><a href="over-mij.html">About</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                </ul>
-            </div>
-            <div class="footer-contact">
-                <h4>Locations</h4>
-                <ul>
-                    <li class="location">Rotterdam</li>
-                    <li><a href="mailto:anderevragen@proton.me">anderevragen@proton.me</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-newsletter">
-            <p class="footer-newsletter-label">Newsletter</p>
-            <form action="https://buttondown.com/api/emails/embed-subscribe/Anderevragen" method="post" class="footer-newsletter-form">
-                <input type="email" name="email" placeholder="Your email" required>
-                <button type="submit">Subscribe</button>
+            <form class="js-nieuwsbrief">
+                <p class="av-footer-titel"><label for="nb-voet">Newsletter</label></p>
+                <p>New dates and themes in your inbox.</p>
+                <p hidden><input name="bot-field" tabindex="-1" autocomplete="off"></p>
+                <div class="av-rij">
+                    <input id="nb-voet" type="email" name="email" required autocomplete="email" placeholder="you@email.com">
+                    <button type="submit" class="av-knop">Subscribe</button>
+                </div>
+                <p class="av-melding" role="status"></p>
             </form>
-        </div>
-        <div class="footer-bottom">
-            <p>© 2026 Andere Vragen. All rights reserved.</p>
+            <p class="av-footer-onder">© 2026 andere vragen</p>
         </div>
     </footer>
 
-    <script src="script.js"></script>
-    <script src="samenkomsten.js"></script>
-    <script src="editor.js"></script>
-    <script>
-    (function () {
-        var datePicker = document.getElementById('date-picker');
-        var form = document.getElementById('samenkomst-form');
-        var eventIdInput = document.getElementById('event_id');
-        var formError = document.getElementById('form-error');
-        var formContent = document.getElementById('form-content');
-        var successMessage = document.getElementById('success-message');
-        var resetButton = document.getElementById('reset-button');
-        var events = [];
-
-        function formatDatumTijd(startISO) {
-            var date = new Date(startISO);
-            var datum = date.toLocaleDateString('en-GB', { timeZone: 'Europe/Amsterdam', weekday: 'long', day: 'numeric', month: 'long' });
-            var tijd = date.toLocaleTimeString('en-GB', { timeZone: 'Europe/Amsterdam', hour: '2-digit', minute: '2-digit' });
-            return { datum: datum, tijd: tijd };
-        }
-
-        function toIcsUtc(date) {
-            return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-        }
-
-        function googleCalendarUrl(ev) {
-            var start = new Date(ev.start);
-            var end = new Date(start.getTime() + ev.duurMinuten * 60000);
-            var params = new URLSearchParams({
-                action: 'TEMPLATE',
-                text: 'Philosophical conversations, Andere Vragen',
-                dates: toIcsUtc(start) + '/' + toIcsUtc(end),
-                details: 'Philosophical conversation in a small group. https://andere-vragen.nl/gatherings.html',
-                location: volledigeLocatie(ev)
-            });
-            return 'https://calendar.google.com/calendar/render?' + params.toString();
-        }
-
-        function volledigeLocatie(ev) {
-            return ev.adres ? ev.locatie + ', ' + ev.adres : ev.locatie;
-        }
-
-        function icsTekst(text) {
-            return String(text).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
-        }
-
-        function icsDataUrl(ev) {
-            var start = new Date(ev.start);
-            var end = new Date(start.getTime() + ev.duurMinuten * 60000);
-            var lines = [
-                'BEGIN:VCALENDAR',
-                'VERSION:2.0',
-                'PRODID:-//Andere Vragen//Samenkomsten//NL',
-                'CALSCALE:GREGORIAN',
-                'METHOD:PUBLISH',
-                'BEGIN:VEVENT',
-                'UID:' + ev.id + '@andere-vragen.nl',
-                'DTSTAMP:' + toIcsUtc(new Date()),
-                'DTSTART:' + toIcsUtc(start),
-                'DTEND:' + toIcsUtc(end),
-                'SUMMARY:' + icsTekst('Philosophical conversations, Andere Vragen'),
-                'LOCATION:' + icsTekst(volledigeLocatie(ev)),
-                'DESCRIPTION:' + icsTekst('Philosophical conversation in a small group. https://andere-vragen.nl/gatherings.html'),
-                'END:VEVENT',
-                'END:VCALENDAR'
-            ];
-            return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(lines.join('\r\n'));
-        }
-
-        function hideError() {
-            if (formError) formError.style.display = 'none';
-        }
-
-        function showError(message) {
-            if (!formError) return;
-            formError.textContent = message;
-            formError.style.display = 'block';
-        }
-
-        function renderPicker() {
-            if (!datePicker) return;
-            eventIdInput.value = '';
-            if (!events.length) {
-                datePicker.innerHTML = '<p class="date-picker-empty">No new date is planned right now. Sign up for the newsletter so you don\'t miss the next one.</p>';
-                return;
-            }
-            datePicker.innerHTML = '';
-
-            var select = document.createElement('select');
-            select.className = 'date-select';
-            select.setAttribute('aria-label', 'Pick a date');
-            // De eerstvolgende datum staat standaard geselecteerd (events zijn op datum gesorteerd).
-            events.forEach(function (ev) {
-                var option = document.createElement('option');
-                option.value = ev.id;
-                option.textContent = formatDatumTijd(ev.start).datum + (ev.status === 'vol' ? ' · WAITING LIST' : '');
-                select.appendChild(option);
-            });
-
-            var details = document.createElement('div');
-            details.className = 'date-details';
-            details.hidden = true;
-
-            function toonDetails() {
-                var ev = events.filter(function (e) { return e.id === select.value; })[0];
-                eventIdInput.value = ev ? ev.id : '';
-                var wachtlijst = !!ev && ev.status === 'vol';
-                select.classList.toggle('wachtlijst', wachtlijst);
-                details.classList.toggle('wachtlijst', wachtlijst);
-                var submitBtn = form && form.querySelector('.form-submit');
-                if (submitBtn) submitBtn.textContent = wachtlijst ? 'Join the waiting list' : 'Sign up';
-                if (!ev) {
-                    details.hidden = true;
-                    return;
-                }
-                var parts = formatDatumTijd(ev.start);
-                details.innerHTML = '';
-                var thema = document.createElement('span');
-                thema.className = 'date-card-thema' + (ev.thema ? '' : ' leeg');
-                thema.textContent = ev.thema ? 'Theme: ' + ev.thema : 'Theme to be announced';
-                var tijd = document.createElement('span');
-                tijd.className = 'date-card-time';
-                tijd.textContent = parts.tijd + ' · ' + ev.locatie;
-                var adres = null;
-                if (ev.adres) {
-                    adres = document.createElement('a');
-                    adres.className = 'date-card-time sk-maplink';
-                    adres.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ev.adres);
-                    adres.target = '_blank';
-                    adres.rel = 'noopener';
-                    adres.textContent = ev.adres;
-                }
-                details.appendChild(thema);
-                details.appendChild(tijd);
-                if (adres) details.appendChild(adres);
-                if (ev.status === 'vol') {
-                    var status = document.createElement('span');
-                    status.className = 'date-card-status';
-                    status.textContent = 'Waiting list: this evening is full. Sign up and you\'ll hear as soon as a spot opens up.';
-                    details.appendChild(status);
-                }
-                details.hidden = false;
-                hideError();
-            }
-
-            select.addEventListener('change', toonDetails);
-            datePicker.appendChild(select);
-            datePicker.appendChild(details);
-            toonDetails();
-        }
-
-        fetch('/.netlify/functions/get-samenkomsten')
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                events = Array.isArray(data) ? data : [];
-                renderPicker();
-            })
-            .catch(function () {
-                if (datePicker) datePicker.innerHTML = '<p class="date-picker-empty">The dates could not be loaded. Reload the page or email anderevragen@proton.me.</p>';
-            });
-
-        function showSuccess(data) {
-            if (formContent) formContent.style.display = 'none';
-            if (!successMessage) return;
-            var isWaitlist = data.status === 'waitlist';
-            var titleEl = successMessage.querySelector('.success-title');
-            var subEl = successMessage.querySelector('.success-sub');
-            var calendars = successMessage.querySelector('.success-calendars');
-            var googleLink = successMessage.querySelector('.success-google');
-            var icsLink = successMessage.querySelector('.success-ics');
-
-            if (titleEl) titleEl.textContent = isWaitlist ? 'You\'re on the waiting list.' : 'Great, you\'re signed up!';
-            if (subEl) subEl.textContent = isWaitlist ? 'You\'ll hear from us as soon as a spot opens up.' : 'Add it to your calendar right away:';
-
-            if (calendars) {
-                if (!isWaitlist && data.event) {
-                    googleLink.href = googleCalendarUrl(data.event);
-                    icsLink.href = icsDataUrl(data.event);
-                    calendars.style.display = 'flex';
-                } else {
-                    calendars.style.display = 'none';
-                }
-            }
-
-            successMessage.style.display = 'block';
-            successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        if (form) {
-            form.addEventListener('submit', function (event) {
-                event.preventDefault();
-                hideError();
-
-                if (!eventIdInput.value) {
-                    showError('Please pick a date first.');
-                    return;
-                }
-
-                var formData = new FormData(form);
-                var payload = {};
-                formData.forEach(function (value, key) { payload[key] = value; });
-                payload.newsletter = form.querySelector('input[name="newsletter"]').checked ? 'ja' : 'nee';
-                payload.lang = 'en';
-
-                var submitBtn = form.querySelector('.form-submit');
-                if (submitBtn) submitBtn.disabled = true;
-
-                fetch('/.netlify/functions/signup-samenkomst', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                })
-                    .then(function (r) { return r.json().then(function (data) { return { ok: r.ok, data: data }; }); })
-                    .then(function (result) {
-                        if (submitBtn) submitBtn.disabled = false;
-                        if (!result.ok) {
-                            showError((result.data && result.data.message) || 'Something went wrong. Please try again later.');
-                            return;
-                        }
-                        showSuccess(result.data);
-                    })
-                    .catch(function () {
-                        if (submitBtn) submitBtn.disabled = false;
-                        showError('Something went wrong. Please try again later or email anderevragen@proton.me.');
-                    });
-            });
-        }
-
-        if (resetButton) {
-            resetButton.addEventListener('click', function () {
-                if (formContent) formContent.style.display = 'block';
-                if (successMessage) successMessage.style.display = 'none';
-                if (form) form.reset();
-                renderPicker();
-                hideError();
-            });
-        }
-    })();
-    </script>
-
-    <script>
-    (function () {
-        var toggle = document.querySelector('.sk-nieuwsbrief-toggle');
-        var form = document.getElementById('nieuwsbrief-form');
-        if (!toggle || !form) return;
-        var melding = form.querySelector('.sk-nieuwsbrief-melding');
-        var knop = form.querySelector('button[type=submit]');
-
-        toggle.addEventListener('click', function () {
-            form.hidden = !form.hidden;
-            toggle.setAttribute('aria-expanded', String(!form.hidden));
-            if (!form.hidden) form.querySelector('input[name=email]').focus();
-        });
-
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-            melding.className = 'sk-nieuwsbrief-melding';
-            melding.textContent = 'Just a moment...';
-            knop.disabled = true;
-            fetch('/.netlify/functions/nieuwsbrief-inschrijven', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: form.email.value,
-                    lang: 'en',
-                    'bot-field': form.querySelector('[name=bot-field]').value
-                })
-            })
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
-                    knop.disabled = false;
-                    if (!data.ok) {
-                        melding.className = 'sk-nieuwsbrief-melding fout';
-                        melding.textContent = data.message || 'Something went wrong. Please try again later.';
-                        return;
-                    }
-                    melding.textContent = data.alIngeschreven ? 'You were already on the newsletter list. Lovely!' : 'Done! You&#39;re on the newsletter list.';
-                    form.email.value = '';
-                })
-                .catch(function () {
-                    knop.disabled = false;
-                    melding.className = 'sk-nieuwsbrief-melding fout';
-                    melding.textContent = 'Something went wrong. Please try again later.';
-                });
-        });
-    })();
-    </script>
+    <script src="aanmelden.js"></script>
 </body>
 </html>

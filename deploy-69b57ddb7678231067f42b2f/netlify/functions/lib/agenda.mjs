@@ -2,12 +2,12 @@
 
 const TEKST = {
   nl: {
-    titel: "Filosofische gesprekken, Andere Vragen",
+    titel: "Filosofische gesprekken, andere vragen",
     beschrijving: "Filosofisch gesprek in een kleine groep. https://andere-vragen.nl/samenkomsten.html",
     bestand: "filosofische-gesprekken.ics",
   },
   en: {
-    titel: "Philosophical conversations, Andere Vragen",
+    titel: "Philosophical conversations, andere vragen",
     beschrijving: "Philosophical conversation in a small group. https://andere-vragen.nl/gatherings.html",
     bestand: "philosophical-conversations.ics",
   },

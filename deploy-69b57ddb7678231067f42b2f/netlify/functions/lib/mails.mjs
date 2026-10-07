@@ -1,11 +1,17 @@
 // Teksten en opmaak van de mails aan deelnemers: bevestiging, wachtlijst en de
-// herinnering een dag van tevoren. Zelfde stijl als de site: crème achtergrond, wit
-// vlak met dunne rand, schreefletter voor de titel en een infoblok met kleine kopjes.
+// herinnering een dag van tevoren. Zelfde huisstijl als de site: warm papier, petrol
+// voor tekst, een koraallijn als accent, schreefletter voor woordmerk en titel.
 //
 // Alles tussen ${...} wordt automatisch ingevuld uit de aanmelding (naam, eten) en
 // uit de samenkomst in de beheer-app (datum, locatie, adres, thema).
 
 const CONTACT = "anderevragen@proton.me";
+
+const KLEUR = { papier: "#F3EFE6", vlak: "#FAF8F3", petrol: "#193B3A", zacht: "#4A5F5E", koraal: "#E96A4B", lijn: "#D9DCD6" };
+const FONT = {
+  kop: "'DM Serif Display',Georgia,'Times New Roman',serif",
+  body: "'DM Sans',Helvetica,Arial,sans-serif",
+};
 
 const T = {
   nl: {
@@ -16,10 +22,10 @@ const T = {
     geenThema: "Wordt nog aangekondigd",
     etenJa: "Je eet mee, om 18:00. Vegetarisch, vrijwillige bijdrage.",
     kosten: "Vrijwillige bijdrage, ter plekke",
-    ondertekening: ["Sean", "Andere Vragen"],
+    ondertekening: ["Sean", "andere vragen"],
 
     bevestiging: {
-      onderwerp: (datum) => `Je bent aangemeld voor ${datum} | Andere Vragen`,
+      onderwerp: (datum) => `Je bent aangemeld voor ${datum} | andere vragen`,
       titel: "Leuk dat je komt!",
       alineas: (eten, { herinneringKomt }) => [
         "Je hoeft niets voor te bereiden. Kom zoals je bent, zin om mee te denken is genoeg.",
@@ -33,7 +39,7 @@ const T = {
     },
 
     afmelding: {
-      onderwerp: (datum) => `Je afmelding voor ${datum} is verwerkt | Andere Vragen`,
+      onderwerp: (datum) => `Je afmelding voor ${datum} is verwerkt | andere vragen`,
       titel: "Je afmelding is verwerkt",
       alineas: (eten, { datumTekst }) => [
         `Je bent afgemeld voor ${datumTekst}. Jammer dat je er niet bij kunt zijn!`,
@@ -44,7 +50,7 @@ const T = {
     },
 
     wachtlijst: {
-      onderwerp: (datum) => `Je staat op de wachtlijst voor ${datum} | Andere Vragen`,
+      onderwerp: (datum) => `Je staat op de wachtlijst voor ${datum} | andere vragen`,
       titel: "Je staat op de wachtlijst",
       alineas: () => [
         "Dank je wel voor je aanmelding! Deze avond zit op dit moment vol, dus je staat op de wachtlijst.",
@@ -54,7 +60,7 @@ const T = {
     },
 
     plek: {
-      onderwerp: (datum) => `Er is een plek vrij voor ${datum} | Andere Vragen`,
+      onderwerp: (datum) => `Er is een plek vrij voor ${datum} | andere vragen`,
       titel: "Er is een plek vrij!",
       intro: "Goed nieuws: er is een plek vrijgekomen, en die is voor jou. Je staat nu op de deelnemerslijst.",
       alineas: (eten) => [
@@ -66,7 +72,7 @@ const T = {
     },
 
     herinnering: {
-      onderwerp: () => "Morgen: filosofisch gesprek | Andere Vragen",
+      onderwerp: () => "Morgen: filosofisch gesprek | andere vragen",
       titel: "Morgen is het zover!",
       intro: "Wat leuk dat je langskomt.",
       alineas: (eten) => [
@@ -87,10 +93,10 @@ const T = {
     geenThema: "To be announced",
     etenJa: "You're joining for dinner at 18:00. Vegetarian, voluntary contribution.",
     kosten: "Voluntary contribution, on the night",
-    ondertekening: ["Sean", "Andere Vragen"],
+    ondertekening: ["Sean", "andere vragen"],
 
     bevestiging: {
-      onderwerp: (datum) => `You're signed up for ${datum} | Andere Vragen`,
+      onderwerp: (datum) => `You're signed up for ${datum} | andere vragen`,
       titel: "Great that you're coming!",
       alineas: (eten, { herinneringKomt }) => [
         "You don't need to prepare anything. Come as you are, feeling like thinking along is enough.",
@@ -102,7 +108,7 @@ const T = {
     },
 
     afmelding: {
-      onderwerp: (datum) => `Your cancellation for ${datum} is confirmed | Andere Vragen`,
+      onderwerp: (datum) => `Your cancellation for ${datum} is confirmed | andere vragen`,
       titel: "Your cancellation is confirmed",
       alineas: (eten, { datumTekst }) => [
         `You're no longer signed up for ${datumTekst}. A pity you can't make it!`,
@@ -113,7 +119,7 @@ const T = {
     },
 
     wachtlijst: {
-      onderwerp: (datum) => `You're on the waiting list for ${datum} | Andere Vragen`,
+      onderwerp: (datum) => `You're on the waiting list for ${datum} | andere vragen`,
       titel: "You're on the waiting list",
       alineas: () => [
         "Thank you for signing up! This evening is full at the moment, so you're on the waiting list.",
@@ -123,7 +129,7 @@ const T = {
     },
 
     plek: {
-      onderwerp: (datum) => `A spot opened up for ${datum} | Andere Vragen`,
+      onderwerp: (datum) => `A spot opened up for ${datum} | andere vragen`,
       titel: "A spot opened up!",
       intro: "Good news: a spot has opened up, and it's yours. You're now on the list of participants.",
       alineas: (eten) => [
@@ -135,7 +141,7 @@ const T = {
     },
 
     herinnering: {
-      onderwerp: () => "Tomorrow: philosophical conversation | Andere Vragen",
+      onderwerp: () => "Tomorrow: philosophical conversation | andere vragen",
       titel: "See you tomorrow!",
       intro: "Lovely that you're coming.",
       alineas: (eten) => [
@@ -152,7 +158,7 @@ const T = {
 // Een knop in de mail. In de platte-tekstversie wordt het "tekst: url".
 function knop(tekst, url) {
   return {
-    html: `<p style="margin:8px 0 20px;"><a href="${url}" style="display:inline-block;padding:12px 22px;border:1px solid #1a1a1a;color:#1a1a1a;text-decoration:none;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;font-family:Helvetica,Arial,sans-serif;">${esc(tekst)}</a></p>`,
+    html: `<p style="margin:8px 0 20px;"><a href="${url}" style="display:inline-block;padding:13px 24px;border-radius:6px;background:${KLEUR.petrol};color:${KLEUR.papier};text-decoration:none;font-size:15px;font-weight:600;font-family:${FONT.body};">${esc(tekst)}</a></p>`,
     text: `${tekst}: ${url}`,
   };
 }
@@ -192,14 +198,14 @@ function infoRijen(t, event, eten, metKosten) {
   const eind = new Date(start.getTime() + (event.duurMinuten || 120) * 60000);
   const wanneer = `${datum(event.start, t.locale)}, ${t.tijd(klok(start, t.locale), klok(eind, t.locale))}`;
 
-  const waarHtml = esc(event.locatie) + (event.adres ? `<br><a href="${mapsUrl(event.adres)}" style="color:#1a1a1a;">${esc(event.adres)}</a>` : "");
+  const waarHtml = esc(event.locatie) + (event.adres ? `<br><a href="${mapsUrl(event.adres)}" style="color:${KLEUR.petrol};">${esc(event.adres)}</a>` : "");
   const waarTekst = event.adres ? `${event.locatie}, ${event.adres} (${mapsUrl(event.adres)})` : event.locatie;
 
   const thema = (event.thema || "").trim();
   const rijen = [
     [t.labels.wanneer, esc(wanneer), wanneer],
     [t.labels.waar, waarHtml, waarTekst],
-    [t.labels.thema, thema ? esc(thema) : `<em style="color:#5a5a5a;">${esc(t.geenThema)}</em>`, thema || t.geenThema],
+    [t.labels.thema, thema ? esc(thema) : `<em style="color:${KLEUR.zacht};">${esc(t.geenThema)}</em>`, thema || t.geenThema],
   ];
   if (eten) rijen.push([t.labels.eten, esc(t.etenJa), t.etenJa]);
   if (metKosten) rijen.push([t.labels.kosten, esc(t.kosten), t.kosten]);
@@ -208,30 +214,34 @@ function infoRijen(t, event, eten, metKosten) {
 
 function opmaak({ titel, aanhef, intro, rijen, alineas, afsluiting, ondertekening }) {
   const p = (tekst, extra = "") =>
-    `<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#1a1a1a;${extra}">${esc(tekst)}</p>`;
+    `<p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:${KLEUR.petrol};${extra}">${esc(tekst)}</p>`;
 
   const info = rijen.length
-    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:8px 0 24px;border-top:1px solid #ece7df;">${rijen
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:8px 0 24px;border-top:1px solid ${KLEUR.lijn};">${rijen
         .map(
           ([label, html]) =>
-            `<tr><td style="padding:10px 12px 10px 0;width:90px;vertical-align:top;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#5a5a5a;border-bottom:1px solid #ece7df;">${esc(label)}</td><td style="padding:10px 0;vertical-align:top;font-size:15px;line-height:1.5;color:#1a1a1a;border-bottom:1px solid #ece7df;">${html}</td></tr>`
+            `<tr><td style="padding:11px 12px 11px 0;width:92px;vertical-align:top;font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:${KLEUR.zacht};border-bottom:1px solid ${KLEUR.lijn};">${esc(label)}</td><td style="padding:11px 0;vertical-align:top;font-size:16px;line-height:1.5;color:${KLEUR.petrol};border-bottom:1px solid ${KLEUR.lijn};">${html}</td></tr>`
         )
         .join("")}</table>`
     : "";
 
-  const html = `<!doctype html><html><body style="margin:0;padding:0;background:#fcfaf7;">
-<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;background:#fcfaf7;"><tr><td style="padding:32px 16px;">
-<table role="presentation" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;margin:0 auto;background:#ffffff;border:1px solid #d9d2c5;">
-<tr><td style="padding:36px 32px 28px;font-family:Helvetica,Arial,sans-serif;">
-<p style="margin:0 0 20px;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:#4a5d4e;">Andere Vragen</p>
-<h1 style="margin:0 0 24px;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:normal;font-size:28px;line-height:1.2;color:#1a1a1a;">${esc(titel)}</h1>
+  const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="color-scheme" content="light">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600&family=DM+Serif+Display&display=swap" rel="stylesheet"></head>
+<body style="margin:0;padding:0;background:${KLEUR.papier};">
+<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;background:${KLEUR.papier};"><tr><td style="padding:32px 16px;">
+<table role="presentation" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;margin:0 auto;background:${KLEUR.vlak};border:1px solid ${KLEUR.lijn};border-top:4px solid ${KLEUR.petrol};border-radius:6px;">
+<tr><td style="padding:32px 32px 28px;font-family:${FONT.body};color:${KLEUR.petrol};">
+<p style="margin:0;font-family:${FONT.kop};font-size:24px;line-height:1;color:${KLEUR.petrol};">andere vragen</p>
+<div style="width:56px;height:4px;margin:12px 0 28px;border-radius:2px;background:${KLEUR.koraal};line-height:4px;font-size:0;">&nbsp;</div>
+<h1 style="margin:0 0 24px;font-family:${FONT.kop};font-weight:normal;font-size:30px;line-height:1.15;color:${KLEUR.petrol};">${esc(titel)}</h1>
 ${p(aanhef)}
 ${intro ? p(intro) : ""}
 ${info}
 ${alineas.map((a) => (typeof a === "object" ? a.html : p(a))).join("\n")}
 ${p(afsluiting, "margin-top:24px;")}
-<p style="margin:0;font-size:15px;line-height:1.5;color:#1a1a1a;">${ondertekening.map(esc).join("<br>")}</p>
+<p style="margin:0;font-size:16px;line-height:1.5;color:${KLEUR.petrol};">${ondertekening.map(esc).join("<br>")}</p>
 </td></tr></table>
+<p style="max-width:560px;margin:16px auto 0;font-family:${FONT.body};font-size:13px;line-height:1.5;color:${KLEUR.zacht};text-align:center;">andere vragen · Rotterdam · <a href="mailto:${CONTACT}" style="color:${KLEUR.zacht};">${CONTACT}</a></p>
 </td></tr></table>
 </body></html>`;
 

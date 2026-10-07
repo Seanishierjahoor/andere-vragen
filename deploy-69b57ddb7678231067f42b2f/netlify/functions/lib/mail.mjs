@@ -2,5 +2,5 @@
 // bij Resend (DNS-records in Netlify DNS), dus mails komen ook aan bij aanmelders.
 // Antwoorden op een bevestiging komen binnen op het gewone mailadres.
 
-export const AFZENDER = "Andere Vragen <samenkomsten@andere-vragen.nl>";
+export const AFZENDER = "andere vragen <samenkomsten@andere-vragen.nl>";
 export const ANTWOORD_ADRES = "anderevragen@proton.me";
