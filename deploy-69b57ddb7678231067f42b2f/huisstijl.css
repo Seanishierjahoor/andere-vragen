@@ -205,11 +205,11 @@ a:hover { text-decoration-thickness: 2px; }
 
 .av-hero-beeld {
     justify-self: center;
-    width: min(100%, 26rem);
+    width: min(100%, 24rem);
 }
 
 @media (max-width: 859px) {
-    .av-hero-beeld { width: min(55%, 12rem); order: -1; justify-self: start; margin-left: -0.25rem; }
+    .av-hero-beeld { display: none; }
 }
 
 /* ---------- Knoppen ---------- */
