@@ -155,14 +155,16 @@ a:hover { text-decoration-thickness: 2px; }
 
 /* ---------- Opening ---------- */
 
-.av-hero {
-    padding: clamp(2.5rem, 7vw, 5rem) 0 clamp(2rem, 5vw, 3.5rem);
-}
+.av-hero { grid-area: intro; }
 
-.av-hero .av-wrap > div { max-width: 44rem; }
+
 
 
 .av-hero h1 { margin: 0.9rem 0 1.25rem; }
+
+@media (min-width: 960px) {
+    .av-hero .av-naar-aanmelden { display: none; }
+}
 
 .av-onderstreept {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'%3E%3Cpath d='M2 8c30-5 62-6 96-3s68 3 100-2' fill='none' stroke='%23E96A4B' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
@@ -234,14 +236,15 @@ a:hover { text-decoration-thickness: 2px; }
 .av-grid {
     display: grid;
     gap: 3rem;
-    grid-template-areas: "kort" "aanmelden" "avond" "faq";
+    padding-top: clamp(2.5rem, 7vw, 4.5rem);
+    grid-template-areas: "intro" "kort" "aanmelden" "avond" "faq";
 }
 
 @media (min-width: 960px) {
     .av-grid {
         grid-template-columns: minmax(0, 1fr) 24rem;
-        grid-template-rows: auto auto 1fr;
-        grid-template-areas: "kort aanmelden" "avond aanmelden" "faq aanmelden";
+        grid-template-rows: auto auto auto 1fr;
+        grid-template-areas: "intro aanmelden" "kort aanmelden" "avond aanmelden" "faq aanmelden";
         column-gap: clamp(3rem, 6vw, 5.5rem);
         row-gap: 4rem;
     }
