@@ -163,7 +163,7 @@ a:hover { text-decoration-thickness: 2px; }
 .av-hero h1 { margin: 0.9rem 0 1.25rem; }
 
 @media (min-width: 960px) {
-    .av-hero .av-naar-aanmelden { display: none; }
+    .av-hero .av-hero-acties { display: none; }
 }
 
 .av-onderstreept {
