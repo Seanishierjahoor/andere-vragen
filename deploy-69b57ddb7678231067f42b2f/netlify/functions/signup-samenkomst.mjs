@@ -94,6 +94,7 @@ export default async (req, context) => {
     if (!alreadyHere) {
       isWaitlist = confirmedList.length >= event.capaciteit;
       const entry = { name, email, eten, lang, timestamp: new Date().toISOString() };
+      if (message) entry.message = message.slice(0, 2000);
       if (isWaitlist) {
         waitlistList.push(entry);
         await store.setJSON(waitlistKey, waitlistList);

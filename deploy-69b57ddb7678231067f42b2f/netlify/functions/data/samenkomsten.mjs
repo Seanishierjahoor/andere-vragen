@@ -1,7 +1,7 @@
 // Lijst van komende "Filosofische gesprekken"-samenkomsten.
-// Beheren via de beheer-app of /beheer-samenkomsten.html (wachtwoord vereist): dat
-// schrijft dit bestand automatisch weg. Handmatig bewerken kan ook: kopieer een
-// object en pas de velden aan.
+// Beheren via /beheer-samenkomsten.html (wachtwoord vereist) — dat schrijft dit
+// bestand automatisch weg. Handmatig bewerken kan ook: kopieer een object en pas
+// de velden aan.
 //
 // - id: uniek, wijzig dit niet voor een bestaande samenkomst (koppelt aanmeldingen)
 // - start: ISO-datumtijd MET UTC-offset (+02:00 zomertijd / +01:00 wintertijd)
