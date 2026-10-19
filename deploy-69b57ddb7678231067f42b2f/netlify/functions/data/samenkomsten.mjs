@@ -28,6 +28,15 @@ export default [
     "duurMinuten": 120,
     "locatie": "Social Art Platform (SAP)",
     "adres": "Willem Buytewechstraat 61A, 3024 BM Rotterdam",
+    "thema": "SIMPEL",
+    "capaciteit": 15
+  },
+  {
+    "id": "sk-mvexr71cn0i3",
+    "start": "2026-11-06T19:00:00+01:00",
+    "duurMinuten": 120,
+    "locatie": "Social Art Platform (SAP)",
+    "adres": "Willem Buytewechstraat 61A, 3024 BM Rotterdam",
     "thema": "",
     "capaciteit": 15
   }
