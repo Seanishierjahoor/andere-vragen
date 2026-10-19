@@ -41,7 +41,7 @@ export default [
     "capaciteit": 15
   },
   {
-    "id": "sk-mvf0azzqoa53",
+    "id": "sk-mvf0bm5922v8",
     "start": "2026-11-20T19:00:00+01:00",
     "duurMinuten": 120,
     "locatie": "Social Art Platform (SAP)",
