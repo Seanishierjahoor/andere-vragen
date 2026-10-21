@@ -28,31 +28,35 @@ export const START = {
   ],
   evenementen: [
     {
-      id: "zwaan-kleef-aan", titel: "TENT × SAP: Zwaan kleef aan", ondertitel: "Filosofisch gesprek", thema: "",
-      plekken: ["tent", "sap"], momenten: [{ datum: "2026-08-15", plek: "", wat: "" }], omslag: null, blokken: [], zichtbaar: true,
+      id: "zwaan-kleef-aan", soort: "Filosofisch gesprek", naam: "Zwaan kleef aan", thema: "",
+      plekken: ["tent", "sap"], momenten: [{ datum: "2026-08-15", plek: "", wat: "", thema: "" }], omslag: null, blokken: [], zichtbaar: true,
     },
     {
-      id: "nieuwe-instituut-volkstuin", titel: "Nieuwe Instituut bij volkstuinvereniging Streven naar Verbetering", ondertitel: "", thema: "",
-      plekken: ["nieuwe-instituut", "volkstuin"], momenten: [{ datum: "2026-09-25", plek: "volkstuin", wat: "" }], omslag: null, blokken: [], zichtbaar: true,
+      id: "nieuwe-instituut-volkstuin", soort: "Filosofisch gesprek", naam: "After Summer School", thema: "Socratisch rondhangen",
+      plekken: ["nieuwe-instituut", "volkstuin"], momenten: [{ datum: "2026-09-25", plek: "volkstuin", wat: "", thema: "" }], omslag: null, blokken: [], zichtbaar: true,
     },
     {
-      id: "te-gast-bij-sap", titel: "Andere vragen te gast bij SAP", ondertitel: "Filosofische gesprekken", thema: "",
+      id: "te-gast-bij-sap", soort: "Filosofisch gesprek", naam: "", thema: "",
       plekken: ["sap"],
-      momenten: ["2026-10-08", "2026-10-22", "2026-11-20"].map((datum) => ({ datum, plek: "sap", wat: "" })),
-      omslag: null, blokken: [], zichtbaar: true,
-    },
-    {
-      id: "filmlokaal-sap", titel: "Filmlokaal Hammerstraat × SAP", ondertitel: "Filmvertoning en vervolggesprek", thema: "",
-      plekken: ["filmlokaal", "sap"],
       momenten: [
-        { datum: "2026-11-05", plek: "filmlokaal", wat: "Filmvertoning" },
-        { datum: "2026-11-06", plek: "sap", wat: "Vervolggesprek" },
+        { datum: "2026-10-08", plek: "sap", wat: "", thema: "Herhaling" },
+        { datum: "2026-10-22", plek: "sap", wat: "", thema: "Simpel" },
+        { datum: "2026-11-20", plek: "sap", wat: "", thema: "" },
       ],
       omslag: null, blokken: [], zichtbaar: true,
     },
     {
-      id: "studio-de-bakkerij", titel: "Studio de Bakkerij", ondertitel: "", thema: "",
-      plekken: ["bakkerij"], momenten: ["2026-12-04", "2026-12-17"].map((datum) => ({ datum, plek: "bakkerij", wat: "" })),
+      id: "filmlokaal-sap", soort: "Filmvertoning en vervolggesprek", naam: "", thema: "",
+      plekken: ["filmlokaal", "sap"],
+      momenten: [
+        { datum: "2026-11-05", plek: "filmlokaal", wat: "Filmvertoning", thema: "" },
+        { datum: "2026-11-06", plek: "sap", wat: "Vervolggesprek", thema: "" },
+      ],
+      omslag: null, blokken: [], zichtbaar: true,
+    },
+    {
+      id: "studio-de-bakkerij", soort: "Filosofisch gesprek", naam: "", thema: "",
+      plekken: ["bakkerij"], momenten: ["2026-12-04", "2026-12-17"].map((datum) => ({ datum, plek: "bakkerij", wat: "", thema: "" })),
       omslag: null, blokken: [], zichtbaar: true,
     },
   ],
@@ -63,6 +67,19 @@ const ID = /^[a-z0-9][a-z0-9-]{0,60}$/;
 const FOTO_ID = /^[a-z0-9-]{8,64}$/;
 const DATUM = /^\d{4}-\d{2}-\d{2}$/;
 const fotoOfNull = (v) => (typeof v === "string" && FOTO_ID.test(v) ? v : null);
+
+// Oude opslag (vóór okt 2026) had "titel" en "ondertitel"; nu zijn dat "soort" en "naam".
+// "TENT × SAP: Zwaan kleef aan" wordt soort "Filosofisch gesprek" (uit de ondertitel) en naam "Zwaan kleef aan".
+export function zetOm(gegevens) {
+  for (const e of gegevens?.evenementen || []) {
+    if (e.soort !== undefined) continue;
+    e.soort = e.ondertitel || "Filosofisch gesprek";
+    e.naam = String(e.titel || "").includes(":") ? e.titel.split(":").slice(1).join(":").trim() : "";
+    delete e.titel;
+    delete e.ondertitel;
+  }
+  return gegevens;
+}
 
 // Controleert en schoont de gegevens uit het beheerscherm. Geeft { fout } of { gegevens }.
 export function controleer(invoer) {
@@ -83,16 +100,17 @@ export function controleer(invoer) {
   const evenementIds = new Set();
   const evenementen = [];
   for (const e of invoer.evenementen) {
-    if (!ID.test(e?.id || "")) return { fout: `Bijeenkomst "${e?.titel || "?"}" heeft een ongeldige sleutel.` };
+    const label = tekst(e?.naam, 200) || tekst(e?.soort, 200) || "?";
+    if (!ID.test(e?.id || "")) return { fout: `Bijeenkomst "${label}" heeft een ongeldige sleutel.` };
     if (evenementIds.has(e.id)) return { fout: `Twee bijeenkomsten hebben dezelfde sleutel (${e.id}).` };
-    if (!tekst(e.titel, 200).trim()) return { fout: "Elke bijeenkomst heeft een titel nodig." };
+    if (!tekst(e.soort, 200).trim()) return { fout: "Geef bij elke bijeenkomst de soort op, bijvoorbeeld Filosofisch gesprek." };
     const eigenPlekken = (Array.isArray(e.plekken) ? e.plekken : []).filter((id) => plekIds.has(id));
-    if (!eigenPlekken.length) return { fout: `Kies bij "${e.titel}" minstens één plek.` };
+    if (!eigenPlekken.length) return { fout: `Kies bij "${label}" minstens één plek.` };
     const momenten = (Array.isArray(e.momenten) ? e.momenten : [])
       .filter((m) => DATUM.test(m?.datum || ""))
-      .map((m) => ({ datum: m.datum, plek: plekIds.has(m.plek) ? m.plek : "", wat: tekst(m.wat, 120) }))
+      .map((m) => ({ datum: m.datum, plek: plekIds.has(m.plek) ? m.plek : "", wat: tekst(m.wat, 120), thema: tekst(m.thema, 300) }))
       .sort((a, b) => a.datum.localeCompare(b.datum));
-    if (!momenten.length) return { fout: `Geef bij "${e.titel}" minstens één datum op.` };
+    if (!momenten.length) return { fout: `Geef bij "${label}" minstens één datum op.` };
 
     const blokken = [];
     for (const b of Array.isArray(e.blokken) ? e.blokken : []) {
@@ -110,8 +128,8 @@ export function controleer(invoer) {
     evenementIds.add(e.id);
     evenementen.push({
       id: e.id,
-      titel: tekst(e.titel, 200).trim(),
-      ondertitel: tekst(e.ondertitel, 200),
+      soort: tekst(e.soort, 200).trim(),
+      naam: tekst(e.naam, 200).trim(),
       thema: tekst(e.thema, 300),
       samenvatting: tekst(e.samenvatting, 600),
       plekken: eigenPlekken,

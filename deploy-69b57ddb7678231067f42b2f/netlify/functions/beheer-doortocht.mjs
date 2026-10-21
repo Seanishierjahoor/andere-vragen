@@ -4,7 +4,7 @@
 
 import { getStore } from "@netlify/blobs";
 import { wachtwoordKlopt } from "./lib/wachtwoord.mjs";
-import { gegevensStore, GEGEVENS_SLEUTEL, START, controleer, json } from "./lib/doortocht.mjs";
+import { gegevensStore, GEGEVENS_SLEUTEL, START, controleer, json, zetOm } from "./lib/doortocht.mjs";
 
 export default async (req, context) => {
   if (req.method !== "POST") return json({ ok: false, error: "Method not allowed" }, 405);
@@ -19,11 +19,11 @@ export default async (req, context) => {
 
     if (actie === "ophalen") {
       const opgeslagen = await store.get(GEGEVENS_SLEUTEL, { type: "json" });
-      return json({ ok: true, gegevens: opgeslagen || START });
+      return json({ ok: true, gegevens: zetOm(opgeslagen) || START });
     }
 
     if (actie === "opslaan") {
-      const { fout, gegevens: schoon } = controleer(gegevens);
+      const { fout, gegevens: schoon } = controleer(zetOm(gegevens));
       if (fout) return json({ ok: false, error: fout }, 400);
       await store.setJSON(GEGEVENS_SLEUTEL, schoon);
       return json({ ok: true, gegevens: schoon });

@@ -22,7 +22,7 @@ export function samenkomstenVanMorgen(nu = new Date()) {
   return samenkomsten.filter((e) => datumNL(new Date(e.start)) === morgen);
 }
 
-async function stuur({ RESEND_API_KEY, naar, mail, prefix }) {
+export async function stuur({ RESEND_API_KEY, naar, mail, prefix }) {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },

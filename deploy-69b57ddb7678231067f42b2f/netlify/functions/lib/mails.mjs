@@ -156,7 +156,7 @@ const T = {
 };
 
 // Een knop in de mail. In de platte-tekstversie wordt het "tekst: url".
-function knop(tekst, url) {
+export function knop(tekst, url) {
   return {
     html: `<p style="margin:8px 0 20px;"><a href="${url}" style="display:inline-block;padding:13px 24px;border-radius:6px;background:${KLEUR.petrol};color:${KLEUR.papier};text-decoration:none;font-size:15px;font-weight:600;font-family:${FONT.body};">${esc(tekst)}</a></p>`,
     text: `${tekst}: ${url}`,
@@ -212,7 +212,7 @@ function infoRijen(t, event, eten, metKosten) {
   return rijen;
 }
 
-function opmaak({ titel, aanhef, intro, rijen, alineas, afsluiting, ondertekening }) {
+export function opmaak({ titel, aanhef, intro, rijen, alineas, afsluiting, ondertekening }) {
   const p = (tekst, extra = "") =>
     `<p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:${KLEUR.petrol};${extra}">${esc(tekst)}</p>`;
 

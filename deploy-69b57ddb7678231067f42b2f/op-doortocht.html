@@ -36,24 +36,40 @@
     </header>
 
     <main class="dt">
-        <div class="av-wrap">
-            <div class="dt-kop">
-                <h1>Op doortocht <small>(portfolio)</small></h1>
-                <p>De plekken in Rotterdam waar we te gast waren, en wat er gebeurde.</p>
+        <section class="dt-podium" id="podium" data-stand="omslag" aria-label="Kaart van de plekken waar we te gast waren">
+            <div class="dt-kaart" id="kaart" aria-busy="true"></div>
+            <div class="dt-waas" aria-hidden="true"></div>
+
+            <div class="dt-omslag">
+                <p class="dt-kicker">andere vragen <span class="dt-geheim">(portfolio)</span></p>
+                <h1><button type="button" class="dt-titelknop" id="naar-omslag" tabindex="-1">Op doortocht</button></h1>
+                <p class="dt-inleiding">De plekken in Rotterdam waar we te gast waren, en wat er gebeurde.</p>
             </div>
 
-            <div class="dt-opzet" id="kaartweergave">
-                <div class="dt-kaart-vak">
-                    <div class="dt-kaart" id="kaart" aria-busy="true"></div>
-                    <div class="dt-kaartje" id="kaartje" hidden></div>
-                    <p class="dt-bron">Kaartgegevens © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap-bijdragers</a> · buurtgrenzen CBS/PDOK</p>
-                </div>
-                <aside class="dt-legenda" id="legenda" aria-label="Bijeenkomsten"></aside>
+            <a class="dt-archieflink" href="#archief">Volledig archief →</a>
+
+            <div class="dt-start">
+                <a class="dt-startknop" href="#kaart">Bekijk waar we te gast waren</a>
             </div>
 
-            <article class="dt-verhaal" id="verhaal" hidden></article>
-        </div>
+            <aside class="dt-index" id="index-vak" aria-label="Bijeenkomsten" inert>
+                <button type="button" class="dt-index-knop" id="index-knop" aria-expanded="true" aria-controls="index">Index</button>
+                <div class="dt-index-binnen" id="index"></div>
+            </aside>
+
+            <div class="dt-bediening" inert>
+                <button type="button" id="zoom-in" aria-label="Inzoomen">+</button>
+                <button type="button" id="zoom-uit" aria-label="Uitzoomen">−</button>
+                <button type="button" id="zoom-alles" aria-label="Alle plekken in beeld">⤢</button>
+            </div>
+
+            <div class="dt-pinkaart" id="pinkaart" role="dialog" aria-label="Bijeenkomsten op deze plek" hidden></div>
+
+            <p class="dt-bron">Kaart © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap-bijdragers</a> · buurten CBS/PDOK</p>
+        </section>
     </main>
+
+    <div class="dt-verhaal" id="verhaal" role="dialog" aria-modal="true" aria-labelledby="verhaal-titel" hidden></div>
 
     <footer class="av-footer">
         <div class="av-wrap">

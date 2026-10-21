@@ -49,8 +49,34 @@ export const maakSvg = (tag, attrs = {}) => {
     return el;
 };
 
+// Opmaak van de kaartlagen. Staat ín de SVG, zodat ook een afbeelding van de kaart (zie maakAfbeelding)
+// er precies zo uitziet. Met de klasse "lijnwerk" op de svg is de kaart kleurloos: crème met dunne
+// petrol lijnen en koraal water, in de kleuren van de huisstijl.
+const KAART_STIJL = `
+    #lappen path, #lappen-effen path { stroke: #2E50D0; stroke-width: 1.6; stroke-linejoin: round; stroke-opacity: .55; }
+    #groen path { stroke: #2F7D3A; stroke-width: 1.6; }
+    .oever { fill: #F5DF4D; stroke: none; }
+    .waterkader { fill: none; stroke: #1E2A5A; stroke-width: 2.6; stroke-linejoin: round; }
+    .vaart { fill: none; stroke: #6FB4E6; stroke-width: 3; }
+    #spoor path { fill: none; stroke: #1E2A5A; stroke-width: 1.6; stroke-dasharray: 2 5; stroke-linecap: round; }
+    #wegen-klein path { fill: none; stroke: #FFFDF6; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    #wegen-groot path { fill: none; stroke: #FFFDF6; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+    #wegen-groot-rand path { fill: none; stroke: #2E50D0; stroke-width: 8.5; stroke-linecap: round; stroke-linejoin: round; }
+
+    .lijnwerk #papier { fill: #F3EFE6; }
+    .lijnwerk #lappen, .lijnwerk .oever, .lijnwerk #wegen-groot-rand { display: none; }
+    .lijnwerk #lappen-effen path { fill: #F3EFE6; stroke: #193B3A; stroke-opacity: .3; stroke-width: 1.1; }
+    .lijnwerk #groen path { fill: #F3EFE6; stroke: #193B3A; stroke-opacity: .32; stroke-width: 1; }
+    .lijnwerk .watervlak { fill: #F3EFE6; }
+    .lijnwerk .waterkader { stroke: #E96A4B; stroke-width: 1.8; }
+    .lijnwerk .vaart { stroke: #E96A4B; stroke-width: 1.4; }
+    .lijnwerk #spoor path { stroke: #193B3A; stroke-opacity: .45; stroke-width: 1.2; }
+    .lijnwerk #wegen-klein path { stroke: #193B3A; stroke-opacity: .2; stroke-width: 1.3; }
+    .lijnwerk #wegen-groot path { stroke: #193B3A; stroke-opacity: .4; stroke-width: 2; }
+`;
+
 // Tekent de kaart in `vak` en geeft hulpmiddelen terug om er pins en lijnen op te zetten.
-export async function tekenKaart(vak, basis = 'beeld/kaart/') {
+export async function tekenKaart(vak, { basis = 'beeld/kaart/', rand = true } = {}) {
     const [svgTekst, maat] = await Promise.all([
         fetch(basis + 'kaart.svg').then((r) => r.text()),
         fetch(basis + 'kaart-maat.json').then((r) => r.json()),
@@ -65,31 +91,29 @@ export async function tekenKaart(vak, basis = 'beeld/kaart/') {
     const { GEBIED, BREED, HOOG } = maat;
 
     const defs = maakSvg('defs');
-    defs.innerHTML = `
-        <filter id="krijt" x="-1%" y="-1%" width="102%" height="102%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="4" result="golf"/>
-            <feDisplacementMap in="SourceGraphic" in2="golf" scale="6" xChannelSelector="R" yChannelSelector="G" result="wiebel"/>
-            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="9" result="korrel"/>
-            <feColorMatrix in="korrel" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  4 0 0 0 -0.55" result="gaatjes"/>
-            <feComposite in="wiebel" in2="gaatjes" operator="in"/>
-        </filter>
-        <clipPath id="waterclip"></clipPath>`;
+    defs.innerHTML = `<style>${KAART_STIJL}</style><clipPath id="waterclip"></clipPath>`;
     svg.prepend(defs);
 
     maakPatroon(defs, 'p-papier', '#FBF7EE', '#D9C3E6', 'krul', 15, 22, 0.35);
     maakPatroon(defs, 'p-water', '#7DBDEA', '#FFFFFF', 'golf', -8, 40, 0.35);
     maakPatroon(defs, 'p-groen', licht('#A8D26B', 0.25), '#2F7D3A', 'lijnen', 35, 12, 0.45);
-    const papier = maakSvg('rect', { width: BREED, height: HOOG, fill: 'url(#p-papier)' });
-    svg.prepend(papier);
+    const papier = maakSvg('rect', { id: 'papier', width: BREED, height: HOOG, fill: 'url(#p-papier)' });
 
-    // Lappen: elke buurt een eigen kleur, arcering en hoek.
-    svg.querySelectorAll('#lappen path').forEach((pad, i) => {
+    // Lappen: elke buurt een eigen kleur, arcering en hoek. Daaronder een effen laag in zachte
+    // tinten (en in lijnwerk de crème vlakken met dunne lijnen).
+    const lappen = svg.querySelector('#lappen');
+    const effen = lappen.cloneNode(true);
+    effen.id = 'lappen-effen';
+    lappen.before(effen);
+    const effenPaden = [...effen.querySelectorAll('path')];
+    lappen.querySelectorAll('path').forEach((pad, i) => {
         const h = hash(pad.dataset.id);
         const [vlak, inkt] = KLEUREN[h % KLEUREN.length];
         const soort = MOTIEVEN[(h >>> 8) % MOTIEVEN.length];
         const hoek = ((h >>> 16) % 12) * 15;
         maakPatroon(defs, 'p-lap-' + i, licht(vlak, RUST.vlak), inkt, soort, hoek, 14 + ((h >>> 4) % 3) * 4, RUST.inkt);
         pad.setAttribute('fill', `url(#p-lap-${i})`);
+        effenPaden[i].setAttribute('fill', licht(vlak, 0.62));
     });
     svg.querySelector('#groen path').setAttribute('fill', 'url(#p-groen)');
 
@@ -100,30 +124,34 @@ export async function tekenKaart(vak, basis = 'beeld/kaart/') {
     const oever = waterPad.cloneNode();
     oever.setAttribute('class', 'oever');
     waterPad.before(oever);
-    Object.entries({ fill: 'url(#p-water)', transform: 'translate(0 7)', 'clip-path': 'url(#waterclip)', stroke: 'none' })
+    Object.entries({ fill: 'url(#p-water)', transform: 'translate(0 7)', 'clip-path': 'url(#waterclip)', stroke: 'none', class: 'watervlak' })
         .forEach(([k, v]) => waterPad.setAttribute(k, v));
     const kader = oever.cloneNode();
     kader.setAttribute('class', 'waterkader');
     waterGroep.appendChild(kader);
 
     const groot = svg.querySelector('#wegen-groot');
-    const rand = groot.cloneNode(true);
-    rand.id = 'wegen-groot-rand';
-    rand.setAttribute('class', 'rand-groot');
-    groot.before(rand);
+    const wegRand = groot.cloneNode(true);
+    wegRand.id = 'wegen-groot-rand';
+    wegRand.removeAttribute('class');
+    groot.before(wegRand);
 
-    // Alles behalve de achtergrond gaat door het krijtfilter.
-    const getekend = maakSvg('g', { class: 'krijt' });
-    [...svg.children].filter((c) => c !== defs && c !== papier).forEach((c) => getekend.appendChild(c));
-    svg.appendChild(getekend);
+    // Alle getekende lagen samen in één groep, zodat de pagina ze in één keer kan wisselen
+    // met een afbeelding (tijdens bewegen).
+    const vector = maakSvg('g', { class: 'kaartvector' });
+    [...svg.children].filter((c) => c !== defs).forEach((c) => vector.appendChild(c));
+    vector.prepend(papier);
+    svg.appendChild(vector);
 
-    // Krulletjesrand rondom, zoals de rand van de tekening.
-    maakPatroon(defs, 'p-rand', '#E9DDF0', '#FFFFFF', 'krul', 0, 20);
-    const r = 34;
-    svg.appendChild(maakSvg('path', {
-        d: `M0 0H${BREED}V${HOOG}H0Z M${r} ${r}V${HOOG - r}H${BREED - r}V${r}Z`,
-        fill: 'url(#p-rand)', 'fill-rule': 'evenodd', class: 'krijt',
-    }));
+    // Krulletjesrand rondom, zoals de rand van de tekening (niet als de kaart schermvullend is).
+    if (rand) {
+        maakPatroon(defs, 'p-rand', '#E9DDF0', '#FFFFFF', 'krul', 0, 20);
+        const r = 34;
+        svg.appendChild(maakSvg('path', {
+            d: `M0 0H${BREED}V${HOOG}H0Z M${r} ${r}V${HOOG - r}H${BREED - r}V${r}Z`,
+            fill: 'url(#p-rand)', 'fill-rule': 'evenodd',
+        }));
+    }
 
     const naarKaart = (lat, lon) => [
         (lon - GEBIED.w) / (GEBIED.e - GEBIED.w) * BREED,
@@ -143,5 +171,26 @@ export async function tekenKaart(vak, basis = 'beeld/kaart/') {
     };
     const binnenGebied = (lat, lon) => lat >= GEBIED.s && lat <= GEBIED.n && lon >= GEBIED.w && lon <= GEBIED.e;
 
-    return { svg, BREED, HOOG, naarKaart, vanKaart, schermNaarKaart, binnenGebied };
+    // Maakt een afbeelding (blob-URL) van de getekende kaart, in kleur of als lijnwerk.
+    // Een afbeelding verschuiven en schalen is voor de browser veel lichter dan de vectorkaart.
+    async function maakAfbeelding({ lijnwerk = false, schaal = 1.5 } = {}) {
+        const kopie = maakSvg('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: `0 0 ${BREED} ${HOOG}`, width: Math.round(BREED * schaal), height: Math.round(HOOG * schaal), class: lijnwerk ? 'lijnwerk' : '' });
+        kopie.append(defs.cloneNode(true), vector.cloneNode(true));
+        const bron = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(kopie)], { type: 'image/svg+xml' }));
+        try {
+            const beeld = new Image();
+            beeld.src = bron;
+            await beeld.decode();
+            const doek = document.createElement('canvas');
+            doek.width = kopie.getAttribute('width');
+            doek.height = kopie.getAttribute('height');
+            doek.getContext('2d').drawImage(beeld, 0, 0, doek.width, doek.height);
+            const blob = await new Promise((klaar) => doek.toBlob(klaar, 'image/webp', 0.9));
+            return URL.createObjectURL(blob);
+        } finally {
+            URL.revokeObjectURL(bron);
+        }
+    }
+
+    return { svg, BREED, HOOG, naarKaart, vanKaart, schermNaarKaart, binnenGebied, maakAfbeelding };
 }

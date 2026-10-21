@@ -35,6 +35,9 @@ const MAANDEN = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 
 const kortDatum = (iso) => iso ? `${+iso.slice(8, 10)} ${MAANDEN[+iso.slice(5, 7) - 1]} ${iso.slice(0, 4)}` : 'geen datum';
 const fotoUrl = (id) => '/doortocht-foto/' + encodeURIComponent(id);
 const plekNaam = (id) => gegevens.plekken.find((p) => p.id === id)?.naam || '?';
+// Hoe een bijeenkomst in lijsten heet: de plekken, met de eigen naam of de soort.
+const evenementLabel = (e) => `${e.plekken.map(plekNaam).join(' × ') || '(nog geen plek)'}: ${e.naam || e.soort || 'zonder soort'}`;
+const SOORTEN = ['Filosofisch gesprek', 'Filmvertoning en vervolggesprek', 'Workshop', 'Wandeling'];
 
 function maakSleutel(tekst, bestaand) {
     const basis = String(tekst || 'nieuw').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -90,7 +93,9 @@ async function inloggen(ww) {
     $('inloggen').hidden = true;
     $('werkplek').hidden = false;
     $('balk-acties').hidden = false;
-    gekozenEvenement = gesorteerdeEvenementen()[0]?.id || null;
+    // Link uit de schrijfherinnering: beheer-doortocht.html#bijeenkomst/<id> opent die bijeenkomst.
+    const uitLink = decodeURIComponent((location.hash.match(/^#bijeenkomst\/(.+)$/) || [])[1] || '');
+    gekozenEvenement = gegevens.evenementen.some((e) => e.id === uitLink) ? uitLink : gesorteerdeEvenementen()[0]?.id || null;
     gekozenPlek = gegevens.plekken[0]?.id || null;
     tekenAlles();
 }
@@ -136,7 +141,8 @@ function tekenEvenementenLijst() {
     const lijst = $('lijst-bijeenkomsten');
     lijst.replaceChildren(...gesorteerdeEvenementen().map((e) => h('li', {},
         h('button', { type: 'button', 'aria-current': String(e.id === gekozenEvenement), onclick: () => { gekozenEvenement = e.id; tekenEvenementenLijst(); tekenEvenement(); } },
-            h('span', { tekst: e.titel || '(zonder titel)' }),
+            h('span', { tekst: e.plekken.map(plekNaam).join(' × ') || '(nog geen plek)' }),
+            h('small', { tekst: [e.soort, e.naam].filter(Boolean).join(' · ') }),
             h('small', { tekst: e.momenten.map((m) => kortDatum(m.datum)).join(', ') }),
             e.zichtbaar === false ? h('span', { class: 'bh-verborgen', tekst: 'Verborgen' }) : null,
         ),
@@ -146,8 +152,8 @@ function tekenEvenementenLijst() {
 $('nieuwe-bijeenkomst').addEventListener('click', () => {
     const id = maakSleutel('nieuwe-bijeenkomst', new Set(gegevens.evenementen.map((e) => e.id)));
     gegevens.evenementen.push({
-        id, titel: 'Nieuwe bijeenkomst', ondertitel: '', thema: '', samenvatting: '',
-        plekken: [], momenten: [{ datum: new Date().toLocaleDateString('sv-SE'), plek: '', wat: '' }],
+        id, soort: 'Filosofisch gesprek', naam: '', thema: '', samenvatting: '',
+        plekken: [], momenten: [{ datum: new Date().toLocaleDateString('sv-SE'), plek: '', wat: '', thema: '' }],
         omslag: null, blokken: [], zichtbaar: false,
     });
     gekozenEvenement = id;
@@ -158,10 +164,10 @@ $('nieuwe-bijeenkomst').addEventListener('click', () => {
 });
 
 // Tekstveld dat direct in het evenement schrijft (zonder opnieuw te tekenen, dan blijft de focus).
-function veld(obj, sleutel, label, { lang = false, hulp = '', naWijzig } = {}) {
+function veld(obj, sleutel, label, { lang = false, hulp = '', naWijzig, lijst } = {}) {
     const id = 'v-' + Math.random().toString(36).slice(2);
     const invoer = h(lang ? 'textarea' : 'input', {
-        id, type: lang ? undefined : 'text', waarde: obj[sleutel] || '',
+        id, type: lang ? undefined : 'text', waarde: obj[sleutel] || '', list: lijst,
         oninput: (e) => { obj[sleutel] = e.target.value; markeerGewijzigd(); naWijzig?.(); },
     });
     return h('div', {}, h('label', { for: id, tekst: label }), hulp ? h('p', { class: 'bh-hulp', tekst: hulp }) : null, invoer);
@@ -177,9 +183,10 @@ function tekenEvenement() {
     const algemeen = h('div', { class: 'bh-kaartvak' },
         h('h2', { tekst: 'Over de bijeenkomst' }),
         h('div', { class: 'bh-velden' },
-            veld(e, 'titel', 'Titel', { naWijzig: lijstBij }),
-            veld(e, 'ondertitel', 'Ondertitel', { hulp: 'Bijvoorbeeld "Filosofisch gesprek" of "Filmvertoning en vervolggesprek".' }),
-            veld(e, 'thema', 'Thema of vraag', { hulp: 'Komt groot in beeld, bijvoorbeeld "Wanneer is iets van jou?"' }),
+            h('datalist', { id: 'soorten' }, SOORTEN.map((naam) => h('option', { value: naam }))),
+            veld(e, 'soort', 'Soort bijeenkomst', { naWijzig: lijstBij, lijst: 'soorten', hulp: 'Kies of typ, bijvoorbeeld "Filosofisch gesprek". Dit is de kop; de plek of samenwerking zet de site er zelf onder.' }),
+            veld(e, 'naam', 'Eigen naam (optioneel)', { naWijzig: lijstBij, hulp: 'Als de bijeenkomst een naam had, bijvoorbeeld "Zwaan kleef aan" of "After Summer School".' }),
+            veld(e, 'thema', 'Thema van de hele bijeenkomst (optioneel)', { hulp: 'Heeft elke datum een eigen thema, zoals bij een reeks? Vul dat dan hieronder bij de data in.' }),
             veld(e, 'samenvatting', 'Korte samenvatting (optioneel)', { lang: true, hulp: 'Staat in het kaartje op de kaart. Leeg laten: dan nemen we het begin van het verhaal.' }),
             h('div', { class: 'bh-vinkjes' },
                 h('label', {}, h('input', { type: 'checkbox', checked: e.zichtbaar !== false, onchange: (ev) => { e.zichtbaar = ev.target.checked; markeerGewijzigd(); lijstBij(); } }), 'Zichtbaar op de site'),
@@ -187,9 +194,29 @@ function tekenEvenement() {
         ),
     );
 
+    // Nieuwe plek: naam + zoeker; na het kiezen staat hij op de kaart en is hij hier aangevinkt.
+    const nieuw = { naam: '' };
+    const nieuwePlek = h('div', { class: 'bh-nieuwe-plek', hidden: true },
+        veld(nieuw, 'naam', 'Naam van de nieuwe plek', { hulp: 'Bijvoorbeeld "Filmlokaal Hammerstraat". Leeg laten mag: dan nemen we de naam uit de zoekresultaten.' }),
+        h('div', {},
+            h('label', { for: 'nieuwe-plek-zoek', tekst: 'Waar is het?' }),
+            plekZoeker({
+                id: 'nieuwe-plek-zoek',
+                opKies: (r) => {
+                    const naam = nieuw.naam.trim() || r.naam || r.adres.split(',')[0];
+                    const id = maakSleutel(naam, new Set(gegevens.plekken.map((x) => x.id)));
+                    gegevens.plekken.push({ id, naam, adres: r.adres, lat: r.lat, lon: r.lon });
+                    e.plekken = [...e.plekken, id];
+                    herteken();
+                    tekenPlekkenLijst();
+                    zetStatus(`"${naam}" toegevoegd (nog opslaan). De precieze plek kun je verslepen onder Plekken.`);
+                },
+            })),
+    );
+
     const plekken = h('div', { class: 'bh-kaartvak' },
         h('h2', { tekst: 'Plekken' }),
-        h('p', { class: 'bh-hulp', tekst: 'Kies er meer dan één bij een samenwerking: dan komt er een stippellijn tussen. Een nieuwe plek maak je onder "Plekken".' }),
+        h('p', { class: 'bh-hulp', tekst: 'Kies er meer dan één bij een samenwerking: dan komt er een stippellijn tussen. Staat de plek er nog niet bij? Voeg hem hieronder toe.' }),
         h('div', { class: 'bh-vinkjes' }, gegevens.plekken.map((p) => h('label', {},
             h('input', {
                 type: 'checkbox', checked: e.plekken.includes(p.id),
@@ -198,13 +225,21 @@ function tekenEvenement() {
                     herteken();
                 },
             }), p.naam))),
+        h('div', { class: 'bh-toevoegen' },
+            h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', tekst: '+ Nieuwe plek', 'aria-expanded': 'false', onclick: (ev) => {
+                nieuwePlek.hidden = !nieuwePlek.hidden;
+                ev.target.setAttribute('aria-expanded', String(!nieuwePlek.hidden));
+                if (!nieuwePlek.hidden) nieuwePlek.querySelector('input').focus();
+            } })),
+        nieuwePlek,
     );
 
     const momenten = h('div', { class: 'bh-kaartvak' },
         h('h2', { tekst: 'Data' }),
-        h('p', { class: 'bh-hulp', tekst: 'Bij een reeks of samenwerking kun je per datum zeggen wat er gebeurt en waar.' }),
+        h('p', { class: 'bh-hulp', tekst: 'Per datum kun je een thema invullen, en bij een samenwerking wat er gebeurt en waar.' }),
         h('div', { class: 'bh-momenten' }, e.momenten.map((m, i) => h('div', { class: 'bh-moment' },
             h('input', { type: 'date', 'aria-label': 'Datum', waarde: m.datum, onchange: (ev) => { m.datum = ev.target.value; markeerGewijzigd(); lijstBij(); } }),
+            h('input', { type: 'text', 'aria-label': 'Thema van deze datum', placeholder: 'Thema (optioneel)', waarde: m.thema || '', oninput: (ev) => { m.thema = ev.target.value; markeerGewijzigd(); } }),
             h('input', { type: 'text', 'aria-label': 'Wat gebeurt er', placeholder: 'Wat (optioneel), bijv. filmvertoning', waarde: m.wat, oninput: (ev) => { m.wat = ev.target.value; markeerGewijzigd(); } }),
             h('select', { 'aria-label': 'Plek', onchange: (ev) => { m.plek = ev.target.value; markeerGewijzigd(); } },
                 h('option', { value: '', tekst: 'Plek (optioneel)' }),
@@ -214,7 +249,7 @@ function tekenEvenement() {
         h('div', { class: 'bh-toevoegen' },
             h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', tekst: '+ Datum', onclick: () => {
                 const laatste = e.momenten[e.momenten.length - 1];
-                e.momenten.push({ datum: laatste?.datum || '', plek: '', wat: '' });
+                e.momenten.push({ datum: laatste?.datum || '', plek: '', wat: '', thema: '' });
                 herteken();
             } })),
     );
@@ -237,7 +272,7 @@ function tekenEvenement() {
 
     const weg = h('div', { class: 'bh-onderaan' },
         h('button', { type: 'button', class: 'bh-knop bh-knop-gevaar', tekst: 'Bijeenkomst verwijderen', onclick: () => {
-            if (!confirm(`"${e.titel}" verwijderen? Dit wordt definitief na Opslaan.`)) return;
+            if (!confirm(`"${evenementLabel(e)}" verwijderen? Dit wordt definitief na Opslaan.`)) return;
             gegevens.evenementen = gegevens.evenementen.filter((x) => x !== e);
             gekozenEvenement = gesorteerdeEvenementen()[0]?.id || null;
             markeerGewijzigd();
@@ -375,23 +410,29 @@ function tekenPlek() {
     if (!p) { vak.replaceChildren(h('p', { class: 'bh-hulp', tekst: 'Kies links een plek, of maak een nieuwe.' })); return; }
     const gebruiktDoor = gegevens.evenementen.filter((e) => e.plekken.includes(p.id));
 
-    const suggesties = h('ul', { class: 'bh-suggesties', hidden: true });
-    let wacht;
-    const zoek = h('input', {
-        id: 'adres-zoek', type: 'search', placeholder: 'Bijvoorbeeld Hammerstraat 17 Rotterdam', autocomplete: 'off',
-        oninput: (ev) => { clearTimeout(wacht); wacht = setTimeout(() => zoekAdres(ev.target.value, suggesties, p), 250); },
-        onkeydown: (ev) => { if (ev.key === 'Escape') suggesties.hidden = true; },
+    const zoeker = plekZoeker({
+        id: 'adres-zoek',
+        opKies: (r) => {
+            p.adres = r.adres;
+            p.lat = r.lat;
+            p.lon = r.lon;
+            if (r.naam && /^Nieuwe plek/.test(p.naam)) p.naam = r.naam;
+            markeerGewijzigd();
+            tekenPlekkenLijst();
+            tekenPlek();
+            tekenPins();
+        },
     });
 
     vak.replaceChildren(h('div', { class: 'bh-kaartvak' },
         h('h2', { tekst: 'Plek' }),
         h('div', { class: 'bh-velden' },
             veld(p, 'naam', 'Naam', { naWijzig: () => { tekenPlekkenLijst(); tekenPins(); } }),
-            h('div', { class: 'bh-zoek' },
-                h('label', { for: 'adres-zoek', tekst: 'Adres zoeken' }),
-                h('p', { class: 'bh-hulp', tekst: p.adres ? `Nu: ${p.adres}` : 'Typ een adres en kies het juiste uit de lijst. Daarna kun je de pin nog slepen.' }),
-                zoek, suggesties),
-            h('p', { class: 'bh-hulp', tekst: gebruiktDoor.length ? `Gebruikt bij: ${gebruiktDoor.map((e) => e.titel).join(', ')}` : 'Nog bij geen enkele bijeenkomst gebruikt.' }),
+            h('div', {},
+                h('label', { for: 'adres-zoek', tekst: 'Plek zoeken' }),
+                h('p', { class: 'bh-hulp', tekst: p.adres ? `Nu: ${p.adres}` : 'Typ een adres, of een naam en klik op "Zoek op naam". Daarna kun je de pin nog slepen.' }),
+                zoeker),
+            h('p', { class: 'bh-hulp', tekst: gebruiktDoor.length ? `Gebruikt bij: ${gebruiktDoor.map(evenementLabel).join(', ')}` : 'Nog bij geen enkele bijeenkomst gebruikt.' }),
         ),
         h('div', { class: 'bh-onderaan' },
             h('button', { type: 'button', class: 'bh-knop bh-knop-gevaar bh-knop-klein', tekst: 'Plek verwijderen', disabled: gebruiktDoor.length > 0,
@@ -406,32 +447,72 @@ function tekenPlek() {
     ));
 }
 
-// Adressen zoeken via de Locatieserver van PDOK (gratis, zonder sleutel).
-async function zoekAdres(tekst, lijst, plek) {
-    if (tekst.trim().length < 3) { lijst.hidden = true; return; }
-    try {
+// Zoeker voor plekken: tijdens het typen adressen via de Locatieserver van PDOK (gratis, zonder
+// sleutel); met Enter of "Zoek op naam" ook namen (TENT, Filmlokaal...) via OpenStreetMap/Nominatim.
+// Nominatim alleen op verzoek, niet per toets: dat vraagt hun gebruiksbeleid.
+function plekZoeker({ id, placeholder = 'Adres of naam, bijv. Hammerstraat 17 of TENT Rotterdam', opKies }) {
+    const lijst = h('ul', { class: 'bh-suggesties', hidden: true });
+    const melding = (tekst) => { lijst.replaceChildren(h('li', {}, h('span', { class: 'bh-hulp', tekst }))); lijst.hidden = false; };
+    const toon = (resultaten) => {
+        if (!resultaten.length) { melding('Niets gevonden. Probeer "Zoek op naam", of alleen straat en huisnummer.'); return; }
+        lijst.replaceChildren(...resultaten.map((r) => h('li', {}, h('button', {
+            type: 'button',
+            onclick: () => {
+                lijst.hidden = true;
+                if (!kaart?.binnenGebied(r.lat, r.lon)) zetStatus('Let op: deze plek valt buiten de kaart.');
+                opKies(r);
+            },
+        }, r.naam ? h('strong', { tekst: r.naam + ' ' }) : null, h('span', { tekst: r.adres })))));
+        lijst.hidden = false;
+    };
+
+    async function adressen(tekst) {
         const url = 'https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?rows=6&fl=weergavenaam,centroide_ll&q=' + encodeURIComponent(tekst);
         const docs = (await (await fetch(url)).json()).response?.docs || [];
-        lijst.replaceChildren(...docs.map((d) => {
+        return docs.map((d) => {
             const [lon, lat] = (d.centroide_ll.match(/POINT\(([-\d.]+) ([-\d.]+)\)/) || []).slice(1).map(Number);
-            return h('li', {}, h('button', { type: 'button', tekst: d.weergavenaam, onclick: () => {
-                if (!kaart?.binnenGebied(lat, lon)) zetStatus('Let op: dit adres valt buiten de kaart.');
-                plek.adres = d.weergavenaam;
-                plek.lat = +lat.toFixed(7);
-                plek.lon = +lon.toFixed(7);
-                lijst.hidden = true;
-                markeerGewijzigd();
-                tekenPlekkenLijst();
-                tekenPlek();
-                tekenPins();
-            } }));
-        }));
-        if (!docs.length) lijst.replaceChildren(h('li', {}, h('span', { class: 'bh-hulp', tekst: 'Niets gevonden.' })));
-        lijst.hidden = false;
-    } catch {
-        lijst.replaceChildren(h('li', {}, h('span', { class: 'bh-hulp', tekst: 'Zoeken lukt nu niet.' })));
-        lijst.hidden = false;
+            return { naam: '', adres: d.weergavenaam, lat: +lat.toFixed(7), lon: +lon.toFixed(7) };
+        });
     }
+    async function namen(tekst) {
+        const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&countrycodes=nl&accept-language=nl'
+            + '&viewbox=4.30,51.98,4.62,51.84&q=' + encodeURIComponent(tekst);
+        const rijen = await (await fetch(url)).json();
+        return rijen.map((r) => {
+            const a = r.address || {};
+            const straat = [a.road, a.house_number].filter(Boolean).join(' ');
+            const plaats = [a.postcode, a.city || a.town || a.village].filter(Boolean).join(' ');
+            return { naam: r.name || '', adres: [straat, plaats].filter(Boolean).join(', ') || r.display_name, lat: +(+r.lat).toFixed(7), lon: +(+r.lon).toFixed(7) };
+        });
+    }
+
+    let wacht;
+    const invoer = h('input', {
+        id, type: 'search', placeholder, autocomplete: 'off',
+        oninput: (ev) => {
+            clearTimeout(wacht);
+            const tekst = ev.target.value.trim();
+            if (tekst.length < 3) { lijst.hidden = true; return; }
+            wacht = setTimeout(() => adressen(tekst).then(toon).catch(() => melding('Zoeken lukt nu niet.')), 250);
+        },
+        onkeydown: (ev) => {
+            if (ev.key === 'Escape') lijst.hidden = true;
+            if (ev.key === 'Enter') { ev.preventDefault(); zoekNaam(); }
+        },
+    });
+    async function zoekNaam() {
+        const tekst = invoer.value.trim();
+        if (tekst.length < 2) return;
+        clearTimeout(wacht);
+        melding('Zoeken op naam…');
+        try {
+            const [opNaam, opAdres] = await Promise.all([namen(tekst), adressen(tekst).catch(() => [])]);
+            toon([...opNaam, ...opAdres].slice(0, 8));
+        } catch { melding('Zoeken op naam lukt nu niet. Probeer het adres.'); }
+    }
+    return h('div', { class: 'bh-zoek' },
+        h('div', { class: 'bh-zoekrij' }, invoer, h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', tekst: 'Zoek op naam', onclick: zoekNaam })),
+        lijst);
 }
 
 // --- Kaart met sleepbare pins ---------------------------------------------
