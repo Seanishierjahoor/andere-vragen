@@ -63,6 +63,16 @@
 .dt-podium .bubbel .ring { stroke-width: 1.6; stroke-dasharray: 2.5 3; opacity: 0; transition: opacity .2s; }
 .dt-podium .bubbel.open .ring, .dt-podium .bubbel.partner .ring, .dt-podium .bubbel:focus-visible .ring { opacity: 1; stroke-width: 1.8; }
 .dt-podium .bubbel .halo { opacity: .3; }
+.dt-podium .knipsel-leeft { animation: dt-wieg var(--duur, 6s) ease-in-out var(--start, 0s) infinite; }
+.dt-podium .schaduw-leeft { animation: dt-schaduw-adem var(--duur, 6s) ease-in-out var(--start, 0s) infinite; }
+@keyframes dt-wieg {
+    0%, 100% { transform: rotate(-4deg) translateY(0) scale(1); }
+    50% { transform: rotate(4deg) translateY(-1.5px) scale(1.05); }
+}
+@keyframes dt-schaduw-adem {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+    50% { transform: translate(1px, 1.5px) scale(1.08); opacity: .8; }
+}
 .dt-podium .bubbel:hover .knipsel, .dt-podium .bubbel.open .knipsel, .dt-podium .bubbel:focus-visible .knipsel { transform: translate(-1px, -4px) rotate(var(--draai)) scale(1.1); }
 .dt-podium .bubbel:hover .pin-schaduw, .dt-podium .bubbel.open .pin-schaduw, .dt-podium .bubbel:focus-visible .pin-schaduw { transform: translate(3px, 4px) scale(1.18); opacity: .24; }
 
@@ -70,7 +80,9 @@
 
 .dt-podium .dt-pins .bubbel, .dt-podium .dt-lijnen { transition: opacity .5s ease; }
 .dt-podium[data-stand="omslag"] .dt-pins .bubbel, .dt-podium[data-stand="omslag"] .dt-lijnen { opacity: 0; pointer-events: none; }
-.dt-podium .dt-kaart svg { cursor: grab; touch-action: none; }
+.dt-podium .dt-kaart svg { cursor: grab; }
+/* Alleen op de open kaart vangt de kaart vegen en knijpen; op de omslag scrol je gewoon de pagina. */
+.dt-podium[data-stand="kaart"] .dt-kaart svg { touch-action: none; }
 .dt-podium .dt-kaart svg.slepen { cursor: grabbing; }
 .dt-podium[data-stand="omslag"] .dt-kaart svg { cursor: default; }
 
@@ -199,11 +211,13 @@
     .dt-inleiding { font-size: 1.1rem; }
     .dt-start { top: 72%; width: calc(100% - 2 * var(--gutter)); text-align: center; }
     .dt-startknop { font-size: 1.35rem; padding: .55rem 1.1rem .7rem; background-size: calc(100% - 2.2rem) 3px; background-position: 1.1rem calc(100% - .5rem); }
-    .dt-index { left: var(--gutter); right: var(--gutter); top: auto; bottom: .75rem; width: auto; max-height: 50%; }
+    .dt-index { left: var(--gutter); right: var(--gutter); top: auto; bottom: .75rem; width: auto; max-height: 40%; }
     .dt-index.ingeklapt { max-height: none; }
     .dt-index-binnen { border-radius: var(--radius); }
     .dt-bediening { bottom: auto; top: 4.5rem; left: auto; right: var(--gutter); }
-    .dt-pinkaart { left: .75rem !important; right: .75rem; top: auto !important; bottom: .75rem; width: auto; max-height: 70%; }
+    .dt-pinkaart { left: .5rem !important; right: .5rem; top: auto !important; bottom: .5rem; width: auto; max-height: 56%; border-radius: 16px; padding-top: .6rem; animation-name: dt-paneel; }
+    .dt-pinkaart::before { content: ""; position: absolute; top: .45rem; left: 50%; width: 2.6rem; height: 4px; margin-left: -1.3rem; border-radius: 2px; background: var(--av-lijn-sterk); }
+    @keyframes dt-paneel { from { transform: translateY(100%); } }
     .dt-bron { display: none; }
 }
 
@@ -290,6 +304,7 @@
 @media (prefers-reduced-motion: reduce) {
     .bubbel .halo, .lijn.aan path, .dt-verhaal, .dt-verhaal.dicht, .dt-pinkaart { animation: none; }
     .dt-podium .knipsel, .dt-podium .pin-schaduw { transition: none; }
+    .dt-podium .knipsel-leeft, .dt-podium .schaduw-leeft { animation: none; }
     .dt-omslag, .dt-index, .dt-start, .dt-waas { transition: none; }
 }
 

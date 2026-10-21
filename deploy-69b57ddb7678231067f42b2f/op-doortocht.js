@@ -138,13 +138,13 @@ function vrijVlak() {
     const open = podium.dataset.stand === 'kaart' && !indexVak.classList.contains('ingeklapt');
     if (SMAL.matches) {
         const onder = open ? indexVak.offsetHeight + 16 : 0;
-        return { x0: 0.05, x1: 0.95, y0: 0.12, y1: Math.max(0.35, (ch - onder) / ch - 0.04) };
+        return { x0: 0.05, x1: 0.95, y0: 0.1, y1: Math.max(0.35, (ch - onder) / ch - 0.03) };
     }
     const rechts = open ? indexVak.offsetWidth + 40 : 0;
     return { x0: 0.06, x1: (cw - rechts) / cw - 0.03, y0: 0.12, y1: 0.9 };
 }
 
-function rondPunten(punten, { rand = 140, minW = 600 } = {}) {
+function rondPunten(punten, { rand = SMAL.matches ? 80 : 140, minW = 600 } = {}) {
     const [cw, ch] = schermMaat();
     const xs = punten.map((p) => p[0]), ys = punten.map((p) => p[1]);
     const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
@@ -241,12 +241,16 @@ function knipsel(id) {
         const p = (graden) => [Math.cos(graden * Math.PI / 180) * r, Math.sin(graden * Math.PI / 180) * r].map((n) => n.toFixed(2)).join(' ');
         return `M${p(van)}A${r} ${r} 0 0 1 ${p(tot)}`;
     };
-    return `<ellipse class="pin-schaduw" cx="3" cy="5.5" rx="12.5" ry="11.5"/>
+    // Elk knipsel wiegt en ademt in een eigen tempo, zodat de kaart een beetje leeft.
+    const leven = `--duur:${(5.5 + (zaad % 7) * 0.45).toFixed(2)}s;--start:${-((zaad * 13) % 50) / 10}s`;
+    return `<g class="schaduw-leeft" style="${leven}"><ellipse class="pin-schaduw" cx="3" cy="5.5" rx="12.5" ry="11.5"/></g>
         <circle class="halo" r="13.5"/><circle class="raak" r="21"/>
         <g class="knipsel" style="--draai:${draai}deg">
-            <path class="papier" d="${knipPad(13, zaad)}"/>
-            <path class="hart" d="${knipPad(9.2, zaad + 2)}"/>
-            <path class="glans" d="${boog(6.2, 195, 255)}"/>
+            <g class="knipsel-leeft" style="${leven}">
+                <path class="papier" d="${knipPad(13, zaad)}"/>
+                <path class="hart" d="${knipPad(9.2, zaad + 2)}"/>
+                <path class="glans" d="${boog(6.2, 195, 255)}"/>
+            </g>
         </g>
         <circle class="ring" r="17.5"/>`;
 }
@@ -333,8 +337,14 @@ function toonPinkaart(plekId, alleen = null) {
     pinkaart.innerHTML = `<div class="dt-pinkaart-kop"><strong>${veilig(PLEKKEN[plekId].naam)}</strong>
             <button type="button" class="dt-pinkaart-sluit" aria-label="Sluiten">×</button></div>
         ${deel(komt, 'komt', 'Komt eraan')}${deel(geweest, 'geweest', 'Geweest')}`;
+    if (SMAL.matches && !indexVak.classList.contains('ingeklapt')) zetIndex(false);
     pinkaart.hidden = false;
     pinkaartPlek = plekId;
+    if (SMAL.matches) {
+        const [x, y] = xyVan[plekId];
+        const vrij = 1 - pinkaart.offsetHeight / schermMaat()[1];
+        vliegNaar(beeldRond(x, y, beeld.w, 0.5, Math.max(0.18, vrij / 2)), 450);
+    }
     vast = alleen ? selectieVanEvenement(alleen) : selectieVanPlek(plekId);
     teken();
     plaatsPinkaart();
@@ -474,13 +484,18 @@ for (const groep of [
 if (!EVENEMENTEN.length) index.innerHTML = '<p class="dt-leeg">Nog geen bijeenkomsten.</p>';
 index.insertAdjacentHTML('beforeend', '<p class="dt-index-voet"><a href="#archief">Volledig archief →</a></p>');
 
+function zetIndex(open) {
+    indexVak.classList.toggle('ingeklapt', !open);
+    $('index-knop').setAttribute('aria-expanded', String(open));
+}
 $('index-knop').addEventListener('click', () => {
-    const dicht = indexVak.classList.toggle('ingeklapt');
-    $('index-knop').setAttribute('aria-expanded', String(!dicht));
+    zetIndex(indexVak.classList.contains('ingeklapt'));
+    // Op een telefoon bedekt de index het onderste deel: schuif de pins naar het vrije stuk.
+    if (SMAL.matches) { sluitPinkaart(); requestAnimationFrame(() => vliegNaar(overzicht(), 500)); }
     schaalPins();
     plaatsPinkaart();
 });
-if (SMAL.matches) { indexVak.classList.add('ingeklapt'); $('index-knop').setAttribute('aria-expanded', 'false'); }
+if (SMAL.matches) zetIndex(false);
 
 // --- Standen -------------------------------------------------------------------
 
