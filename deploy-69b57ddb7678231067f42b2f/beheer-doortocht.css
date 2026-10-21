@@ -1,0 +1,89 @@
+/* Beheerscherm Op doortocht. */
+
+.bh { background-image: none; }
+.bh [hidden] { display: none !important; }
+.bh-balk { position: sticky; top: 0; z-index: 10; background: var(--av-petrol); color: #fff; }
+.bh-balk-binnen { max-width: 80rem; margin: 0 auto; padding: .75rem var(--gutter); display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; justify-content: space-between; }
+.bh-titel { margin: 0; }
+.bh-balk-acties { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.bh-status { font-size: .9rem; opacity: .9; }
+
+.bh-knop { font: 600 .95rem var(--font-body); background: var(--av-petrol); color: #fff; border: 2px solid var(--av-petrol); border-radius: 999px; padding: .55rem 1.1rem; cursor: pointer; text-decoration: none; display: inline-block; }
+.bh-balk .bh-knop { background: var(--av-coral); border-color: var(--av-coral); color: var(--av-petrol); }
+.bh-balk .bh-knop:disabled { background: transparent; border-color: rgba(255, 255, 255, .4); color: rgba(255, 255, 255, .6); cursor: default; }
+.bh-balk .bh-knop-licht { background: transparent; border-color: #fff; color: #fff; }
+.bh-knop-licht { background: transparent; color: var(--av-petrol); }
+.bh-knop-klein { font-size: .85rem; padding: .3rem .75rem; }
+.bh-knop-gevaar { background: transparent; color: #8a3b2f; border-color: rgba(138, 59, 47, .5); }
+.bh-knop:focus-visible, .bh-tabs button:focus-visible, .bh-lijst button:focus-visible { outline: 3px solid var(--av-coral); outline-offset: 2px; }
+
+.bh-main { max-width: 80rem; margin: 0 auto; padding: 1.5rem var(--gutter) 6rem; }
+.bh-inloggen { max-width: 24rem; margin: 3rem auto; display: grid; gap: .6rem; }
+.bh-inloggen h1 { font-size: 2rem; }
+.bh-fout { color: #8a3b2f; min-height: 1.5em; margin: 0; }
+
+.bh label, .bh-veldnaam { font-size: .85rem; font-weight: 600; display: block; margin-bottom: .2rem; }
+.bh input[type=text], .bh input[type=password], .bh input[type=date], .bh input[type=search], .bh textarea, .bh select {
+    font: inherit; font-size: 1rem; color: var(--av-petrol); width: 100%; padding: .55rem .7rem;
+    border: 1.5px solid var(--av-lijn-sterk); border-radius: 8px; background: #fff;
+}
+.bh textarea { min-height: 9rem; resize: vertical; line-height: 1.5; }
+.bh input:focus, .bh textarea:focus, .bh select:focus { outline: 3px solid rgba(233, 106, 75, .45); border-color: var(--av-petrol); }
+
+.bh-tabs { display: flex; gap: .5rem; margin-bottom: 1.25rem; }
+.bh-tabs button { font: 600 1rem var(--font-body); background: transparent; color: var(--av-petrol); border: 2px solid var(--av-petrol); border-radius: 999px; padding: .5rem 1.2rem; cursor: pointer; }
+.bh-tabs button[aria-selected=true] { background: var(--av-petrol); color: #fff; }
+
+.bh-paneel { display: grid; grid-template-columns: 18rem minmax(0, 1fr); gap: 1.5rem; align-items: start; }
+@media (max-width: 860px) { .bh-paneel { grid-template-columns: 1fr; } }
+.bh-nieuw { width: 100%; margin-bottom: .75rem; }
+.bh-lijst { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
+.bh-lijst button { all: unset; box-sizing: border-box; display: grid; width: 100%; padding: .6rem .8rem; border-radius: 10px; border: 1.5px solid var(--av-lijn); background: var(--av-paper-licht); cursor: pointer; line-height: 1.35; }
+.bh-lijst button[aria-current=true] { border-color: var(--av-petrol); background: #fff; box-shadow: inset 4px 0 0 var(--av-coral); }
+.bh-lijst small { color: var(--av-petrol-zacht); }
+.bh-verborgen { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #8a3b2f; }
+
+.bh-bewerk { min-width: 0; }
+.bh-kaartvak { background: #fff; border: 1.5px solid var(--av-lijn); border-radius: 14px; padding: 1.25rem; margin-bottom: 1rem; }
+.bh-kaartvak > h2 { font-size: 1.4rem; margin-bottom: .75rem; }
+.bh-velden { display: grid; gap: .9rem; }
+.bh-rij2 { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+@media (max-width: 600px) { .bh-rij2 { grid-template-columns: 1fr; } }
+.bh-hulp { font-size: .9rem; color: var(--av-petrol-zacht); margin: .25rem 0 .5rem; }
+.bh-vinkjes { display: flex; flex-wrap: wrap; gap: .4rem .9rem; }
+.bh-vinkjes label { font-weight: 400; font-size: 1rem; display: flex; gap: .4rem; align-items: center; margin: 0; }
+
+.bh-momenten { display: grid; gap: .5rem; }
+.bh-moment { display: grid; grid-template-columns: 10rem 1fr 12rem auto; gap: .5rem; align-items: center; }
+@media (max-width: 700px) { .bh-moment { grid-template-columns: 1fr 1fr; } }
+
+.bh-foto { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+.bh-foto img { width: 9rem; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 8px; border: 1.5px solid var(--av-lijn); }
+.bh-foto-leeg { width: 9rem; aspect-ratio: 3 / 2; border: 2px dashed var(--av-lijn-sterk); border-radius: 8px; display: grid; place-items: center; font-size: .85rem; color: var(--av-petrol-zacht); text-align: center; padding: .25rem; }
+.bh-sleep-hier { outline: 3px dashed var(--av-coral); outline-offset: 4px; }
+
+.bh-blokken { display: grid; gap: .75rem; }
+.bh-blok { border: 1.5px solid var(--av-lijn-sterk); border-radius: 12px; padding: .9rem; background: var(--av-paper-licht); }
+.bh-blok-kop { display: flex; justify-content: space-between; align-items: center; gap: .5rem; margin-bottom: .6rem; }
+.bh-blok-kop strong { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
+.bh-blok-knoppen { display: flex; gap: .3rem; }
+.bh-blok-knoppen button { font: 600 .9rem var(--font-body); width: 2.1rem; height: 2.1rem; border-radius: 50%; border: 1.5px solid var(--av-lijn-sterk); background: #fff; color: var(--av-petrol); cursor: pointer; }
+.bh-blok-knoppen button:disabled { opacity: .35; cursor: default; }
+.bh-reeks { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .6rem; }
+.bh-reeks-foto { display: grid; gap: .3rem; }
+.bh-reeks-foto img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; }
+.bh-reeks-foto input { font-size: .85rem !important; padding: .35rem .5rem !important; }
+.bh-toevoegen { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
+
+.bh-zoek { position: relative; }
+.bh-suggesties { position: absolute; left: 0; right: 0; top: 100%; z-index: 5; list-style: none; margin: .25rem 0 0; padding: .25rem; background: #fff; border: 1.5px solid var(--av-petrol); border-radius: 10px; box-shadow: 0 10px 24px rgba(25, 59, 58, .18); }
+.bh-suggesties button { all: unset; box-sizing: border-box; display: block; width: 100%; padding: .5rem .6rem; border-radius: 6px; cursor: pointer; }
+.bh-suggesties button:hover, .bh-suggesties button:focus-visible { background: rgba(233, 106, 75, .14); }
+
+.bh-kaart { margin-top: .5rem; }
+.bh-kaart .bubbel { cursor: grab; }
+.bh-kaart .bubbel.slepen { cursor: grabbing; }
+.bh-kaart .bordje { opacity: 1; transform: none; }
+.bh-kaart .bubbel:not(.open) .bordje { opacity: .85; }
+.bh-kaart .bubbel .halo { display: none; }
+.bh-onderaan { display: flex; justify-content: flex-end; margin-top: .5rem; }

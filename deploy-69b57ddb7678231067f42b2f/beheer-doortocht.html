@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Beheer Op doortocht | andere vragen</title>
+    <link rel="icon" type="image/png" href="beeld/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="huisstijl.css">
+    <link rel="stylesheet" href="op-doortocht.css">
+    <link rel="stylesheet" href="beheer-doortocht.css">
+</head>
+<body class="bh">
+    <header class="bh-balk">
+        <div class="bh-balk-binnen">
+            <p class="bh-titel">Beheer <strong>Op doortocht</strong></p>
+            <div class="bh-balk-acties" id="balk-acties" hidden>
+                <span class="bh-status" id="status" role="status"></span>
+                <a href="op-doortocht.html" target="_blank" rel="noopener" class="bh-knop bh-knop-licht">Bekijk pagina</a>
+                <button type="button" class="bh-knop" id="opslaan" disabled>Opslaan</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="bh-main">
+        <form class="bh-inloggen" id="inloggen">
+            <h1>Inloggen</h1>
+            <p>Gebruik hetzelfde wachtwoord als bij het beheer van de samenkomsten.</p>
+            <label for="wachtwoord">Wachtwoord</label>
+            <input id="wachtwoord" type="password" autocomplete="current-password" required>
+            <button type="submit" class="bh-knop">Inloggen</button>
+            <p class="bh-fout" id="inlog-fout" role="alert"></p>
+        </form>
+
+        <div id="werkplek" hidden>
+            <div class="bh-tabs" role="tablist">
+                <button type="button" role="tab" id="tab-bijeenkomsten" aria-selected="true" aria-controls="paneel-bijeenkomsten">Bijeenkomsten</button>
+                <button type="button" role="tab" id="tab-plekken" aria-selected="false" aria-controls="paneel-plekken">Plekken</button>
+            </div>
+
+            <section id="paneel-bijeenkomsten" role="tabpanel" aria-labelledby="tab-bijeenkomsten" class="bh-paneel">
+                <div class="bh-lijstvak">
+                    <button type="button" class="bh-knop bh-nieuw" id="nieuwe-bijeenkomst">+ Nieuwe bijeenkomst</button>
+                    <ul class="bh-lijst" id="lijst-bijeenkomsten"></ul>
+                </div>
+                <div class="bh-bewerk" id="bewerk-bijeenkomst"></div>
+            </section>
+
+            <section id="paneel-plekken" role="tabpanel" aria-labelledby="tab-plekken" class="bh-paneel" hidden>
+                <div class="bh-lijstvak">
+                    <button type="button" class="bh-knop bh-nieuw" id="nieuwe-plek">+ Nieuwe plek</button>
+                    <ul class="bh-lijst" id="lijst-plekken"></ul>
+                </div>
+                <div class="bh-bewerk">
+                    <div id="bewerk-plek"></div>
+                    <p class="bh-hulp">Sleep een pin om hem te verplaatsen. Klik op een pin om die plek te kiezen.</p>
+                    <div class="dt-kaart bh-kaart" id="beheer-kaart"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script type="module" src="beheer-doortocht.js"></script>
+</body>
+</html>

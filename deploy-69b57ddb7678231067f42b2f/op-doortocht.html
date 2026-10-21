@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Op doortocht | andere vragen</title>
+    <meta name="robots" content="noindex">
+    <meta name="description" content="De plekken in Rotterdam waar andere vragen te gast was, met verhalen en foto's van de bijeenkomsten.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Op doortocht | andere vragen">
+    <meta property="og:description" content="De plekken in Rotterdam waar andere vragen te gast was, met verhalen en foto's van de bijeenkomsten.">
+    <meta property="og:url" content="https://andere-vragen.nl/op-doortocht.html">
+    <meta property="og:image" content="https://andere-vragen.nl/beeld/deelbeeld-logo.jpg">
+    <meta property="og:image:width" content="700">
+    <meta property="og:image:height" content="700">
+    <meta property="og:locale" content="nl_NL">
+    <meta name="theme-color" content="#F3EFE6">
+    <link rel="icon" type="image/png" href="beeld/favicon.png">
+    <link rel="apple-touch-icon" href="beeld/apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="huisstijl.css">
+    <link rel="stylesheet" href="op-doortocht.css">
+</head>
+<body>
+    <header class="av-header">
+        <div class="av-wrap">
+            <a href="/" class="av-woordmerk">andere vragen</a>
+            <nav class="av-nav" aria-label="Hoofdmenu">
+                <a href="/">Samenkomsten</a>
+                <a href="op-doortocht.html" aria-current="page">Op doortocht</a>
+                <a href="gatherings.html" class="av-taal" lang="en" hreflang="en">English</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="dt">
+        <div class="av-wrap">
+            <div class="dt-kop">
+                <h1>Op doortocht <small>(portfolio)</small></h1>
+                <p>De plekken in Rotterdam waar we te gast waren, en wat er gebeurde.</p>
+            </div>
+
+            <div class="dt-opzet" id="kaartweergave">
+                <div class="dt-kaart-vak">
+                    <div class="dt-kaart" id="kaart" aria-busy="true"></div>
+                    <div class="dt-kaartje" id="kaartje" hidden></div>
+                    <p class="dt-bron">Kaartgegevens © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap-bijdragers</a> · buurtgrenzen CBS/PDOK</p>
+                </div>
+                <aside class="dt-legenda" id="legenda" aria-label="Bijeenkomsten"></aside>
+            </div>
+
+            <article class="dt-verhaal" id="verhaal" hidden></article>
+        </div>
+    </main>
+
+    <footer class="av-footer">
+        <div class="av-wrap">
+            <div>
+                <a href="/" class="av-woordmerk">andere vragen</a>
+                <div class="av-footer-lijn" aria-hidden="true"></div>
+                <p>Filosofische gesprekken in Rotterdam.</p>
+                <p><a href="mailto:anderevragen@proton.me">anderevragen@proton.me</a></p>
+            </div>
+            <form class="js-nieuwsbrief">
+                <p class="av-footer-titel"><label for="nb-voet">Nieuwsbrief</label></p>
+                <p>Nieuwe data en thema's in je inbox.</p>
+                <p hidden><input name="bot-field" tabindex="-1" autocomplete="off"></p>
+                <div class="av-rij">
+                    <input id="nb-voet" type="email" name="email" required autocomplete="email" placeholder="jij@email.com">
+                    <button type="submit" class="av-knop">Inschrijven</button>
+                </div>
+                <p class="av-melding" role="status"></p>
+            </form>
+            <p class="av-footer-onder">© 2026 andere vragen</p>
+        </div>
+    </footer>
+
+    <script src="aanmelden.js"></script>
+    <script type="module" src="op-doortocht.js"></script>
+</body>
+</html>

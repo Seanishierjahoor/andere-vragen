@@ -1,0 +1,114 @@
+/* Op doortocht (portfolio): kaart, legenda, kaartje en verhaal. Bouwt voort op huisstijl.css. */
+
+.dt { padding: 2rem 0 4rem; }
+.dt-kop { margin-bottom: 1.5rem; }
+.dt-kop h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); line-height: 1.05; }
+.dt-kop h1 small { font-family: var(--font-body); font-size: 1rem; color: var(--av-petrol-zacht); }
+.dt-kop p { margin: .5rem 0 0; color: var(--av-petrol-zacht); max-width: 40rem; }
+
+.dt-opzet { display: grid; grid-template-columns: minmax(0, 1fr) 19rem; gap: 1.5rem; align-items: start; }
+@media (max-width: 900px) { .dt-opzet { grid-template-columns: 1fr; } }
+
+.dt-kaart-vak { position: relative; }
+.dt-kaart { border-radius: var(--radius); overflow: hidden; background: #FBF7EE; box-shadow: 0 10px 30px rgba(25, 59, 58, .12); aspect-ratio: 1600 / 1704; }
+.dt-kaart svg { display: block; width: 100%; height: auto; touch-action: manipulation; }
+.dt-bron { font-size: .8rem; color: var(--av-petrol-zacht); margin: .5rem 0 0; }
+.dt-bron a { color: inherit; }
+
+/* Kaartlagen */
+.dt-kaart .laag-lappen path { stroke: #2E50D0; stroke-width: 1.6; stroke-linejoin: round; stroke-opacity: .55; }
+.dt-kaart .laag-groen path { stroke: #2F7D3A; stroke-width: 1.6; }
+.dt-kaart .oever { fill: #F5DF4D; stroke: none; }
+.dt-kaart .waterkader { fill: none; stroke: #1E2A5A; stroke-width: 2.6; stroke-linejoin: round; }
+.dt-kaart .laag-water .vaart { fill: none; stroke: #6FB4E6; stroke-width: 3; }
+.dt-kaart .laag-spoor path { fill: none; stroke: #1E2A5A; stroke-width: 1.6; stroke-dasharray: 2 5; stroke-linecap: round; }
+.dt-kaart .laag-weg-klein path { fill: none; stroke: #FFFDF6; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.dt-kaart .laag-weg-groot path { fill: none; stroke: #FFFDF6; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+.dt-kaart .rand-groot path { fill: none; stroke: #2E50D0; stroke-width: 8.5; stroke-linecap: round; stroke-linejoin: round; }
+.dt-kaart .krijt { filter: url(#krijt); }
+
+/* Pins: koraal = komt eraan, petrol = geweest */
+.bubbel { cursor: pointer; outline: none; }
+.bubbel .raak { fill: transparent; }
+.bubbel .hart { fill: var(--av-coral); stroke: #fff; stroke-width: 5; }
+.bubbel .ring { fill: none; stroke: var(--av-petrol); stroke-width: 3; }
+.bubbel .halo { fill: #fff; opacity: .7; transform-box: fill-box; transform-origin: center; animation: dt-adem 3s ease-in-out infinite; }
+.bubbel.geweest .hart { fill: var(--av-petrol); }
+.bubbel.geweest .halo { display: none; }
+.bubbel.open .ring, .bubbel.partner .ring, .bubbel:focus-visible .ring { stroke-width: 5; }
+@keyframes dt-adem { 50% { transform: scale(1.4); opacity: .2; } }
+
+.bordje { opacity: 0; transform: translateY(6px); transition: opacity .18s, transform .18s; pointer-events: none; }
+.bubbel.open .bordje, .bubbel:focus-visible .bordje { opacity: 1; transform: none; }
+.bordje rect { fill: #FFFDF6; stroke: var(--av-petrol); stroke-width: 2.5; }
+.bordje .naam { font: 600 32px var(--font-body); fill: var(--av-petrol); }
+.bordje .regel { font: 400 25px var(--font-body); fill: var(--av-petrol); opacity: .75; }
+
+.lijn { fill: none; stroke: var(--av-petrol); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 2 13; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.lijn.aan { opacity: 1; animation: dt-mier 1.2s linear infinite; }
+@keyframes dt-mier { to { stroke-dashoffset: -30; } }
+
+/* Legenda */
+.dt-legenda { background: var(--av-paper-licht); border: 2px solid var(--av-petrol); border-radius: 14px; padding: 1.25rem; }
+.dt-legenda section + section { margin-top: 1.25rem; }
+.dt-legenda h2 { font-size: 1.5rem; margin: 0 0 .5rem; display: flex; align-items: center; gap: .6rem; }
+.dt-stip { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--av-petrol); flex: none; }
+.dt-stip.komt { background: var(--av-coral); }
+.dt-stip.geweest { background: var(--av-petrol); }
+.dt-legenda ul { list-style: none; margin: 0; padding: 0; }
+.dt-legenda button { all: unset; box-sizing: border-box; display: grid; gap: 2px; width: 100%; padding: .6rem .75rem; border-radius: 10px; cursor: pointer; font-size: 1rem; line-height: 1.35; }
+.dt-legenda button:hover, .dt-legenda button.open { background: rgba(233, 106, 75, .14); }
+.dt-legenda button:focus-visible { outline: 2px solid var(--av-petrol); outline-offset: 2px; }
+.dt-legenda .datum { font-weight: 600; }
+.dt-legenda .sub, .dt-legenda .plek { font-size: .9rem; color: var(--av-petrol-zacht); }
+.dt-leeg { color: var(--av-petrol-zacht); margin: 0; }
+
+/* Kaartje dat boven de kaart ontvouwt */
+.dt-kaartje {
+    position: absolute; right: 1rem; top: 1rem; width: min(24rem, calc(100% - 2rem)); max-height: calc(100% - 3.5rem); overflow: auto;
+    background: #FFFDF6; border: 2px solid var(--av-petrol); border-radius: 14px; box-shadow: 0 12px 32px rgba(25, 59, 58, .22);
+    animation: dt-ontvouw .22s ease-out;
+}
+@keyframes dt-ontvouw { from { opacity: 0; transform: translateY(-8px) scale(.98); } }
+@media (max-width: 600px) {
+    .dt-kaartje { position: static; width: auto; max-height: none; margin-top: .75rem; }
+}
+.dt-kaartje-sluit { all: unset; position: sticky; float: right; top: .5rem; margin: .5rem .5rem 0 0; width: 2.25rem; height: 2.25rem; border-radius: 50%; background: var(--av-petrol); color: #fff; text-align: center; line-height: 2.25rem; font-size: 1.3rem; cursor: pointer; z-index: 1; }
+.dt-kaartje-sluit:focus-visible { outline: 3px solid var(--av-coral); outline-offset: 2px; }
+.dt-kaartje-kop { padding: 1rem 1.25rem .25rem; }
+.dt-kaartje-kop h2 { font-size: 1.6rem; line-height: 1.15; }
+.dt-item { padding: 1rem 1.25rem; border-top: 1px solid var(--av-lijn); }
+.dt-item:first-of-type { border-top: none; }
+.dt-item img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: var(--radius); margin-bottom: .75rem; }
+.dt-item h3 { font-size: 1.35rem; line-height: 1.2; margin: .15rem 0; }
+.dt-item p { margin: .35rem 0 0; }
+.dt-datumregel { font-weight: 600; font-size: .95rem; }
+.dt-label { display: inline-block; font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: .1rem .5rem; border-radius: 999px; border: 1.5px solid var(--av-petrol); margin-right: .4rem; }
+.dt-label.komt { background: var(--av-coral); border-color: var(--av-coral); color: #fff; }
+.dt-thema { font-family: var(--font-heading); font-style: italic; font-size: 1.15rem; }
+.dt-momenten { list-style: none; padding: 0; margin: .4rem 0 0; font-size: .95rem; }
+.dt-verder { display: inline-block; margin-top: .75rem; font-weight: 600; color: var(--av-petrol); }
+
+/* Verhaal */
+.dt-verhaal { max-width: 46rem; margin: 0 auto; }
+.dt-verhaal p { margin: 0 0 1em; }
+.dt-verhaal .dt-meta li { margin: 0; }
+.dt-terug { display: inline-block; margin-bottom: 1.5rem; font-weight: 600; color: var(--av-petrol); }
+.dt-verhaal h1 { font-size: clamp(2.2rem, 6vw, 3.2rem); line-height: 1.08; }
+.dt-verhaal .dt-ondertitel { font-size: 1.25rem; margin: .5rem 0 0; color: var(--av-petrol-zacht); }
+.dt-verhaal .dt-meta { margin: 1rem 0 0; padding: 0; list-style: none; }
+.dt-verhaal .dt-thema-groot { font-family: var(--font-heading); font-style: italic; font-size: clamp(1.5rem, 4vw, 2rem); line-height: 1.25; margin: 1.75rem 0; padding-left: 1rem; border-left: 4px solid var(--av-coral); }
+.dt-verhaal figure { margin: 2rem 0; }
+.dt-verhaal figure img { width: 100%; border-radius: var(--radius); }
+.dt-verhaal figcaption { font-size: .9rem; color: var(--av-petrol-zacht); margin-top: .4rem; }
+.dt-verhaal .dt-omslag { margin-top: 1.5rem; }
+.dt-verhaal .dt-reeks { display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); gap: .75rem; }
+.dt-verhaal .dt-reeks figure { margin: 0; }
+.dt-verhaal .dt-reeks img { aspect-ratio: 1; object-fit: cover; }
+.dt-verhaal blockquote { margin: 2rem 0; font-family: var(--font-heading); font-size: clamp(1.4rem, 4vw, 1.9rem); line-height: 1.3; }
+.dt-verhaal blockquote footer { font-family: var(--font-body); font-size: 1rem; margin-top: .5rem; color: var(--av-petrol-zacht); }
+
+@media (prefers-reduced-motion: reduce) {
+    .bubbel .halo, .lijn.aan, .dt-kaartje { animation: none; }
+}
+.dt [hidden] { display: none !important; }
