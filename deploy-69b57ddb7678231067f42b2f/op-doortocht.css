@@ -317,3 +317,16 @@
     .av-header .av-nav a { white-space: nowrap; }
     .av-header .av-nav .av-taal { display: none; }
 }
+
+/* --- Strookjes: namen van de plekken op touchscreens (zie STROOKJES in op-doortocht.js) --- */
+.strook { display: none; pointer-events: none; }
+.dt-podium.met-strookjes .strook { display: inline; opacity: 1; transform: none; transition: opacity .45s ease var(--strook-vertraging, 0s), transform .45s cubic-bezier(.2, .7, .2, 1) var(--strook-vertraging, 0s); }
+.dt-podium.met-strookjes[data-stand="omslag"] .strook { opacity: 0; transform: translateY(4px); transition-delay: 0s; }
+.dt-podium.met-strookjes .strook.weg { opacity: 0; transition-delay: 0s; }
+.dt-podium.met-strookjes .bordje { display: none; }
+.strook-vlak { fill: #FFFDF6; stroke: rgba(25, 59, 58, .22); stroke-width: .8; }
+.strook-schaduw { fill: var(--av-petrol); opacity: .16; }
+.strook-naam { font: 600 12.5px var(--font-body); fill: var(--av-petrol); letter-spacing: .01em; }
+.plakband { fill: var(--av-coral); opacity: .5; }
+.bubbel.open .strook-vlak, .bubbel.partner .strook-vlak { stroke: var(--av-coral); stroke-width: 1.6; }
+@media (prefers-reduced-motion: reduce) { .dt-podium.met-strookjes .strook { transition: none; } }

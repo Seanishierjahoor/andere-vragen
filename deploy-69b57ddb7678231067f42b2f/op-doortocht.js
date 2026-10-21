@@ -11,6 +11,10 @@ const MAANDEN = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli',
 const KORT = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
 const DAGEN = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
 const RUSTIG = matchMedia('(prefers-reduced-motion: reduce)');
+// Strookjes: namen van de plekken altijd zichtbaar op touchscreens (en in een smal venster),
+// omdat je daar niet kunt aanwijzen. Op false zetten om terug te gaan naar alleen pins.
+const STROOKJES = true;
+const AANRAAK = matchMedia('(hover: none), (max-width: 860px)');
 const SMAL = matchMedia('(max-width: 860px)');
 
 const kortDatum = (iso) => `${+iso.slice(8, 10)} ${KORT[+iso.slice(5, 7) - 1]}`;
@@ -259,7 +263,8 @@ for (const p of gebruikt) {
     const regel = komt.length ? `Volgende: ${kortDatum(komt[0])}` : `Geweest: ${kortDatum(data[data.length - 1])}`;
     const g = maakSvg('g', { class: 'bubbel ' + (komt.length ? 'komt' : 'geweest'), tabindex: '-1', role: 'button', 'aria-label': `${p.naam}, ${regel}` });
     g.innerHTML = `${knipsel(p.id)}
-        <g class="bordje"><rect class="bordschaduw" rx="4"/><rect class="vlak" rx="4"/><text class="naam">${veilig(p.naam)}</text><text class="regel">${regel}</text></g>`;
+        <g class="bordje"><rect class="bordschaduw" rx="4"/><rect class="vlak" rx="4"/><text class="naam">${veilig(p.naam)}</text><text class="regel">${regel}</text></g>
+        ${STROOKJES ? `<g class="strook"><g class="strook-draai"><rect class="strook-schaduw" rx="2"/><rect class="strook-vlak" rx="2"/><text class="strook-naam">${veilig(p.naam)}</text><rect class="plakband" width="15" height="7"/></g></g>` : ''}`;
     bubbels.appendChild(g);
     bubbelVan[p.id] = g;
 }
@@ -283,6 +288,46 @@ function schaalPins() {
         Object.entries({ x: bx + 3, y: -18, width: w, height: 44 }).forEach(([k, v]) => g.querySelector('rect.bordschaduw').setAttribute(k, v));
         g.querySelector('.naam').setAttribute('x', bx + 11); g.querySelector('.naam').setAttribute('y', -3);
         g.querySelector('.regel').setAttribute('x', bx + 11); g.querySelector('.regel').setAttribute('y', 14);
+    }
+    if (STROOKJES) plaatsStrookjes(u);
+}
+
+// Strookjes naast de pins. Eerst rechts proberen, dan links; botst het met een ander strookje
+// of een pin, dan wijkt de plek met de minste bijeenkomsten (bij inzoomen komt hij terug).
+const voorrang = Object.keys(bubbelVan).sort((a, b) =>
+    EVENEMENTEN.filter((e) => e.plekken.includes(b)).length - EVENEMENTEN.filter((e) => e.plekken.includes(a)).length);
+function plaatsStrookjes(u) {
+    podium.classList.toggle('met-strookjes', AANRAAK.matches);
+    if (!AANRAAK.matches) return;
+    const scherm = (id) => [(xyVan[id][0] - beeld.x) / u, (xyVan[id][1] - beeld.y) / u];
+    const bezet = Object.keys(bubbelVan).map((id) => { const [x, y] = scherm(id); return { id, x: x - 15, y: y - 15, w: 30, h: 30 }; });
+    // Ook de zoomknoppen en de indexknop zijn bezet.
+    const vak = kaartVak.getBoundingClientRect();
+    for (const el of [document.querySelector('.dt-bediening'), $('index-knop')]) {
+        const r = el.getBoundingClientRect();
+        if (r.width) bezet.push({ id: 'knoppen', x: r.left - vak.left - 6, y: r.top - vak.top - 6, w: r.width + 12, h: r.height + 12 });
+    }
+    const botst = (a) => bezet.some((b) => b.id !== a.id && a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y);
+    const breedte = schermMaat()[0];
+    for (const id of voorrang) {
+        const g = bubbelVan[id].querySelector('.strook');
+        const tekst = g.querySelector('.strook-naam');
+        if (!g.dataset.w) g.dataset.w = tekst.getBBox().width + 18;
+        const w = +g.dataset.w, h = 22;
+        const [px, py] = scherm(id);
+        const kanten = [{ x: 15, y: -30 }, { x: -15 - w, y: -30 }, { x: 15, y: 9 }, { x: -15 - w, y: 9 }];
+        const kant = kanten.find((k) => px + k.x > 4 && px + k.x + w < breedte - 4 && !botst({ id, x: px + k.x, y: py + k.y, w, h }));
+        g.classList.toggle('weg', !kant);
+        if (!kant) continue;
+        bezet.push({ id: id + '-strook', x: px + kant.x, y: py + kant.y, w, h });
+        // Een tikje scheef, zoals een opgeplakt papiertje; altijd dezelfde kant op per plek.
+        const scheef = (([...id].reduce((n, c) => n + c.charCodeAt(0), 0) % 7) - 3) * 0.8;
+        g.querySelector('.strook-draai').setAttribute('transform', `translate(${kant.x} ${kant.y}) rotate(${scheef} ${w / 2} ${h / 2})`);
+        for (const [sel, extra] of [['.strook-vlak', 0], ['.strook-schaduw', 2.5]]) {
+            Object.entries({ x: extra, y: extra, width: w, height: h }).forEach(([k, val]) => g.querySelector(sel).setAttribute(k, val));
+        }
+        tekst.setAttribute('x', 9); tekst.setAttribute('y', 15);
+        g.querySelector('.plakband').setAttribute('transform', `translate(${kant.x > 0 ? -5 : w - 10} -3) rotate(${kant.x > 0 ? -18 : 18} 7.5 3.5)`);
     }
 }
 
@@ -547,7 +592,8 @@ async function kleurIn(vanaf) {
 function pinsGolf() {
     Object.values(bubbelVan).forEach((g, i) => {
         g.style.transitionDelay = RUSTIG.matches ? '0s' : `${0.6 + i * 0.12}s`;
-        setTimeout(() => { g.style.transitionDelay = ''; }, 2500);
+        g.style.setProperty('--strook-vertraging', RUSTIG.matches ? '0s' : `${1.4 + i * 0.15}s`);
+        setTimeout(() => { g.style.transitionDelay = ''; g.style.removeProperty('--strook-vertraging'); }, 3500);
     });
 }
 
@@ -722,6 +768,7 @@ document.addEventListener('keydown', (ev) => {
 });
 
 let vorigeMaat = schermMaat().join();
+AANRAAK.addEventListener('change', () => schaalPins());
 new ResizeObserver(() => {
     const maat = schermMaat().join();
     if (maat === vorigeMaat) return;
