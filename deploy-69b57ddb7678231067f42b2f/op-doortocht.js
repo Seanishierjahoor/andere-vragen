@@ -47,10 +47,9 @@ document.querySelector('.dt-geheim')?.addEventListener('click', () => {
 });
 
 const [kaart, gegevens] = await Promise.all([
-    tekenKaart(kaartVak, { rand: false }),
+    tekenKaart(kaartVak, { rand: false, lijnwerk: true }),
     fetch('/.netlify/functions/get-doortocht').then((r) => r.json()).catch(() => null),
 ]);
-kaartVak.removeAttribute('aria-busy');
 
 const PLEKKEN = Object.fromEntries((gegevens?.plekken || []).map((p) => [p.id, p]));
 const EVENEMENTEN = (gegevens?.evenementen || [])
@@ -734,4 +733,5 @@ if (location.hash === '#kaart') history.replaceState(null, '', location.pathname
 podium.dataset.stand = '';
 zetStand('omslag');
 zetBeeld(overzicht());
+kaartVak.removeAttribute('aria-busy'); // nu pas zichtbaar: in de goede stand en op de goede plek
 volgHash({ eerste: true });

@@ -76,13 +76,15 @@ const KAART_STIJL = `
 `;
 
 // Tekent de kaart in `vak` en geeft hulpmiddelen terug om er pins en lijnen op te zetten.
-export async function tekenKaart(vak, { basis = 'beeld/kaart/', rand = true } = {}) {
+export async function tekenKaart(vak, { basis = 'beeld/kaart/', rand = true, lijnwerk = false } = {}) {
     const [svgTekst, maat] = await Promise.all([
         fetch(basis + 'kaart.svg').then((r) => r.text()),
         fetch(basis + 'kaart-maat.json').then((r) => r.json()),
     ]);
     vak.innerHTML = svgTekst;
     const svg = vak.querySelector('svg');
+    // Meteen in de goede stand, nog voordat de browser iets tekent (anders flitst de kleur even).
+    if (lijnwerk) svg.classList.add('lijnwerk');
     svg.removeAttribute('width');
     svg.removeAttribute('height');
     svg.setAttribute('role', 'img');

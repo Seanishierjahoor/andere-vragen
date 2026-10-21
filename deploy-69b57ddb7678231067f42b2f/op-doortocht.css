@@ -41,7 +41,9 @@
 /* --- Podium: de kaart vult het scherm ----------------------------------- */
 
 .dt-podium { position: relative; height: calc(100svh - 4.4rem); min-height: 34rem; overflow: hidden; background: #FBF7EE; }
-.dt-podium .dt-kaart { position: absolute; inset: 0; }
+.dt-podium .dt-kaart { position: absolute; inset: 0; transition: opacity .6s ease; }
+/* Tot de kaart helemaal klaar is, blijft hij onzichtbaar; daarna vloeit hij zacht in. */
+.dt-podium .dt-kaart[aria-busy="true"] { opacity: 0; }
 /* De krijtkorrel is een stilstaande textuur van lichte spikkels over de kaart. */
 .dt-podium .dt-kaart::after {
     content: ""; position: absolute; inset: 0; pointer-events: none;
