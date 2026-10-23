@@ -64,12 +64,19 @@ EVENEMENTEN.forEach((e, i) => { e.nr = String(i + 1).padStart(2, '0'); });
 const komtNog = (e) => e.data[e.data.length - 1] >= VANDAAG;
 const plekNamen = (e) => e.plekken.map((id) => PLEKKEN[id].naam).join(' × ');
 const plekRegel = (e) => e.plekken.length === 1 ? 'bij ' + PLEKKEN[e.plekken[0]].naam : plekNamen(e);
-// Naam en thema's van een bijeenkomst (eventueel alleen van bepaalde data), zonder dubbelen.
-const namenEnThemas = (e, data = e.data) => {
-    const lijst = [e.naam, e.thema, ...e.momenten.filter((m) => data.includes(m.datum)).map((m) => m.thema)];
-    const gezien = new Set();
-    return lijst.map((t) => String(t || '').trim()).filter((t) => t && !gezien.has(t.toLowerCase()) && gezien.add(t.toLowerCase()));
-};
+// Naam en thema's van een bijeenkomst (eventueel alleen van bepaalde data) als HTML, zonder dubbelen en
+// met een label voor de thema's: "After Summer School · Thema: Socratisch rondhangen". Zo zie je meteen
+// dat "Simpel" of "Herhaling" het thema van de avond was.
+function naamEnThemaHtml(e, data = e.data) {
+    const naam = String(e.naam || '').trim();
+    const gezien = new Set([naam.toLowerCase()]);
+    const themas = [e.thema, ...e.momenten.filter((m) => data.includes(m.datum)).map((m) => m.thema)]
+        .map((t) => String(t || '').trim()).filter((t) => t && !gezien.has(t.toLowerCase()) && gezien.add(t.toLowerCase()));
+    const delen = [];
+    if (naam) delen.push(veilig(naam));
+    if (themas.length) delen.push(`<span class="dt-themalabel">${themas.length > 1 ? "Thema's" : 'Thema'}:</span> ${veilig(themas.join(', '))}`);
+    return delen.join(' · ');
+}
 // Korte naam voor koppen en de paginatitel: de eigen naam, anders het thema, anders de soort.
 const titelVan = (e) => e.naam || e.thema || e.soort;
 
@@ -371,9 +378,9 @@ function toonPinkaart(plekId, alleen = null) {
         ${e.omslag ? `<img src="${fotoUrl(e.omslag)}" alt="" loading="lazy">` : ''}
         <span class="dt-bovenregel">${e.nr} · ${opsomming(data.map(kortDatum))}</span>
         <h3>${veilig(e.soort)}</h3>
-        ${namenEnThemas(e, data).length ? `<p class="thema">${veilig(namenEnThemas(e, data).join(' · '))}</p>` : ''}
+        ${naamEnThemaHtml(e, data) ? `<p class="thema">${naamEnThemaHtml(e, data)}</p>` : ''}
         ${e.plekken.length > 1 ? `<p>${veilig(plekNamen(e))}</p>` : ''}
-        <button type="button" class="dt-meer" data-evenement="${veilig(e.id)}">${soort === 'komt' ? 'Lees meer' : 'Terugblik'}</button>
+        <button type="button" class="dt-meer dt-knop" data-evenement="${veilig(e.id)}">${soort === 'komt' ? 'Lees meer' : 'Terugblik'}</button>
     </div>`;
     const deel = (rijen, soort, kop) => rijen.length
         ? `<section class="dt-pindeel ${soort}"><h4><span class="dt-stip ${soort}" aria-hidden="true"></span>${kop}</h4>${rijen.map((r) => item(r, soort)).join('')}</section>`
@@ -502,13 +509,13 @@ for (const groep of [
     const lijst = document.createElement('ol');
     for (const { e, data } of groep.rijen) {
         const li = document.createElement('li');
-        const namen = namenEnThemas(e, data);
+        const namen = naamEnThemaHtml(e, data);
         li.innerHTML = `<button type="button" class="dt-regel" data-evenement="${veilig(e.id)}">
             <span class="dt-nr" aria-hidden="true">${e.nr}</span>
             <span class="dt-bovenregel">${opsomming(data.map(kortDatum))}</span>
             <span class="titel">${veilig(plekNamen(e))}</span>
             <span class="sub">${veilig(e.soort)}</span>
-            ${namen.length ? `<span class="namen">${veilig(namen.join(' · '))}</span>` : ''}
+            ${namen ? `<span class="namen">${namen}</span>` : ''}
             ${e.omslag ? `<img class="dt-duim" src="${fotoUrl(e.omslag)}" alt="" loading="lazy">` : ''}</button>`;
         const knop = li.querySelector('button');
         knop.addEventListener('mouseenter', () => zweefOp(selectieVanEvenement(e)));
@@ -526,7 +533,7 @@ for (const groep of [
     index.append(kop, lijst);
 }
 if (!EVENEMENTEN.length) index.innerHTML = '<p class="dt-leeg">Nog geen bijeenkomsten.</p>';
-index.insertAdjacentHTML('beforeend', '<p class="dt-index-voet"><a href="#archief">Volledig archief →</a></p>');
+index.insertAdjacentHTML('beforeend', '<p class="dt-index-voet"><a class="dt-knop dt-knop-klein" href="#archief">Volledig archief →</a></p>');
 
 function zetIndex(open) {
     indexVak.classList.toggle('ingeklapt', !open);
@@ -549,6 +556,7 @@ function zetStand(stand) {
     const opKaart = stand === 'kaart';
     indexVak.inert = !opKaart;
     document.querySelector('.dt-bediening').inert = !opKaart;
+    document.querySelector('.dt-legenda').inert = !opKaart;
     document.querySelector('.dt-start').inert = opKaart;
     document.querySelector('.dt-archieflink').inert = opKaart;
     $('naar-omslag').tabIndex = opKaart ? 0 : -1;
@@ -622,7 +630,7 @@ function verhaalHtml(e) {
     const i = EVENEMENTEN.indexOf(e);
     const vorige = EVENEMENTEN[i - 1], volgende = EVENEMENTEN[i + 1];
     const link = (x, richting) => x ? `<a href="#verhaal/${encodeURIComponent(x.id)}"><small class="dt-bovenregel">${richting}</small><span>${veilig(titelVan(x))}</span></a>` : '';
-    return `<button type="button" class="dt-sluit">← Terug</button>
+    return `<button type="button" class="dt-sluit dt-knop">← Terug</button>
         <header class="dt-held ${e.omslag ? 'met-foto' : ''}">
             ${e.omslag ? `<img src="${fotoUrl(e.omslag)}" alt="">` : ''}
             <div class="dt-held-tekst">
@@ -647,17 +655,22 @@ function archiefHtml() {
     const plekken = gebruikt.map((p) => {
         const hier = EVENEMENTEN.filter((e) => e.plekken.includes(p.id));
         const jaartallen = [...new Set(hier.flatMap((e) => e.data.map((d) => d.slice(0, 4))))].sort();
-        return { p, aantal: hier.length, jaartallen };
+        // Per datum tellen; bij een samenwerking met een plek per datum alleen de data op deze plek.
+        const aantal = hier.reduce((n, e) => n + e.data.filter((d) => {
+            const plekVanDatum = e.momenten.find((m) => m.datum === d)?.plek;
+            return !plekVanDatum || plekVanDatum === p.id || e.plekken.length === 1;
+        }).length, 0);
+        return { p, aantal, jaartallen };
     }).sort((a, b) => b.aantal - a.aantal || a.p.naam.localeCompare(b.p.naam));
-    return `<button type="button" class="dt-sluit">← Terug</button>
+    return `<button type="button" class="dt-sluit dt-knop">← Terug</button>
         <div class="dt-archief">
             <header>
                 <p class="dt-kicker">Op doortocht · archief</p>
                 <h1 id="verhaal-titel">Volledig archief</h1>
                 <ul class="dt-tellers">
-                    <li><strong>${EVENEMENTEN.length}</strong>bijeenkomsten</li>
-                    <li><strong>${EVENEMENTEN.reduce((n, e) => n + e.data.length, 0)}</strong>data</li>
+                    <li><strong>${EVENEMENTEN.reduce((n, e) => n + e.data.length, 0)}</strong>bijeenkomsten</li>
                     <li><strong>${gebruikt.length}</strong>plekken</li>
+                    <li><strong>${EVENEMENTEN.filter((e) => e.plekken.length > 1).length}</strong>samenwerkingen</li>
                     ${sinds ? `<li>sinds <strong>${sinds}</strong></li>` : ''}
                 </ul>
             </header>
@@ -666,8 +679,8 @@ function archiefHtml() {
                     <time datetime="${e.data[0]}">${dataInJaar(e.data.filter((d) => d.startsWith(jaar)))}</time>
                     <div>
                         <h3><a href="#verhaal/${encodeURIComponent(e.id)}">${veilig(plekNamen(e))}</a>${komtNog(e) ? '<span class="dt-label">komt eraan</span>' : ''}</h3>
-                        <p>${veilig(e.soort)}</p>
-                        ${namenEnThemas(e).length ? `<p class="dt-archief-themas">${veilig(namenEnThemas(e).join(' · '))}</p>` : ''}
+                        <p>${veilig(e.soort)}${e.data.filter((d) => d.startsWith(jaar)).length > 1 ? ` · ${e.data.filter((d) => d.startsWith(jaar)).length} bijeenkomsten` : ''}</p>
+                        ${naamEnThemaHtml(e) ? `<p class="dt-archief-themas">${naamEnThemaHtml(e)}</p>` : ''}
                     </div>
                 </li>`).join('')}
             </ol></section>`).join('')}

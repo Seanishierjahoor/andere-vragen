@@ -111,7 +111,7 @@
 .dt-omslag h1 { font-size: clamp(3rem, 8vw, 6.5rem); line-height: .92; margin: .6rem 0 0; letter-spacing: -.01em; }
 .dt-titelknop { all: unset; cursor: default; }
 .dt-inleiding { font-size: clamp(1.15rem, 1.8vw, 1.45rem); font-weight: 500; line-height: 1.4; margin: 1.1rem 0 0; max-width: 24rem; text-shadow: 0 0 12px var(--av-paper), 0 0 4px var(--av-paper); transition: opacity .5s; }
-.dt-archieflink { position: absolute; right: var(--gutter); bottom: 2.2rem; font-weight: 600; color: var(--av-petrol); text-decoration: none; border-bottom: 2px solid var(--av-coral); padding: .35rem 0 .1rem; background: linear-gradient(transparent, transparent); transition: opacity .5s; text-shadow: 0 0 10px var(--av-paper), 0 0 3px var(--av-paper); }
+.dt-archieflink { position: absolute; right: var(--gutter); bottom: 2.2rem; transition: opacity .5s; }
 .dt-archieflink:hover { color: var(--av-coral-donker, #B44A2E); }
 .dt-archieflink:focus-visible, .dt-startknop:focus-visible, .dt-titelknop:focus-visible { outline: 3px solid var(--av-coral); outline-offset: 4px; }
 
@@ -120,15 +120,9 @@
 .dt-podium[data-stand="kaart"] .dt-inleiding, .dt-podium[data-stand="kaart"] .dt-archieflink { opacity: 0; pointer-events: none; visibility: hidden; transition: opacity .3s, visibility 0s .3s; }
 
 /* De uitnodiging in het midden. */
-.dt-start { position: absolute; left: 50%; top: 56%; transform: translate(-50%, -50%); transition: opacity .5s, transform .6s; }
-.dt-startknop {
-    display: inline-block; font-family: var(--font-heading); font-size: clamp(1.6rem, 3.2vw, 2.6rem); color: var(--av-petrol); text-decoration: none;
-    background: rgba(250, 248, 243, .9); padding: .5rem 1.4rem .65rem; border-radius: 999px; box-shadow: 0 10px 30px rgba(25, 59, 58, .15);
-    background-image: linear-gradient(var(--av-coral), var(--av-coral)); background-repeat: no-repeat; background-size: calc(100% - 2.8rem) 3px; background-position: 1.4rem calc(100% - .55rem);
-    transition: background-size .35s, color .2s, transform .2s;
-}
-.dt-startknop:hover { color: #fff; background-color: var(--av-petrol); background-size: calc(100% - 2.8rem) 3px; transform: translateY(-2px); }
-.dt-startknop::after { content: " →"; color: var(--av-coral); }
+.dt-start { position: absolute; left: 58%; top: 63%; transform: translate(-50%, -50%); transition: opacity .5s, transform .6s; }
+.dt-startknop { font-family: var(--font-heading); font-size: clamp(1.6rem, 3.2vw, 2.6rem); font-weight: 400; padding: .5rem 1.5rem .65rem; box-shadow: 0 10px 30px rgba(25, 59, 58, .15); }
+.dt-startknop::before { content: "→"; order: 2; color: var(--av-coral); margin-left: .5rem; }
 .dt-podium[data-stand="kaart"] .dt-start { opacity: 0; transform: translate(-50%, -30%); pointer-events: none; visibility: hidden; transition: opacity .4s, transform .5s, visibility 0s .5s; }
 
 .dt-bron { position: absolute; left: var(--gutter); bottom: .6rem; margin: 0; font-size: .75rem; color: var(--av-petrol-zacht); }
@@ -147,8 +141,9 @@
 .dt-podium[data-stand="omslag"] .dt-index { transform: translateX(calc(100% + 3rem)); opacity: 0; transition-delay: 0s; }
 .dt-index.ingeklapt .dt-index-binnen { display: none; }
 .dt-index-knop { font: 600 .8rem var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--av-petrol); background: rgba(250, 248, 243, .94); border: 2px solid var(--av-petrol); border-radius: 999px; padding: .4rem .9rem; cursor: pointer; }
-.dt-index-knop::after { content: " ×"; }
-.dt-index.ingeklapt .dt-index-knop::after { content: " +"; }
+.dt-index-knop { display: inline-flex; align-items: center; gap: .35rem; }
+.dt-index-knop::before { content: "×"; order: 2; }
+.dt-index.ingeklapt .dt-index-knop::before { content: "+"; }
 .dt-index-knop:focus-visible { outline: 3px solid var(--av-coral); outline-offset: 2px; }
 .dt-index-binnen {
     width: 100%; overflow-y: auto; min-height: 0;
@@ -174,7 +169,7 @@
 .dt-regel .namen { font-family: var(--font-heading); font-style: italic; font-size: .95rem; line-height: 1.3; }
 .dt-duim { grid-column: 3; grid-row: 1 / span 5; width: 3.4rem; aspect-ratio: 1; object-fit: cover; border-radius: 3px; }
 .dt-index-voet { margin: .8rem 0 0; padding-top: .7rem; border-top: 1px solid var(--av-lijn-sterk); }
-.dt-index-voet a { font-weight: 600; color: var(--av-petrol); text-decoration: none; border-bottom: 2px solid var(--av-coral); }
+
 .dt-leeg { margin: 0; color: var(--av-petrol-zacht); }
 
 /* --- Kaartje bij een pin ---------------------------------------------------- */
@@ -203,7 +198,7 @@
 .dt-pinitem h3 { font-size: 1.25rem; line-height: 1.15; }
 .dt-pinitem .thema { font-family: var(--font-heading); font-style: italic; font-size: .98rem; line-height: 1.3; }
 .dt-meer { justify-self: start; margin-top: .4rem; font: 600 .95rem var(--font-body); color: #fff; background: var(--av-petrol); border: none; border-radius: 999px; padding: .5rem 1rem; cursor: pointer; }
-.dt-meer::after { content: " →"; color: var(--av-coral); }
+.dt-meer::before { content: "→"; order: 2; color: var(--av-coral); }
 .dt-meer:hover { background: #0f2827; }
 .dt-meer:focus-visible { outline: 3px solid var(--av-coral); outline-offset: 2px; }
 
@@ -211,8 +206,8 @@
     .dt-podium { height: calc(100svh - 4.4rem); }
     .dt-omslag h1 { font-size: 3.2rem; }
     .dt-inleiding { font-size: 1.1rem; }
-    .dt-start { top: 72%; width: calc(100% - 2 * var(--gutter)); text-align: center; }
-    .dt-startknop { font-size: 1.35rem; padding: .55rem 1.1rem .7rem; background-size: calc(100% - 2.2rem) 3px; background-position: 1.1rem calc(100% - .5rem); }
+    .dt-start { left: 50%; top: 72%; width: calc(100% - 2 * var(--gutter)); text-align: center; }
+    .dt-startknop.dt-knop { font-size: 1.25rem; padding: .55rem 1rem .7rem; white-space: normal; text-align: left; }
     .dt-index { left: var(--gutter); right: var(--gutter); top: auto; bottom: .75rem; width: auto; max-height: 40%; }
     .dt-index.ingeklapt { max-height: none; }
     .dt-index-binnen { border-radius: var(--radius); }
@@ -330,3 +325,62 @@
 .plakband { fill: var(--av-coral); opacity: .5; }
 .bubbel.open .strook-vlak, .bubbel.partner .strook-vlak { stroke: var(--av-coral); stroke-width: 1.6; }
 @media (prefers-reduced-motion: reduce) { .dt-podium.met-strookjes .strook { transition: none; } }
+
+/* --- Eén knopstijl voor de hele pagina, met een koraal ring die zich bij aanwijzen als een
+   racebaan rond de knop tekent (snel, een halve seconde). --- */
+@property --ring { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
+.dt-knop {
+    display: inline-flex; align-items: center; gap: .4rem; white-space: nowrap;
+    font: 600 .95rem var(--font-body); color: var(--av-petrol); text-decoration: none;
+    background: #FFFDF6; border: 2px solid var(--av-petrol); border-radius: 999px; padding: .5rem 1.1rem; cursor: pointer;
+    transition: transform .2s, background-color .2s;
+}
+.dt-knop-klein { font-size: .9rem; padding: .35rem .9rem; }
+/* Knoppen die nergens anders gepositioneerd zijn, krijgen relative voor hun ring. */
+.dt-start .dt-knop, .dt-pinkaart .dt-knop, .dt-index-voet .dt-knop { position: relative; }
+.dt-archieflink.dt-knop { position: absolute; }
+.dt-startknop.dt-knop { font-family: var(--font-heading); font-size: clamp(1.6rem, 3.2vw, 2.6rem); font-weight: 400; padding: .5rem 1.5rem .65rem; box-shadow: 0 10px 30px rgba(25, 59, 58, .15); }
+.dt-archieflink.dt-knop { box-shadow: 0 6px 18px rgba(25, 59, 58, .12); }
+.dt-knop:hover { transform: translateY(-1px); }
+.dt-knop::after, .dt-bediening button::after, .dt-index-knop::after {
+    content: ""; position: absolute; inset: -5px; border-radius: 999px; pointer-events: none;
+    padding: 2px; background: conic-gradient(from 270deg, var(--av-coral) var(--ring), transparent var(--ring));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    --ring: 0%; transition: --ring .45s cubic-bezier(.4, 0, .2, 1);
+}
+.dt-knop:hover::after, .dt-knop:focus-visible::after,
+.dt-bediening button:hover::after, .dt-bediening button:focus-visible::after,
+.dt-index-knop:hover::after, .dt-index-knop:focus-visible::after { --ring: 100%; }
+.dt-knop:focus-visible, .dt-bediening button:focus-visible, .dt-index-knop:focus-visible { outline: none; }
+.dt-bediening button, .dt-index-knop { position: relative; }
+.dt-meer.dt-knop { color: #fff; background: var(--av-petrol); }
+.dt-pindeel.geweest .dt-meer.dt-knop { color: var(--av-petrol); background: #FFFDF6; }
+.dt-sluit.dt-knop { position: fixed; }
+@media (prefers-reduced-motion: reduce) { .dt-knop::after, .dt-bediening button::after, .dt-index-knop::after { transition: none; } }
+
+/* Thema-label in de index, het kaartje en het archief. */
+.dt-themalabel { font-family: var(--font-body); font-style: normal; font-weight: 600; font-size: .68em; letter-spacing: .1em; text-transform: uppercase; color: var(--av-petrol-zacht); margin-right: .15em; }
+
+/* --- Legenda op de kaart: wat de pins en de stippellijn betekenen --- */
+.dt-legenda {
+    position: absolute; left: var(--gutter); bottom: 2.2rem; display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; margin: 0; padding: .55rem .9rem; list-style: none;
+    background: rgba(250, 248, 243, .92); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    border-radius: 999px; box-shadow: 0 6px 18px rgba(25, 59, 58, .14); font-size: .85rem; font-weight: 500; color: var(--av-petrol);
+    transition: opacity .5s .8s;
+}
+.dt-legenda li { display: flex; align-items: center; gap: .4rem; }
+.dt-legenda svg { width: 1.15rem; height: 1.15rem; overflow: visible; }
+.dt-legenda li:last-child svg { width: 2.1rem; }
+.dt-podium[data-stand="omslag"] .dt-legenda { opacity: 0; transition-delay: 0s; pointer-events: none; }
+.dt-bediening { bottom: 5.4rem; }
+@media (max-width: 860px) {
+    .dt-legenda { left: var(--gutter); right: auto; top: 3.6rem; bottom: auto; font-size: .75rem; padding: .35rem .7rem; gap: .3rem .8rem; }
+    .dt-legenda svg { width: .95rem; height: .95rem; }
+    .dt-legenda li:last-child svg { width: 1.7rem; }
+    .dt-bediening { top: 7rem; bottom: auto; }
+}
+
+/* Strookjes zijn ook aan te tikken (ze horen bij de pin). */
+.dt-podium.met-strookjes .strook { pointer-events: auto; cursor: pointer; }
+.dt-podium.met-strookjes .strook.weg { pointer-events: none; }
