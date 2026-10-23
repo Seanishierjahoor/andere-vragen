@@ -106,21 +106,37 @@ const klaar = { lijn: false, kleur: false };
 // geladen als de pagina klaar en rustig is, zodat ze het eerste beeld niet vertragen. Klein voor telefoons.
 // Opnieuw maken na een kaartwijziging: zie andere-vragen-kaart/OPDRACHT-performance.md, en KAART_VERSIE ophogen.
 const KAART_VERSIE = '2026-10-23';
+let afbeeldingenBelofte = null;
 function laadAfbeeldingen() {
-    const maat = Math.max(innerWidth, innerHeight) * (devicePixelRatio || 1) > 1700 ? 'groot' : 'klein';
+    if (afbeeldingenBelofte) return afbeeldingenBelofte;
+    // Groot alleen voor echt grote schermen (laptop, groot scherm); telefoons en tablets klein.
+    const maat = Math.max(innerWidth, innerHeight) >= 1300 ? 'groot' : 'klein';
     const laad = (soort, image) => {
         const url = `beeld/kaart/kaart-${soort}-${maat}.webp?v=${KAART_VERSIE}`;
         const beeld = new Image();
         beeld.decoding = 'async';
+        beeld.fetchPriority = 'low';
         beeld.src = url;
         return beeld.decode().then(() => { image.setAttribute('href', url); klaar[soort] = true; });
     };
-    laad('lijn', rasterLijn).then(() => laad('kleur', rasterKleur)).catch(() => {});
+    afbeeldingenBelofte = laad('lijn', rasterLijn).then(() => laad('kleur', rasterKleur)).then(warmVoor).catch(() => {});
+    return afbeeldingenBelofte;
 }
-const naRust = () => (window.requestIdleCallback ? requestIdleCallback(laadAfbeeldingen, { timeout: 2500 }) : setTimeout(laadAfbeeldingen, 800));
-if (document.readyState === 'complete') naRust(); else addEventListener('load', naRust, { once: true });
-// Klikt iemand voor die tijd al op de knop, dan meteen laden.
-document.querySelector('.dt-startknop').addEventListener('pointerdown', () => { if (!klaar.lijn) laadAfbeeldingen(); }, { once: true });
+// De eerste keer dat een grote afbeelding zichtbaar wordt, moet de browser hem klaarzetten voor de
+// grafische chip; dat geeft een hapering. Daarom tonen we ze één keer onzichtbaar op de omslag (het
+// lijnwerk is daar identiek aan de vectorkaart, de kleur staat op doorzichtig).
+function warmVoor() {
+    if (podium.dataset.stand !== 'omslag' || svg.classList.contains('overgang')) return;
+    svg.classList.add('opwarmen');
+    svg.dataset.laag = 'raster';
+    requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => {
+        svg.classList.remove('opwarmen');
+        if (!svg.classList.contains('overgang')) svg.dataset.laag = 'vector';
+    })));
+}
+// Meteen na het eerste beeld laden (met lage voorrang). Wachten op een rustig moment kan niet in Safari,
+// en dan zijn ze er te laat als iemand snel op de knop drukt.
+if (document.readyState === 'complete') laadAfbeeldingen(); else addEventListener('load', laadAfbeeldingen, { once: true });
 
 // Tijdens bewegen het plaatje tonen; even stil, dan weer de scherpe vectorkaart.
 let stilTimer = null;
@@ -592,7 +608,15 @@ function zetStand(stand) {
 
 // De lappendeken vloeit als inkt vanuit de knop over de kaart; intussen zoomt de kaart in.
 async function kleurIn(vanaf) {
-    if (!klaar.kleur || RUSTIG.matches) { svg.classList.remove('lijnwerk'); return vliegNaar(overzicht(), 1300); }
+    // Even wachten op de afbeeldingen (op een normale verbinding zijn ze er al).
+    if (!klaar.kleur && !RUSTIG.matches) await Promise.race([laadAfbeeldingen(), new Promise((klaar) => setTimeout(klaar, 1500))]);
+    if (!klaar.kleur || RUSTIG.matches) {
+        // Rustige terugval zonder zware vectorzoom: de kaart staat meteen op zijn plek en vloeit in kleur in.
+        svg.classList.remove('lijnwerk');
+        zetBeeld(overzicht(), { stil: true });
+        if (!RUSTIG.matches) svg.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 600, easing: 'ease-out' });
+        return;
+    }
     const cirkel = svg.querySelector('#onthul-cirkel');
     cirkel.setAttribute('cx', vanaf[0]);
     cirkel.setAttribute('cy', vanaf[1]);

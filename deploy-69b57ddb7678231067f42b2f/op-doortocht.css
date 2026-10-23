@@ -424,3 +424,6 @@ body.balk-zichtbaar .dt-balkknop { opacity: 0; pointer-events: none; transition-
 /* Eigen laag voor pins en lijnen (zie op-doortocht.js): klikken op lege plekken gaan door naar de kaart. */
 .dt-kaart .dt-pinlaag { position: absolute; inset: 0; pointer-events: none; }
 .dt-kaart .dt-pinlaag .bubbel { pointer-events: auto; }
+
+/* Opwarmen (zie warmVoor in op-doortocht.js): de kleurenafbeelding één keer onzichtbaar tekenen. */
+.dt-podium svg.opwarmen #raster-kleur { display: inline !important; opacity: .001; }
