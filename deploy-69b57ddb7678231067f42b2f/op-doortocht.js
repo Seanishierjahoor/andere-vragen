@@ -60,7 +60,11 @@ const EVENEMENTEN = (gegevens?.evenementen || [])
     .map((e) => ({ ...e, plekken: e.plekken.filter((id) => PLEKKEN[id]), data: [...new Set(e.momenten.map((m) => m.datum))].sort() }))
     .filter((e) => e.plekken.length && e.data.length)
     .sort((a, b) => a.data[0].localeCompare(b.data[0]));
-EVENEMENTEN.forEach((e, i) => { e.nr = String(i + 1).padStart(2, '0'); });
+// In de index en het kaartje bij een pin krijgt elke datum een eigen blokje, met een eigen nummer
+// (chronologisch) en het thema en "wat" van die datum.
+const DATUMRIJEN = EVENEMENTEN.flatMap((e) => e.data.map((d) => ({ e, d, m: e.momenten.find((m) => m.datum === d) || {} })))
+    .sort((a, b) => a.d.localeCompare(b.d));
+DATUMRIJEN.forEach((r, i) => { r.nr = String(i + 1).padStart(2, '0'); });
 const komtNog = (e) => e.data[e.data.length - 1] >= VANDAAG;
 const plekNamen = (e) => e.plekken.map((id) => PLEKKEN[id].naam).join(' × ');
 const plekRegel = (e) => e.plekken.length === 1 ? 'bij ' + PLEKKEN[e.plekken[0]].naam : plekNamen(e);
@@ -368,17 +372,17 @@ const zweefOp = (sel) => { zweef = sel; teken(); };
 
 let pinkaartPlek = null;
 
-function toonPinkaart(plekId, alleen = null) {
+function toonPinkaart(plekId, alleen = null, alleenDatum = null) {
     const hier = alleen ? [alleen] : EVENEMENTEN.filter((e) => e.plekken.includes(plekId));
-    // Komt eraan en geweest apart; een reeks die deels geweest is, staat in beide met de eigen data.
-    const groep = (kies) => hier.map((e) => ({ e, data: e.data.filter(kies) })).filter((r) => r.data.length);
-    const komt = groep((d) => d >= VANDAAG).sort((a, b) => a.data[0].localeCompare(b.data[0]));
-    const geweest = groep((d) => d < VANDAAG).sort((a, b) => b.data[0].localeCompare(a.data[0]));
-    const item = ({ e, data }, soort) => `<div class="dt-pinitem ${soort}">
+    // Komt eraan en geweest apart, en elke datum een eigen blokje.
+    const rijen = DATUMRIJEN.filter((r) => hier.includes(r.e) && (!alleenDatum || r.d === alleenDatum));
+    const komt = rijen.filter((r) => r.d >= VANDAAG);
+    const geweest = rijen.filter((r) => r.d < VANDAAG).reverse();
+    const item = ({ e, d, m, nr }, soort) => `<div class="dt-pinitem ${soort}">
         ${e.omslag ? `<img src="${fotoUrl(e.omslag)}" alt="" loading="lazy">` : ''}
-        <span class="dt-bovenregel">${e.nr} · ${opsomming(data.map(kortDatum))}</span>
-        <h3>${veilig(e.soort)}</h3>
-        ${naamEnThemaHtml(e, data) ? `<p class="thema">${naamEnThemaHtml(e, data)}</p>` : ''}
+        <span class="dt-bovenregel">${nr} · ${langDatum(d)}</span>
+        <h3>${veilig(m.wat || e.soort)}</h3>
+        ${naamEnThemaHtml(e, [d]) ? `<p class="thema">${naamEnThemaHtml(e, [d])}</p>` : ''}
         ${e.plekken.length > 1 ? `<p>${veilig(plekNamen(e))}</p>` : ''}
         <button type="button" class="dt-meer dt-knop" data-evenement="${veilig(e.id)}">${soort === 'komt' ? 'Lees meer' : 'Terugblik'}</button>
     </div>`;
@@ -495,26 +499,26 @@ for (const [id, g] of Object.entries(bubbelVan)) {
 // --- Index ------------------------------------------------------------------
 
 // Een reeks die deels geweest is, staat in beide groepen met de bijbehorende data.
-const rijenVoor = (kies, volgorde) => EVENEMENTEN
-    .map((e) => ({ e, data: e.data.filter(kies) }))
-    .filter((r) => r.data.length)
-    .sort((a, b) => volgorde * a.data[0].localeCompare(b.data[0]));
 for (const groep of [
-    { kop: 'Komt eraan', soort: 'komt', rijen: rijenVoor((d) => d >= VANDAAG, 1) },
-    { kop: 'Geweest', soort: 'geweest', rijen: rijenVoor((d) => d < VANDAAG, -1) },
+    { kop: 'Komt eraan', soort: 'komt', rijen: DATUMRIJEN.filter((r) => r.d >= VANDAAG) },
+    { kop: 'Geweest', soort: 'geweest', rijen: DATUMRIJEN.filter((r) => r.d < VANDAAG).reverse() },
 ]) {
     if (!groep.rijen.length) continue;
     const kop = document.createElement('h2');
     kop.innerHTML = `<span class="dt-stip ${groep.soort}" aria-hidden="true"></span>${groep.kop}`;
     const lijst = document.createElement('ol');
-    for (const { e, data } of groep.rijen) {
+    for (const { e, d, m, nr } of groep.rijen) {
         const li = document.createElement('li');
-        const namen = naamEnThemaHtml(e, data);
+        const namen = naamEnThemaHtml(e, [d]);
+        // Bij een samenwerking met een plek per datum: die plek voorop.
+        const waar = m.plek && PLEKKEN[m.plek] && e.plekken.length > 1
+            ? [PLEKKEN[m.plek].naam, ...e.plekken.filter((p) => p !== m.plek).map((p) => PLEKKEN[p].naam)].join(' × ')
+            : plekNamen(e);
         li.innerHTML = `<button type="button" class="dt-regel" data-evenement="${veilig(e.id)}">
-            <span class="dt-nr" aria-hidden="true">${e.nr}</span>
-            <span class="dt-bovenregel">${opsomming(data.map(kortDatum))}</span>
-            <span class="titel">${veilig(plekNamen(e))}</span>
-            <span class="sub">${veilig(e.soort)}</span>
+            <span class="dt-nr" aria-hidden="true">${nr}</span>
+            <span class="dt-bovenregel">${kortDatum(d)}</span>
+            <span class="titel">${veilig(waar)}</span>
+            <span class="sub">${veilig(m.wat || e.soort)}</span>
             ${namen ? `<span class="namen">${namen}</span>` : ''}
             ${e.omslag ? `<img class="dt-duim" src="${fotoUrl(e.omslag)}" alt="" loading="lazy">` : ''}</button>`;
         const knop = li.querySelector('button');
@@ -526,7 +530,7 @@ for (const groep of [
         knop.addEventListener('click', async () => {
             pinkaart.hidden = true;
             await vliegNaar(rondPunten(e.plekken.map((p) => xyVan[p]), { rand: 220, minW: 700 }), 700);
-            toonPinkaart(e.plekken[0], e);
+            toonPinkaart(m.plek && PLEKKEN[m.plek] ? m.plek : e.plekken[0], e, d);
         });
         lijst.appendChild(li);
     }
@@ -634,7 +638,7 @@ function verhaalHtml(e) {
         <header class="dt-held ${e.omslag ? 'met-foto' : ''}">
             ${e.omslag ? `<img src="${fotoUrl(e.omslag)}" alt="">` : ''}
             <div class="dt-held-tekst">
-                <p class="dt-bovenregel">${e.nr} · ${veilig(plekNamen(e))} · ${opsomming(e.data.map(kortDatum))}</p>
+                <p class="dt-bovenregel">${veilig(plekNamen(e))} · ${opsomming(e.data.map(kortDatum))}</p>
                 <h1 id="verhaal-titel">${veilig(kop)}</h1>
                 <p class="dt-ondertitel">${kop === e.soort ? '' : veilig(e.soort) + (e.plekken.length === 1 ? ' ' : ' · ')}${veilig(plekRegel(e))}</p>
             </div>
