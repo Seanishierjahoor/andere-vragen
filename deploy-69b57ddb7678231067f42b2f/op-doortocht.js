@@ -92,15 +92,38 @@ svg.classList.add('lijnwerk'); // de omslag is kleurloos
 
 // --- Afbeeldingen van de kaart: tijdens bewegen schuift de browser een plaatje, geen vectorkaart ----
 
-const defs = svg.querySelector('defs');
-defs.insertAdjacentHTML('beforeend', `
-    <radialGradient id="zachte-rand"><stop offset=".8" stop-color="#fff"/><stop offset="1" stop-color="#000"/></radialGradient>
-    <mask id="onthul" maskUnits="userSpaceOnUse" x="0" y="0" width="${BREED}" height="${HOOG}">
-        <rect width="${BREED}" height="${HOOG}" fill="#000"/><circle id="onthul-cirkel" r="0" fill="url(#zachte-rand)"/>
-    </mask>`);
-const rasterLijn = maakSvg('image', { id: 'raster-lijn', class: 'raster', width: BREED, height: HOOG, preserveAspectRatio: 'none' });
-const rasterKleur = maakSvg('image', { id: 'raster-kleur', class: 'raster', width: BREED, height: HOOG, preserveAspectRatio: 'none' });
-svg.querySelector('.kaartvector').before(rasterLijn, rasterKleur);
+// De afbeeldingen staan als gewone <img> boven de tekening, niet erin. Zoomen, schuiven en het inkleurende
+// rondje zijn dan alleen verschuivingen van kant-en-klare plaatjes: dat doet de grafische chip, zonder
+// dat de browser iets opnieuw hoeft te tekenen. Op iPads en telefoons scheelt dat de laatste haperingen.
+const rasterVak = document.createElement('div');
+rasterVak.className = 'dt-raster';
+rasterVak.innerHTML = '<img id="raster-lijn" alt="" draggable="false"><div class="dt-onthul"><img id="raster-kleur" alt="" draggable="false"></div>';
+svg.after(rasterVak);
+const rasterLijn = rasterVak.querySelector('#raster-lijn');
+const rasterKleur = rasterVak.querySelector('#raster-kleur');
+const onthul = rasterVak.querySelector('.dt-onthul');
+for (const img of [rasterLijn, rasterKleur]) Object.assign(img.style, { width: BREED + 'px', height: HOOG + 'px' });
+let inkt = null; // { cx, cy, r } in kaarteenheden, alleen tijdens het inkleuren
+
+// Zet de plaatjes op dezelfde plek als de vectorkaart (het beeld heeft altijd de verhouding van het scherm).
+function plaatsRaster() {
+    if (kaartVak.dataset.laag !== 'raster') return;
+    const k = schermMaat()[0] / beeld.w;
+    const x = -beeld.x * k, y = -beeld.y * k;
+    rasterLijn.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${k})`;
+    if (inkt) {
+        const cx = (inkt.cx - beeld.x) * k, cy = (inkt.cy - beeld.y) * k, r = Math.max(inkt.r * k, 0.5);
+        Object.assign(onthul.style, { left: `${cx - r}px`, top: `${cy - r}px`, width: `${2 * r}px`, height: `${2 * r}px` });
+        rasterKleur.style.transform = `translate3d(${x - (cx - r)}px, ${y - (cy - r)}px, 0) scale(${k})`;
+    } else {
+        Object.assign(onthul.style, { left: '0', top: '0', width: '100%', height: '100%' });
+        rasterKleur.style.transform = rasterLijn.style.transform;
+    }
+}
+function zetLaag(laag) {
+    kaartVak.dataset.laag = laag;
+    plaatsRaster();
+}
 const klaar = { lijn: false, kleur: false };
 // De afbeeldingen zijn vooraf gemaakt (zelf tekenen kost een telefoon seconden rekenwerk). Ze worden pas
 // geladen als de pagina klaar en rustig is, zodat ze het eerste beeld niet vertragen. Klein voor telefoons.
@@ -117,7 +140,7 @@ function laadAfbeeldingen() {
         beeld.decoding = 'async';
         beeld.fetchPriority = 'low';
         beeld.src = url;
-        return beeld.decode().then(() => { image.setAttribute('href', url); klaar[soort] = true; });
+        return beeld.decode().then(() => { image.src = url; klaar[soort] = true; });
     };
     afbeeldingenBelofte = laad('lijn', rasterLijn).then(() => laad('kleur', rasterKleur)).then(warmVoor).catch(() => {});
     return afbeeldingenBelofte;
@@ -126,12 +149,12 @@ function laadAfbeeldingen() {
 // grafische chip; dat geeft een hapering. Daarom tonen we ze één keer onzichtbaar op de omslag (het
 // lijnwerk is daar identiek aan de vectorkaart, de kleur staat op doorzichtig).
 function warmVoor() {
-    if (podium.dataset.stand !== 'omslag' || svg.classList.contains('overgang')) return;
-    svg.classList.add('opwarmen');
-    svg.dataset.laag = 'raster';
+    if (podium.dataset.stand !== 'omslag' || kaartVak.classList.contains('overgang')) return;
+    kaartVak.classList.add('opwarmen');
+    zetLaag('raster');
     requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => {
-        svg.classList.remove('opwarmen');
-        if (!svg.classList.contains('overgang')) svg.dataset.laag = 'vector';
+        kaartVak.classList.remove('opwarmen');
+        if (!kaartVak.classList.contains('overgang')) zetLaag('vector');
     })));
 }
 // Meteen na het eerste beeld laden (met lage voorrang). Wachten op een rustig moment kan niet in Safari,
@@ -142,10 +165,10 @@ if (document.readyState === 'complete') laadAfbeeldingen(); else addEventListene
 let stilTimer = null;
 function beweeg() {
     const nodig = podium.dataset.stand === 'kaart' ? klaar.kleur : klaar.lijn;
-    if (!nodig && !svg.classList.contains('overgang')) return;
-    svg.dataset.laag = 'raster';
+    if (!nodig && !kaartVak.classList.contains('overgang')) return;
+    if (kaartVak.dataset.laag !== 'raster') zetLaag('raster');
     clearTimeout(stilTimer);
-    stilTimer = setTimeout(() => { if (!svg.classList.contains('overgang')) svg.dataset.laag = 'vector'; }, 220);
+    stilTimer = setTimeout(() => { if (!kaartVak.classList.contains('overgang')) zetLaag('vector'); }, 220);
 }
 const gebruikt = Object.values(PLEKKEN).filter((p) => EVENEMENTEN.some((e) => e.plekken.includes(p.id)));
 const xyVan = Object.fromEntries(gebruikt.map((p) => [p.id, naarKaart(p.lat, p.lon)]));
@@ -207,6 +230,7 @@ function zetBeeld(b, { stil = false } = {}) {
     beeld = begrens(b);
     svg.setAttribute('viewBox', `${beeld.x} ${beeld.y} ${beeld.w} ${beeld.h}`);
     pinlaag.setAttribute('viewBox', `${beeld.x} ${beeld.y} ${beeld.w} ${beeld.h}`);
+    plaatsRaster();
     schaalPins();
     plaatsPinkaart();
 }
@@ -579,6 +603,7 @@ $('index-knop').addEventListener('click', () => {
     zetIndex(indexVak.classList.contains('ingeklapt'));
     // Op een telefoon bedekt de index het onderste deel: schuif de pins naar het vrije stuk.
     if (SMAL.matches) { sluitPinkaart(); requestAnimationFrame(() => vliegNaar(overzicht(), 500)); }
+    plaatsRaster();
     schaalPins();
     plaatsPinkaart();
 });
@@ -617,13 +642,9 @@ async function kleurIn(vanaf) {
         if (!RUSTIG.matches) svg.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 600, easing: 'ease-out' });
         return;
     }
-    const cirkel = svg.querySelector('#onthul-cirkel');
-    cirkel.setAttribute('cx', vanaf[0]);
-    cirkel.setAttribute('cy', vanaf[1]);
-    cirkel.setAttribute('r', 0);
-    rasterKleur.setAttribute('mask', 'url(#onthul)');
-    svg.classList.add('overgang');
-    svg.dataset.laag = 'raster';
+    inkt = { cx: vanaf[0], cy: vanaf[1], r: 0 };
+    kaartVak.classList.add('overgang');
+    zetLaag('raster');
     // De inkt groeit tot de verste hoek van het beeld waar we heen zoomen (niet van de hele kaart),
     // anders is hij in beeld al klaar voordat je hem ziet.
     const doel = overzicht();
@@ -631,17 +652,19 @@ async function kleurIn(vanaf) {
     const straal = Math.max(...hoeken.map(([x, y]) => Math.hypot(x - vanaf[0], y - vanaf[1]))) / 0.8;
     const duur = 2000, t0 = performance.now();
     const zacht = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
-    const inkt = new Promise((klaar) => {
+    const inktKlaar = new Promise((klaar) => {
         const stap = (nu) => {
             const t = Math.min((nu - t0) / duur, 1);
-            cirkel.setAttribute('r', straal * zacht(t));
+            inkt.r = straal * zacht(t);
+            plaatsRaster();
             if (t < 1) requestAnimationFrame(stap); else klaar();
         };
         requestAnimationFrame(stap);
     });
-    await Promise.all([inkt, vliegNaar(overzicht(), 1500)]);
-    svg.classList.remove('lijnwerk', 'overgang');
-    rasterKleur.removeAttribute('mask');
+    await Promise.all([inktKlaar, vliegNaar(overzicht(), 1500)]);
+    inkt = null;
+    svg.classList.remove('lijnwerk');
+    kaartVak.classList.remove('overgang');
     beweeg();
 }
 

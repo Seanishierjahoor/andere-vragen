@@ -6,11 +6,15 @@
 /* Kaart: de lagen zelf zijn opgemaakt in op-doortocht-kaart.js (ook voor de afbeelding van de kaart).
    Tijdens bewegen toont de pagina een afbeelding in plaats van de vectorkaart: dat is veel soepeler. */
 .dt-kaart svg { display: block; width: 100%; height: 100%; }
-.dt-kaart .raster { pointer-events: none; }
-.dt-kaart svg[data-laag="raster"] .kaartvector { display: none; }
-.dt-kaart svg:not([data-laag="raster"]) .raster { display: none; }
-.dt-podium[data-stand="omslag"] svg:not(.overgang) #raster-kleur,
-.dt-podium[data-stand="kaart"] svg:not(.overgang) #raster-lijn { display: none; }
+/* Afbeeldingen boven de tekening (zie plaatsRaster in op-doortocht.js). */
+.dt-kaart .dt-raster { position: absolute; inset: 0; overflow: hidden; pointer-events: none; display: none; contain: strict; }
+.dt-kaart[data-laag="raster"] .dt-raster { display: block; }
+.dt-kaart[data-laag="raster"] .kaartvector { display: none; }
+.dt-raster img { position: absolute; left: 0; top: 0; max-width: none; transform-origin: 0 0; will-change: transform; user-select: none; }
+.dt-onthul { position: absolute; overflow: hidden; border-radius: 0; }
+.dt-kaart.overgang .dt-onthul { border-radius: 50%; will-change: left, top, width, height; }
+.dt-podium[data-stand="omslag"] .dt-kaart:not(.overgang) .dt-onthul,
+.dt-podium[data-stand="kaart"] .dt-kaart:not(.overgang) #raster-lijn { display: none; }
 
 /* Pins: koraal = komt eraan, petrol = geweest */
 .bubbel { cursor: pointer; outline: none; }
@@ -426,4 +430,4 @@ body.balk-zichtbaar .dt-balkknop { opacity: 0; pointer-events: none; transition-
 .dt-kaart .dt-pinlaag .bubbel { pointer-events: auto; }
 
 /* Opwarmen (zie warmVoor in op-doortocht.js): de kleurenafbeelding één keer onzichtbaar tekenen. */
-.dt-podium svg.opwarmen #raster-kleur { display: inline !important; opacity: .001; }
+.dt-kaart.opwarmen .dt-onthul { display: block !important; opacity: .001; }
