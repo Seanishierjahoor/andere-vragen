@@ -560,6 +560,8 @@ function zetStand(stand) {
     const opKaart = stand === 'kaart';
     // Op de kaart verdwijnt de bovenste balk, zodat de kaart het hele scherm vult.
     document.body.classList.toggle('dt-kaart-open', opKaart);
+    toonBalk(false);
+    $('balk-knop').tabIndex = opKaart ? 0 : -1;
     if (opKaart) window.scrollTo({ top: 0, behavior: 'instant' });
     indexVak.inert = !opKaart;
     document.querySelector('.dt-bediening').inert = !opKaart;
@@ -613,6 +615,34 @@ function pinsGolf() {
 }
 
 $('naar-omslag').addEventListener('click', () => { if (podium.dataset.stand === 'kaart') location.hash = ''; });
+
+// --- De bovenste balk terughalen op de kaart ---------------------------------------
+// Laptop: zoals het Dock, muis even tegen de bovenrand houden; van de balk af en hij gaat weer weg.
+// Overal: het lipje bovenaan in het midden. Klik of tik op de kaart om hem weer te verbergen.
+const balk = document.querySelector('.av-header');
+function toonBalk(aan) {
+    document.body.classList.toggle('balk-zichtbaar', aan);
+    $('balk-knop').setAttribute('aria-expanded', String(aan));
+    $('balk-knop').setAttribute('aria-label', aan ? 'Menu verbergen' : 'Menu tonen');
+}
+$('balk-knop').addEventListener('click', () => toonBalk(!document.body.classList.contains('balk-zichtbaar')));
+svg.addEventListener('pointerdown', () => toonBalk(false));
+let dockTimer = null, wegTimer = null;
+document.addEventListener('mousemove', (ev) => {
+    if (podium.dataset.stand !== 'kaart' || !overlay.hidden) return;
+    if (ev.clientY <= 6) {
+        if (!dockTimer && !document.body.classList.contains('balk-zichtbaar')) dockTimer = setTimeout(() => toonBalk(true), 320);
+    } else {
+        clearTimeout(dockTimer);
+        dockTimer = null;
+    }
+});
+balk.addEventListener('mouseenter', () => clearTimeout(wegTimer));
+balk.addEventListener('mouseleave', () => {
+    if (podium.dataset.stand !== 'kaart') return;
+    wegTimer = setTimeout(() => toonBalk(false), 500);
+});
+document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') toonBalk(false); });
 let inktBron = null;
 document.querySelector('.dt-startknop').addEventListener('click', () => {
     const r = document.querySelector('.dt-startknop').getBoundingClientRect();
