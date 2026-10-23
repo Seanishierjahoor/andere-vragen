@@ -716,14 +716,27 @@ function archiefHtml() {
                 </ul>
             </header>
             ${jaren.map((jaar) => `<section class="dt-jaar"><h2>${jaar}</h2><ol>
-                ${perJaar[jaar].map((e) => `<li class="dt-archiefregel">
-                    <time datetime="${e.data[0]}">${dataInJaar(e.data.filter((d) => d.startsWith(jaar)))}</time>
-                    <div>
-                        <h3><a href="#verhaal/${encodeURIComponent(e.id)}">${veilig(plekNamen(e))}</a>${komtNog(e) ? '<span class="dt-label">komt eraan</span>' : ''}</h3>
-                        <p>${veilig(e.soort)}${e.data.filter((d) => d.startsWith(jaar)).length > 1 ? ` · ${e.data.filter((d) => d.startsWith(jaar)).length} bijeenkomsten` : ''}</p>
-                        ${naamEnThemaHtml(e) ? `<p class="dt-archief-themas">${naamEnThemaHtml(e)}</p>` : ''}
-                    </div>
-                </li>`).join('')}
+                ${perJaar[jaar].map((e) => {
+                    // Eén sectie per bijeenkomst; elke datum daarin een eigen regel met het eigen thema.
+                    const dataHier = e.data.filter((d) => d.startsWith(jaar));
+                    const regels = dataHier.map((d) => {
+                        const m = e.momenten.find((x) => x.datum === d) || {};
+                        const thema = m.thema || e.thema;
+                        const plek = e.plekken.length > 1 && m.plek && PLEKKEN[m.plek] ? `bij ${PLEKKEN[m.plek].naam}` : '';
+                        const wat = [m.wat, plek].filter(Boolean).join(' ');
+                        return `<li>
+                            <time datetime="${d}">${+d.slice(8, 10)} ${MAANDEN[+d.slice(5, 7) - 1]}</time>
+                            <span>${wat ? `<span class="dt-archief-wat">${veilig(wat)}</span>` : ''}${thema ? `<span class="dt-archief-themas"><span class="dt-themalabel">Thema:</span> ${veilig(thema)}</span>` : ''}${d >= VANDAAG ? '<span class="dt-label">komt eraan</span>' : ''}</span>
+                        </li>`;
+                    }).join('');
+                    return `<li class="dt-archiefregel">
+                        <div class="dt-archiefkop">
+                            <h3><a href="#verhaal/${encodeURIComponent(e.id)}">${veilig(plekNamen(e))}</a></h3>
+                            <p>${veilig(e.soort)}${e.naam ? ` · <em>${veilig(e.naam)}</em>` : ''}${dataHier.length > 1 ? ` · ${dataHier.length} bijeenkomsten` : ''}</p>
+                        </div>
+                        <ol class="dt-archiefdata">${regels}</ol>
+                    </li>`;
+                }).join('')}
             </ol></section>`).join('')}
             <section class="dt-jaar dt-plekken-sectie"><h2>Plekken</h2>
                 <ul class="dt-plekkenlijst">${plekken.map(({ p, aantal, jaartallen }) => `<li><strong>${veilig(p.naam)}</strong>
