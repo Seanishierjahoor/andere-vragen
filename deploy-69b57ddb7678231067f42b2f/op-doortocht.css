@@ -120,7 +120,7 @@
 .dt-podium[data-stand="kaart"] .dt-inleiding, .dt-podium[data-stand="kaart"] .dt-archieflink { opacity: 0; pointer-events: none; visibility: hidden; transition: opacity .3s, visibility 0s .3s; }
 
 /* De uitnodiging in het midden. */
-.dt-start { position: absolute; left: 58%; top: 63%; transform: translate(-50%, -50%); transition: opacity .5s, transform .6s; }
+.dt-start { position: absolute; left: 50%; top: 68%; transform: translate(-50%, -50%); transition: opacity .5s, transform .6s; }
 .dt-startknop { font-family: var(--font-heading); font-size: clamp(1.6rem, 3.2vw, 2.6rem); font-weight: 400; padding: .5rem 1.5rem .65rem; box-shadow: 0 10px 30px rgba(25, 59, 58, .15); }
 .dt-startknop::before { content: "→"; order: 2; color: var(--av-coral); margin-left: .5rem; }
 .dt-podium[data-stand="kaart"] .dt-start { opacity: 0; transform: translate(-50%, -30%); pointer-events: none; visibility: hidden; transition: opacity .4s, transform .5s, visibility 0s .5s; }
@@ -206,8 +206,8 @@
     .dt-podium { height: calc(100svh - 4.4rem); }
     .dt-omslag h1 { font-size: 3.2rem; }
     .dt-inleiding { font-size: 1.1rem; }
-    .dt-start { left: 50%; top: 72%; width: calc(100% - 2 * var(--gutter)); text-align: center; }
-    .dt-startknop.dt-knop { font-size: 1.25rem; padding: .55rem 1rem .7rem; white-space: normal; text-align: left; }
+    .dt-start { left: 50%; top: 74%; width: calc(100% - 2 * var(--gutter)); text-align: center; }
+    .dt-startknop.dt-knop { font-size: 1.1rem; padding: .5rem .95rem .55rem; }
     .dt-index { left: var(--gutter); right: var(--gutter); top: auto; bottom: .75rem; width: auto; max-height: 40%; }
     .dt-index.ingeklapt { max-height: none; }
     .dt-index-binnen { border-radius: var(--radius); }
@@ -339,7 +339,7 @@
 /* Knoppen die nergens anders gepositioneerd zijn, krijgen relative voor hun ring. */
 .dt-start .dt-knop, .dt-pinkaart .dt-knop, .dt-index-voet .dt-knop { position: relative; }
 .dt-archieflink.dt-knop { position: absolute; }
-.dt-startknop.dt-knop { font-family: var(--font-heading); font-size: clamp(1.6rem, 3.2vw, 2.6rem); font-weight: 400; padding: .5rem 1.5rem .65rem; box-shadow: 0 10px 30px rgba(25, 59, 58, .15); }
+.dt-startknop.dt-knop { font-family: var(--font-heading); font-size: clamp(1.4rem, 2.5vw, 2.05rem); font-weight: 400; padding: .45rem 1.3rem .55rem; box-shadow: 0 10px 30px rgba(25, 59, 58, .15); }
 .dt-archieflink.dt-knop { box-shadow: 0 6px 18px rgba(25, 59, 58, .12); }
 .dt-knop:hover { transform: translateY(-1px); color: var(--av-petrol); text-decoration: none; }
 .dt-meer.dt-knop:hover { color: #fff; }
@@ -385,3 +385,6 @@
 /* Strookjes zijn ook aan te tikken (ze horen bij de pin). */
 .dt-podium.met-strookjes .strook { pointer-events: auto; cursor: pointer; }
 .dt-podium.met-strookjes .strook.weg { pointer-events: none; }
+
+/* Op een touchscreen kun je niet aanwijzen: daar staat de koraal ring om de grote knop vast. */
+@media (hover: none) { .dt-startknop.dt-knop::after { --ring: 100%; } }
