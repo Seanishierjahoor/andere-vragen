@@ -6,6 +6,7 @@
 // beschrijving die onderaan elke bijeenkomst op die plek staat.
 
 import { isProductie } from "./omgeving.mjs";
+import { PLEK_TEKSTEN, BIJEENKOMST_TEKSTEN } from "./doortocht-proefteksten.mjs";
 
 export function gegevensStore(context) {
   return isProductie(context) ? "doortocht" : "doortocht-staging";
@@ -55,6 +56,10 @@ export const START = {
   ],
 };
 
+// Proefteksten erin als start.
+for (const p of START.plekken) p.beschrijving = PLEK_TEKSTEN[p.id] || "";
+for (const b of START.bijeenkomsten) b.samenvatting = BIJEENKOMST_TEKSTEN[b.id] || "";
+
 const tekst = (v, max) => String(v ?? "").slice(0, max);
 const ID = /^[a-z0-9][a-z0-9-]{0,60}$/;
 const FOTO_ID = /^[a-z0-9-]{8,64}$/;
@@ -73,6 +78,12 @@ export function zetOm(gegevens) {
     if (p.id === "tent" && /Witte de Withstraat/.test(p.adres || "")) Object.assign(p, { adres: "Coolhaven 32, 3024 AC Rotterdam", lat: 51.9079129, lon: 4.4605758 });
   }
   if (gegevens.versie === 2 && Array.isArray(gegevens.bijeenkomsten)) return gegevens;
+
+  // Versie 1 waarin nog niets is geschreven (alleen de oorspronkelijke startgegevens): dan meteen de nieuwe
+  // start nemen, met proefteksten, de juiste reeksen en TENT op de goede plek.
+  const ietsGeschreven = (gegevens.evenementen || []).some((e) => (e.blokken || []).length || e.omslag || (e.samenvatting || "").trim())
+    || (gegevens.plekken || []).some((p) => (p.beschrijving || "").trim());
+  if (!ietsGeschreven && (gegevens.plekken || []).every((p) => START.plekken.some((x) => x.id === p.id))) return structuredClone(START);
 
   const naamVan = (id) => (gegevens.plekken || []).find((p) => p.id === id)?.naam || id;
   const bijeenkomsten = [];
