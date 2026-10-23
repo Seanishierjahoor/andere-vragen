@@ -726,7 +726,7 @@ function archiefHtml() {
                         const wat = [m.wat, plek].filter(Boolean).join(' ');
                         return `<li>
                             <time datetime="${d}">${+d.slice(8, 10)} ${MAANDEN[+d.slice(5, 7) - 1]}</time>
-                            <span>${wat ? `<span class="dt-archief-wat">${veilig(wat)}</span>` : ''}${thema ? `<span class="dt-archief-themas"><span class="dt-themalabel">Thema:</span> ${veilig(thema)}</span>` : ''}${d >= VANDAAG ? '<span class="dt-label">komt eraan</span>' : ''}</span>
+                            <span>${wat ? `<span class="dt-archief-wat">${veilig(wat)}</span>` : ''}${thema ? `<span class="dt-archief-themas"><span class="dt-themalabel">Thema:</span> ${veilig(thema)}</span>` : ''}${d >= VANDAAG ? '<span class="dt-label">komt eraan</span>' : '<span class="dt-label geweest">geweest</span>'}</span>
                         </li>`;
                     }).join('');
                     return `<li class="dt-archiefregel">

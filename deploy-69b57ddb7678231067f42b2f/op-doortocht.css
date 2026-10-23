@@ -291,6 +291,8 @@
 .dt-archiefregel:last-child { border-bottom: none; }
 .dt-archiefregel time { font-weight: 600; font-size: .95rem; line-height: 1.5; }
 .dt-archiefdata .dt-label { margin-left: 0; }
+.dt-archiefdata .dt-label.geweest { background: transparent; color: var(--av-petrol); box-shadow: inset 0 0 0 1.5px var(--av-petrol); }
+.dt-archiefdata li:has(.dt-label.geweest) { border-left-color: var(--av-petrol); }
 .dt-archiefregel h3 { font-size: 1.35rem; line-height: 1.2; }
 .dt-archiefregel h3 a { color: var(--av-petrol); text-decoration: none; background-image: linear-gradient(var(--av-coral), var(--av-coral)); background-size: 0 2px; background-repeat: no-repeat; background-position: 0 100%; transition: background-size .25s; }
 .dt-archiefregel h3 a:hover, .dt-archiefregel h3 a:focus-visible { background-size: 100% 2px; }
