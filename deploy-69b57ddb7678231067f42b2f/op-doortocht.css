@@ -341,7 +341,8 @@
 .dt-archieflink.dt-knop { position: absolute; }
 .dt-startknop.dt-knop { font-family: var(--font-heading); font-size: clamp(1.6rem, 3.2vw, 2.6rem); font-weight: 400; padding: .5rem 1.5rem .65rem; box-shadow: 0 10px 30px rgba(25, 59, 58, .15); }
 .dt-archieflink.dt-knop { box-shadow: 0 6px 18px rgba(25, 59, 58, .12); }
-.dt-knop:hover { transform: translateY(-1px); }
+.dt-knop:hover { transform: translateY(-1px); color: var(--av-petrol); text-decoration: none; }
+.dt-meer.dt-knop:hover { color: #fff; }
 .dt-knop::after, .dt-bediening button::after, .dt-index-knop::after {
     content: ""; position: absolute; inset: -5px; border-radius: 999px; pointer-events: none;
     padding: 2px; background: conic-gradient(from 270deg, var(--av-coral) var(--ring), transparent var(--ring));
