@@ -344,11 +344,15 @@ function plaatsStrookjes(u) {
 
 // --- Wat er oplicht -------------------------------------------------------------
 
+// Elk blokje in de index heeft een eigen sleutel (bijeenkomst + datum), zodat bij een reeks
+// alleen het aangewezen blokje oplicht.
+const rijSleutel = (e, d) => `${e.id}|${d}`;
+const sleutelsVan = (e) => e.data.map((d) => rijSleutel(e, d));
 const selectieVanPlek = (id) => {
     const samen = EVENEMENTEN.filter((e) => e.plekken.length > 1 && e.plekken.includes(id));
-    return { plekken: [id], partners: samen.flatMap((e) => e.plekken), evenementen: samen.map((e) => e.id), regels: EVENEMENTEN.filter((e) => e.plekken.includes(id)).map((e) => e.id) };
+    return { plekken: [id], partners: samen.flatMap((e) => e.plekken), evenementen: samen.map((e) => e.id), regels: EVENEMENTEN.filter((e) => e.plekken.includes(id)).flatMap(sleutelsVan) };
 };
-const selectieVanEvenement = (e) => ({ plekken: e.plekken, partners: e.plekken, evenementen: [e.id], regels: [e.id] });
+const selectieVanEvenement = (e, d = null) => ({ plekken: e.plekken, partners: e.plekken, evenementen: [e.id], regels: d ? [rijSleutel(e, d)] : sleutelsVan(e) });
 
 let zweef = null, vast = null;
 function teken() {
@@ -364,7 +368,7 @@ function teken() {
         if (plekken.has(id) && bubbels.lastElementChild !== g) bubbels.appendChild(g);
     }
     for (const [id, lijst] of Object.entries(lijnenVan)) lijst.forEach((l) => l.classList.toggle('aan', evenementen.has(id)));
-    index.querySelectorAll('[data-evenement]').forEach((k) => k.classList.toggle('open', regels.has(k.dataset.evenement)));
+    index.querySelectorAll('[data-rij]').forEach((k) => k.classList.toggle('open', regels.has(k.dataset.rij)));
 }
 const zweefOp = (sel) => { zweef = sel; teken(); };
 
@@ -400,7 +404,7 @@ function toonPinkaart(plekId, alleen = null, alleenDatum = null) {
         const vrij = 1 - pinkaart.offsetHeight / schermMaat()[1];
         vliegNaar(beeldRond(x, y, beeld.w, 0.5, Math.max(0.18, vrij / 2)), 450);
     }
-    vast = alleen ? selectieVanEvenement(alleen) : selectieVanPlek(plekId);
+    vast = alleen ? selectieVanEvenement(alleen, alleenDatum) : selectieVanPlek(plekId);
     teken();
     plaatsPinkaart();
     pinkaart.querySelector('.dt-pinkaart-sluit').addEventListener('click', sluitPinkaart);
@@ -514,7 +518,7 @@ for (const groep of [
         const waar = m.plek && PLEKKEN[m.plek] && e.plekken.length > 1
             ? [PLEKKEN[m.plek].naam, ...e.plekken.filter((p) => p !== m.plek).map((p) => PLEKKEN[p].naam)].join(' × ')
             : plekNamen(e);
-        li.innerHTML = `<button type="button" class="dt-regel" data-evenement="${veilig(e.id)}">
+        li.innerHTML = `<button type="button" class="dt-regel" data-rij="${veilig(rijSleutel(e, d))}">
             <span class="dt-nr" aria-hidden="true">${nr}</span>
             <span class="dt-bovenregel">${kortDatum(d)}</span>
             <span class="titel">${veilig(waar)}</span>
@@ -522,9 +526,9 @@ for (const groep of [
             ${namen ? `<span class="namen">${namen}</span>` : ''}
             ${e.omslag ? `<img class="dt-duim" src="${fotoUrl(e.omslag)}" alt="" loading="lazy">` : ''}</button>`;
         const knop = li.querySelector('button');
-        knop.addEventListener('mouseenter', () => zweefOp(selectieVanEvenement(e)));
+        knop.addEventListener('mouseenter', () => zweefOp(selectieVanEvenement(e, d)));
         knop.addEventListener('mouseleave', () => zweefOp(null));
-        knop.addEventListener('focus', () => zweefOp(selectieVanEvenement(e)));
+        knop.addEventListener('focus', () => zweefOp(selectieVanEvenement(e, d)));
         knop.addEventListener('blur', () => zweefOp(null));
         // Naar de plek vliegen en daar het kaartje met "Lees meer" openen.
         knop.addEventListener('click', async () => {
