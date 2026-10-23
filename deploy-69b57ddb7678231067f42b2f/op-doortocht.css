@@ -388,3 +388,10 @@
 
 /* Op een touchscreen kun je niet aanwijzen: daar staat de koraal ring om de grote knop vast. */
 @media (hover: none) { .dt-startknop.dt-knop::after { --ring: 100%; } }
+
+/* Op de kaart schuift de bovenste balk weg en vult de kaart het scherm. */
+.av-header { transition: transform .6s cubic-bezier(.2, .7, .2, 1); }
+.dt-podium { transition: height .6s cubic-bezier(.2, .7, .2, 1), margin-top .6s cubic-bezier(.2, .7, .2, 1); }
+body.dt-kaart-open .av-header { transform: translateY(-105%); }
+body.dt-kaart-open .dt-podium { height: 100svh; margin-top: -4.32rem; }
+@media (prefers-reduced-motion: reduce) { .av-header, .dt-podium { transition: none; } }

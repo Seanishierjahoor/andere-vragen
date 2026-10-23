@@ -558,6 +558,9 @@ function zetStand(stand) {
     if (podium.dataset.stand === stand) return false;
     podium.dataset.stand = stand;
     const opKaart = stand === 'kaart';
+    // Op de kaart verdwijnt de bovenste balk, zodat de kaart het hele scherm vult.
+    document.body.classList.toggle('dt-kaart-open', opKaart);
+    if (opKaart) window.scrollTo({ top: 0, behavior: 'instant' });
     indexVak.inert = !opKaart;
     document.querySelector('.dt-bediening').inert = !opKaart;
     document.querySelector('.dt-legenda').inert = !opKaart;
