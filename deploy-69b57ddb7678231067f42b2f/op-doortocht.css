@@ -110,7 +110,7 @@
 .dt-geheim { cursor: default; letter-spacing: .06em; text-transform: none; font-weight: 400; color: var(--av-petrol-zacht); }
 .dt-omslag h1 { font-size: clamp(3rem, 8vw, 6.5rem); line-height: .92; margin: .6rem 0 0; letter-spacing: -.01em; }
 .dt-titelknop { all: unset; cursor: default; }
-.dt-inleiding { font-size: clamp(1.15rem, 1.8vw, 1.45rem); font-weight: 500; line-height: 1.4; margin: 1.1rem 0 0; max-width: 24rem; text-shadow: 0 0 12px var(--av-paper), 0 0 4px var(--av-paper); transition: opacity .5s; }
+.dt-inleiding { font-size: clamp(1.05rem, 1.45vw, 1.25rem); font-weight: 500; line-height: 1.45; margin: 1.1rem 0 0; max-width: 28rem; text-shadow: 0 0 12px var(--av-paper), 0 0 4px var(--av-paper); transition: opacity .5s; }
 .dt-archieflink { position: absolute; right: var(--gutter); bottom: 2.2rem; transition: opacity .5s; }
 .dt-archieflink:hover { color: var(--av-coral-donker, #B44A2E); }
 .dt-archieflink:focus-visible, .dt-startknop:focus-visible, .dt-titelknop:focus-visible { outline: 3px solid var(--av-coral); outline-offset: 4px; }
@@ -205,7 +205,7 @@
 @media (max-width: 860px) {
     .dt-podium { height: calc(100svh - 4.4rem); }
     .dt-omslag h1 { font-size: 3.2rem; }
-    .dt-inleiding { font-size: 1.1rem; }
+    .dt-inleiding { font-size: 1rem; }
     .dt-start { left: 50%; top: 74%; width: calc(100% - 2 * var(--gutter)); text-align: center; }
     .dt-startknop.dt-knop { font-size: 1.1rem; padding: .5rem .95rem .55rem; }
     .dt-index { left: var(--gutter); right: var(--gutter); top: auto; bottom: .75rem; width: auto; max-height: 40%; }
