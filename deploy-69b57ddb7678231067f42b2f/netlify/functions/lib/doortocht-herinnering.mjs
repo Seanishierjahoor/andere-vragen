@@ -25,24 +25,26 @@ function vingerafdruk(e) {
   return (h >>> 0).toString(36) + ":" + tekst.length;
 }
 
-// Welke herinneringen moeten vandaag weg? Data die binnen drie dagen op elkaar volgen
-// (5 en 6 november) tellen als één bijeenkomst: alleen de laatste van zo'n rij krijgt een mail.
+// Welke herinneringen moeten vandaag weg? Bijeenkomsten uit dezelfde reeks die binnen drie dagen op
+// elkaar volgen (5 en 6 november) tellen als één: alleen de laatste krijgt een mail, die de eerdere noemt.
 // Vensters van een paar dagen, zodat een gemiste run de mail niet laat vallen.
 export function teVersturen(gegevens, staat, vandaag) {
   const lijst = [];
-  for (const e of gegevens.evenementen || []) {
-    if (e.zichtbaar === false) continue;
-    const data = [...new Set((e.momenten || []).map((m) => m.datum))].sort();
-    data.forEach((datum, i) => {
-      if (data[i + 1] && data[i + 1] <= dagen(datum, 3)) return;
-      const sleutel = `${e.id}|${datum}`;
-      const s = staat[sleutel] || {};
-      if (!s.eerste && vandaag >= dagen(datum, 1) && vandaag <= dagen(datum, 3)) {
-        lijst.push({ soort: "eerste", e, datum, sleutel, data: data.filter((d) => d <= datum && d >= dagen(datum, -3)) });
-      } else if (s.eerste && !s.tweede && vandaag >= dagen(datum, 8) && vandaag <= dagen(datum, 12) && s.verhaal === vingerafdruk(e)) {
-        lijst.push({ soort: "tweede", e, datum, sleutel, data: data.filter((d) => d <= datum && d >= dagen(datum, -3)) });
-      }
-    });
+  const alle = (gegevens.bijeenkomsten || []).filter((b) => b.zichtbaar !== false);
+  for (const e of alle) {
+    const datum = e.datum;
+    const zelfdeReeks = (x) => e.reeks && x.reeks === e.reeks;
+    if (alle.some((x) => x !== e && zelfdeReeks(x) && x.datum > datum && x.datum <= dagen(datum, 3))) continue;
+    const data = alle.filter((x) => (x === e || zelfdeReeks(x)) && x.datum <= datum && x.datum >= dagen(datum, -3)).map((x) => x.datum).sort();
+    const sleutel = e.id;
+    // Vóór 23 okt heette een herinnering "<bijeenkomst>|<datum>"; die telt ook, anders komt hij dubbel.
+    const oud = Object.keys(staat).find((k) => k.endsWith(`|${datum}`));
+    const s = staat[sleutel] || (oud ? staat[oud] : {});
+    if (!s.eerste && vandaag >= dagen(datum, 1) && vandaag <= dagen(datum, 3)) {
+      lijst.push({ soort: "eerste", e, datum, sleutel, data });
+    } else if (s.eerste && !s.tweede && vandaag >= dagen(datum, 8) && vandaag <= dagen(datum, 12) && s.verhaal === vingerafdruk(e)) {
+      lijst.push({ soort: "tweede", e, datum, sleutel, data });
+    }
   }
   return lijst;
 }
@@ -56,7 +58,7 @@ export function herinneringsMailDoortocht({ soort, e, data }, plekken) {
   const waar = plekRegel(e, plekken);
   const watWaar = `${e.soort}${waar.startsWith("bij ") ? " " : " · "}${waar}`;
   const kortWaar = e.plekken.map((id) => plekken.find((p) => p.id === id)?.naam).filter(Boolean).join(" × ");
-  const themas = [e.naam, e.thema, ...(e.momenten || []).filter((m) => data.includes(m.datum)).map((m) => m.thema)].filter(Boolean);
+  const themas = [e.naam, e.thema, e.vraag].filter(Boolean);
   const wanneer = data.length > 1 ? `${data.slice(0, -1).map((d) => +d.slice(8, 10)).join(", ")} en ${mooieDatum(data[data.length - 1])}` : mooieDatum(data[0]);
   const link = `${BEHEER}#bijeenkomst/${encodeURIComponent(e.id)}`;
   const rijen = [

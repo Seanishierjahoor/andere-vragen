@@ -93,3 +93,11 @@
 .bh-suggesties strong { font-weight: 600; }
 .bh-suggesties span { color: var(--av-petrol-zacht); }
 .bh-nieuwe-plek { display: grid; gap: .9rem; margin-top: 1rem; padding: 1rem; border: 1.5px dashed var(--av-lijn-sterk); border-radius: 12px; background: var(--av-paper-licht); }
+
+.bh-lijstkop { font-size: .75rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--av-petrol-zacht); padding: .6rem .2rem .1rem; }
+.bh-lijst .bh-datum { font-weight: 600; color: var(--av-petrol); }
+.bh-reekslabel { font-style: italic; }
+.bh-nogschrijven { font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #fff; background: var(--av-coral); border-radius: 999px; padding: .05rem .5rem; justify-self: start; margin-top: .2rem; }
+.bh-kaartvak-kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .5rem; margin-bottom: .75rem; }
+.bh-kaartvak-kop h2 { margin: 0; }
+.bh-onderaan { gap: .75rem; flex-wrap: wrap; }

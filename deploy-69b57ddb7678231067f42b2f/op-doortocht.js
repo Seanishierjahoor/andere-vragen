@@ -56,10 +56,15 @@ const [kaart, gegevens] = await Promise.all([
 ]);
 
 const PLEKKEN = Object.fromEntries((gegevens?.plekken || []).map((p) => [p.id, p]));
-const EVENEMENTEN = (gegevens?.evenementen || [])
-    .map((e) => ({ ...e, plekken: e.plekken.filter((id) => PLEKKEN[id]), data: [...new Set(e.momenten.map((m) => m.datum))].sort() }))
-    .filter((e) => e.plekken.length && e.data.length)
-    .sort((a, b) => a.data[0].localeCompare(b.data[0]));
+// Elke bijeenkomst is één datum. Voor de rest van de code krijgt hij dezelfde vorm als vroeger
+// (data en momenten met één datum), zodat index, kaartje en lijnen gewoon blijven werken.
+const EVENEMENTEN = (gegevens?.bijeenkomsten || [])
+    .map((b) => ({
+        ...b, plekken: b.plekken.filter((id) => PLEKKEN[id]), data: [b.datum],
+        momenten: [{ datum: b.datum, plek: b.plek, wat: b.wat, thema: b.thema }],
+    }))
+    .filter((e) => e.plekken.length)
+    .sort((a, b) => a.datum.localeCompare(b.datum));
 // In de index en het kaartje bij een pin krijgt elke datum een eigen blokje, met een eigen nummer
 // (chronologisch) en het thema en "wat" van die datum.
 const DATUMRIJEN = EVENEMENTEN.flatMap((e) => e.data.map((d) => ({ e, d, m: e.momenten.find((m) => m.datum === d) || {} })))
@@ -82,7 +87,7 @@ function naamEnThemaHtml(e, data = e.data) {
     return delen.join(' · ');
 }
 // Korte naam voor koppen en de paginatitel: de eigen naam, anders het thema, anders de soort.
-const titelVan = (e) => e.naam || e.thema || e.soort;
+const titelVan = (e) => e.naam || e.vraag || e.soort;
 
 // --- Beeld: zoomen en pannen via de viewBox -----------------------------------
 
@@ -438,7 +443,8 @@ function toonPinkaart(plekId, alleen = null, alleenDatum = null) {
         ${e.omslag ? `<img src="${fotoUrl(e.omslag)}" alt="" loading="lazy">` : ''}
         <span class="dt-bovenregel">${nr} · ${langDatum(d)}</span>
         <h3>${veilig(m.wat || e.soort)}</h3>
-        ${naamEnThemaHtml(e, [d]) ? `<p class="thema">${naamEnThemaHtml(e, [d])}</p>` : ''}
+        ${e.vraag ? `<p class="thema">${veilig(e.vraag)}</p>` : ''}
+        ${naamEnThemaHtml(e, [d]) ? `<p class="dt-pin-naam">${naamEnThemaHtml(e, [d])}</p>` : ''}
         ${e.plekken.length > 1 ? `<p>${veilig(plekNamen(e))}</p>` : ''}
         <button type="button" class="dt-meer dt-knop" data-evenement="${veilig(e.id)}">${soort === 'komt' ? 'Lees meer' : 'Terugblik'}</button>
     </div>`;
@@ -723,80 +729,92 @@ function blokHtml(b) {
 }
 
 function verhaalHtml(e) {
-    const metPlek = e.plekken.length > 1;
-    const wanneer = e.momenten.map((m) => `${langDatum(m.datum)}${m.wat ? ': ' + veilig(m.wat) : ''}${metPlek && m.plek && PLEKKEN[m.plek] ? ' bij ' + veilig(PLEKKEN[m.plek].naam) : ''}${m.thema ? ` · <em>${veilig(m.thema)}</em>` : ''}`).join('<br>');
-    const kop = titelVan(e);
-    const waar = e.plekken.map((id) => veilig(PLEKKEN[id].naam)).join('<br>');
+    const kop = e.naam || e.soort;
+    const plekVanDag = e.plek && PLEKKEN[e.plek] ? e.plek : null;
+    const wanneer = `${langDatum(e.datum)}${e.wat ? ': ' + veilig(e.wat) : ''}`;
+    const waar = (plekVanDag ? [plekVanDag, ...e.plekken.filter((p) => p !== plekVanDag)] : e.plekken).map((id) => veilig(PLEKKEN[id].naam)).join('<br>');
     const i = EVENEMENTEN.indexOf(e);
     const vorige = EVENEMENTEN[i - 1], volgende = EVENEMENTEN[i + 1];
-    const link = (x, richting) => x ? `<a href="#verhaal/${encodeURIComponent(x.id)}"><small class="dt-bovenregel">${richting}</small><span>${veilig(titelVan(x))}</span></a>` : '';
+    const titelLink = (x) => `${kortDatum(x.datum)} · ${x.naam || x.soort}${x.plekken.length === 1 ? ' ' : ' · '}${plekRegel(x)}`;
+    const link = (x, richting) => x ? `<a href="#verhaal/${encodeURIComponent(x.id)}"><small class="dt-bovenregel">${richting}</small><span>${veilig(titelLink(x))}</span></a>` : '';
+    const leeg = !e.blokken.length && !e.samenvatting;
+    // Vaste beschrijving van de plek(ken), onderaan elke bijeenkomst daar.
+    const overPlekken = e.plekken.map((id) => PLEKKEN[id]).filter((p) => p.beschrijving)
+        .map((p) => `<section class="dt-overplek"><h2>Over ${veilig(p.naam)}</h2>${alineas(p.beschrijving)}${p.adres ? `<p class="dt-overplek-adres">${veilig(p.adres)}</p>` : ''}</section>`).join('');
     return `<button type="button" class="dt-sluit dt-knop">← Terug</button>
         <header class="dt-held ${e.omslag ? 'met-foto' : ''}">
             ${e.omslag ? `<img src="${fotoUrl(e.omslag)}" alt="">` : ''}
             <div class="dt-held-tekst">
-                <p class="dt-bovenregel">${veilig(plekNamen(e))} · ${opsomming(e.data.map(kortDatum))}</p>
+                <p class="dt-bovenregel">${veilig(plekNamen(e))} · ${kortDatum(e.datum)}${e.reeks ? ` · ${veilig(e.reeks)}` : ''}</p>
                 <h1 id="verhaal-titel">${veilig(kop)}</h1>
                 <p class="dt-ondertitel">${kop === e.soort ? '' : veilig(e.soort) + (e.plekken.length === 1 ? ' ' : ' · ')}${veilig(plekRegel(e))}</p>
             </div>
         </header>
         <article class="dt-artikel">
-            <ul class="dt-meta"><li><small>Wanneer</small>${wanneer}</li><li><small>Waar</small>${waar}</li></ul>
-            ${e.thema && e.thema !== kop ? `<p class="dt-thema-groot">${veilig(e.thema)}</p>` : ''}
-            ${e.blokken.length ? e.blokken.map(blokHtml).join('') : `<p class="dt-geen-verhaal">${komtNog(e) ? 'Deze bijeenkomst komt nog.' : 'Het verhaal van deze bijeenkomst volgt nog.'}</p>`}
+            <ul class="dt-meta"><li><small>Wanneer</small>${wanneer}</li><li><small>Waar</small>${waar}</li>${e.thema ? `<li><small>Thema</small>${veilig(e.thema)}</li>` : ''}</ul>
+            ${e.vraag ? `<p class="dt-thema-groot">${veilig(e.vraag)}</p>` : ''}
+            ${e.samenvatting ? `<div class="dt-tekst dt-samenvatting">${alineas(e.samenvatting)}</div>` : ''}
+            ${e.blokken.map(blokHtml).join('')}
+            ${leeg ? `<p class="dt-geen-verhaal">${komtNog(e) ? 'Deze bijeenkomst komt nog.' : 'Het verhaal van deze bijeenkomst volgt nog.'}</p>` : ''}
+            ${overPlekken}
             <nav class="dt-verder-lezen breed" aria-label="Andere bijeenkomsten">${link(vorige, 'Vorige')}${link(volgende, 'Volgende')}</nav>
         </article>`;
 }
 
 function archiefHtml() {
-    const perJaar = {};
-    for (const e of [...EVENEMENTEN].reverse()) (perJaar[e.data[0].slice(0, 4)] ||= []).push(e);
-    const jaren = Object.keys(perJaar).sort().reverse();
-    const sinds = EVENEMENTEN[0]?.data[0].slice(0, 4);
+    // Secties: een reeks (zelfde reeksnaam) of een losse bijeenkomst. Per jaar, nieuwste bovenaan.
+    const secties = [];
+    for (const e of EVENEMENTEN) {
+        const sleutel = e.reeks ? 'r:' + e.reeks + '|' + e.datum.slice(0, 4) : 'e:' + e.id;
+        let sectie = secties.find((x) => x.sleutel === sleutel);
+        if (!sectie) secties.push(sectie = { sleutel, reeks: e.reeks, jaar: e.datum.slice(0, 4), leden: [] });
+        sectie.leden.push(e);
+    }
+    secties.sort((a, b) => b.leden[b.leden.length - 1].datum.localeCompare(a.leden[a.leden.length - 1].datum));
+    const jaren = [...new Set(secties.map((x) => x.jaar))].sort().reverse();
+    const sinds = EVENEMENTEN[0]?.datum.slice(0, 4);
     const plekken = gebruikt.map((p) => {
-        const hier = EVENEMENTEN.filter((e) => e.plekken.includes(p.id));
-        const jaartallen = [...new Set(hier.flatMap((e) => e.data.map((d) => d.slice(0, 4))))].sort();
-        // Per datum tellen; bij een samenwerking met een plek per datum alleen de data op deze plek.
-        const aantal = hier.reduce((n, e) => n + e.data.filter((d) => {
-            const plekVanDatum = e.momenten.find((m) => m.datum === d)?.plek;
-            return !plekVanDatum || plekVanDatum === p.id || e.plekken.length === 1;
-        }).length, 0);
-        return { p, aantal, jaartallen };
-    }).sort((a, b) => b.aantal - a.aantal || a.p.naam.localeCompare(b.p.naam));
+        const hier = EVENEMENTEN.filter((e) => e.plekken.includes(p.id) && (!e.plek || e.plek === p.id || e.plekken.length === 1));
+        return { p, aantal: hier.length, jaartallen: [...new Set(hier.map((e) => e.datum.slice(0, 4)))].sort() };
+    }).filter((x) => x.aantal).sort((a, b) => b.aantal - a.aantal || a.p.naam.localeCompare(b.p.naam));
+    const samenwerkingen = new Set(EVENEMENTEN.filter((e) => e.plekken.length > 1).map((e) => e.reeks || e.id)).size;
+    const regel = (e) => {
+        const plek = e.plekken.length > 1 && e.plek && PLEKKEN[e.plek] ? `bij ${PLEKKEN[e.plek].naam}` : '';
+        const wat = [e.wat || (e.soort !== secties.find((x) => x.leden.includes(e)).leden[0].soort ? e.soort : ''), plek].filter(Boolean).join(' ');
+        return `<li>
+            <time datetime="${e.datum}">${+e.datum.slice(8, 10)} ${MAANDEN[+e.datum.slice(5, 7) - 1]}</time>
+            <span>
+                ${wat ? `<span class="dt-archief-wat">${veilig(wat)}</span>` : ''}
+                ${e.thema ? `<span class="dt-archief-themas"><span class="dt-themalabel">Thema:</span> ${veilig(e.thema)}</span>` : ''}
+                ${e.vraag ? `<a class="dt-archief-vraag" href="#verhaal/${encodeURIComponent(e.id)}">${veilig(e.vraag)}</a>` : `<a class="dt-archief-lees" href="#verhaal/${encodeURIComponent(e.id)}">Lees meer</a>`}
+                ${e.datum >= VANDAAG ? '<span class="dt-label">komt eraan</span>' : '<span class="dt-label geweest">geweest</span>'}
+            </span>
+        </li>`;
+    };
+    const sectieHtml = (x) => {
+        const eerste = x.leden[0];
+        const kop = x.reeks || plekNamen(eerste);
+        const onder = x.reeks
+            ? `${veilig(plekNamen(eerste))}${x.leden.length > 1 ? ` · ${x.leden.length} bijeenkomsten` : ''}`
+            : `${veilig(eerste.soort)}${eerste.naam ? ` · <em>${veilig(eerste.naam)}</em>` : ''}`;
+        return `<li class="dt-archiefregel">
+            <div class="dt-archiefkop"><h3><a href="#verhaal/${encodeURIComponent(eerste.id)}">${veilig(kop)}</a></h3><p>${onder}</p></div>
+            <ol class="dt-archiefdata">${[...x.leden].reverse().map(regel).join('')}</ol>
+        </li>`;
+    };
     return `<button type="button" class="dt-sluit dt-knop">← Terug</button>
         <div class="dt-archief">
             <header>
                 <p class="dt-kicker">Op doortocht · archief</p>
                 <h1 id="verhaal-titel">Volledig archief</h1>
                 <ul class="dt-tellers">
-                    <li><strong>${EVENEMENTEN.reduce((n, e) => n + e.data.length, 0)}</strong>bijeenkomsten</li>
-                    <li><strong>${gebruikt.length}</strong>plekken</li>
-                    <li><strong>${EVENEMENTEN.filter((e) => e.plekken.length > 1).length}</strong>samenwerkingen</li>
+                    <li><strong>${EVENEMENTEN.length}</strong>bijeenkomsten</li>
+                    <li><strong>${plekken.length}</strong>plekken</li>
+                    <li><strong>${samenwerkingen}</strong>samenwerkingen</li>
                     ${sinds ? `<li>sinds <strong>${sinds}</strong></li>` : ''}
                 </ul>
             </header>
-            ${jaren.map((jaar) => `<section class="dt-jaar"><h2>${jaar}</h2><ol>
-                ${perJaar[jaar].map((e) => {
-                    // Eén sectie per bijeenkomst; elke datum daarin een eigen regel met het eigen thema.
-                    const dataHier = e.data.filter((d) => d.startsWith(jaar));
-                    const regels = dataHier.map((d) => {
-                        const m = e.momenten.find((x) => x.datum === d) || {};
-                        const thema = m.thema || e.thema;
-                        const plek = e.plekken.length > 1 && m.plek && PLEKKEN[m.plek] ? `bij ${PLEKKEN[m.plek].naam}` : '';
-                        const wat = [m.wat, plek].filter(Boolean).join(' ');
-                        return `<li>
-                            <time datetime="${d}">${+d.slice(8, 10)} ${MAANDEN[+d.slice(5, 7) - 1]}</time>
-                            <span>${wat ? `<span class="dt-archief-wat">${veilig(wat)}</span>` : ''}${thema ? `<span class="dt-archief-themas"><span class="dt-themalabel">Thema:</span> ${veilig(thema)}</span>` : ''}${d >= VANDAAG ? '<span class="dt-label">komt eraan</span>' : '<span class="dt-label geweest">geweest</span>'}</span>
-                        </li>`;
-                    }).join('');
-                    return `<li class="dt-archiefregel">
-                        <div class="dt-archiefkop">
-                            <h3><a href="#verhaal/${encodeURIComponent(e.id)}">${veilig(plekNamen(e))}</a></h3>
-                            <p>${veilig(e.soort)}${e.naam ? ` · <em>${veilig(e.naam)}</em>` : ''}${dataHier.length > 1 ? ` · ${dataHier.length} bijeenkomsten` : ''}</p>
-                        </div>
-                        <ol class="dt-archiefdata">${regels}</ol>
-                    </li>`;
-                }).join('')}
-            </ol></section>`).join('')}
+            ${jaren.map((jaar) => `<section class="dt-jaar"><h2>${jaar}</h2><ol>${secties.filter((x) => x.jaar === jaar).map(sectieHtml).join('')}</ol></section>`).join('')}
             <section class="dt-jaar dt-plekken-sectie"><h2>Plekken</h2>
                 <ul class="dt-plekkenlijst">${plekken.map(({ p, aantal, jaartallen }) => `<li><strong>${veilig(p.naam)}</strong>
                     <span>${veilig(p.adres || '')}${p.adres ? '<br>' : ''}${aantal} ${aantal === 1 ? 'bijeenkomst' : 'bijeenkomsten'} · ${jaartallen.join(', ')}</span></li>`).join('')}</ul>

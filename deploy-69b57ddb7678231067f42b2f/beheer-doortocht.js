@@ -8,7 +8,7 @@ const FUNCTIE = '/.netlify/functions/beheer-doortocht';
 const MAX_FOTO = 2000; // langste zijde in pixels na verkleinen
 
 let wachtwoord = '';
-let gegevens = { plekken: [], evenementen: [] };
+let gegevens = { versie: 2, plekken: [], bijeenkomsten: [] };
 let gewijzigd = false;
 let gekozenEvenement = null;
 let gekozenPlek = null;
@@ -36,8 +36,9 @@ const kortDatum = (iso) => iso ? `${+iso.slice(8, 10)} ${MAANDEN[+iso.slice(5, 7
 const fotoUrl = (id) => '/doortocht-foto/' + encodeURIComponent(id);
 const plekNaam = (id) => gegevens.plekken.find((p) => p.id === id)?.naam || '?';
 // Hoe een bijeenkomst in lijsten heet: de plekken, met de eigen naam of de soort.
-const evenementLabel = (e) => `${e.plekken.map(plekNaam).join(' × ') || '(nog geen plek)'}: ${e.naam || e.soort || 'zonder soort'}`;
-const SOORTEN = ['Filosofisch gesprek', 'Filmvertoning en vervolggesprek', 'Workshop', 'Wandeling'];
+const evenementLabel = (e) => `${kortDatum(e.datum)} · ${e.plekken.map(plekNaam).join(' × ') || '(nog geen plek)'}: ${e.naam || e.soort || 'zonder soort'}`;
+const SOORTEN = ['Filosofisch gesprek', 'Filmvertoning', 'Vervolggesprek', 'Workshop', 'Wandeling'];
+const VANDAAG = new Date().toLocaleDateString('sv-SE');
 
 function maakSleutel(tekst, bestaand) {
     const basis = String(tekst || 'nieuw').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -95,7 +96,7 @@ async function inloggen(ww) {
     $('balk-acties').hidden = false;
     // Link uit de schrijfherinnering: beheer-doortocht.html#bijeenkomst/<id> opent die bijeenkomst.
     const uitLink = decodeURIComponent((location.hash.match(/^#bijeenkomst\/(.+)$/) || [])[1] || '');
-    gekozenEvenement = gegevens.evenementen.some((e) => e.id === uitLink) ? uitLink : gesorteerdeEvenementen()[0]?.id || null;
+    gekozenEvenement = gegevens.bijeenkomsten.some((e) => e.id === uitLink) ? uitLink : (eerstVolgende() || gesorteerdeEvenementen()[0])?.id || null;
     gekozenPlek = gegevens.plekken[0]?.id || null;
     tekenAlles();
 }
@@ -133,61 +134,90 @@ function tekenAlles() {
 }
 
 // --- Bijeenkomsten -------------------------------------------------------
+// Elke datum is een eigen bijeenkomst met een eigen verhaal. Bijeenkomsten die bij elkaar horen,
+// krijgen dezelfde reeks (bijvoorbeeld "Te gast bij SAP"); in het archief staan ze dan samen.
 
-const eersteDatum = (e) => e.momenten.map((m) => m.datum).filter(Boolean).sort()[0] || '';
-const gesorteerdeEvenementen = () => [...gegevens.evenementen].sort((a, b) => eersteDatum(b).localeCompare(eersteDatum(a)));
+const gesorteerdeEvenementen = () => [...gegevens.bijeenkomsten].sort((a, b) => b.datum.localeCompare(a.datum));
+const eerstVolgende = () => [...gegevens.bijeenkomsten].filter((e) => e.datum >= VANDAAG).sort((a, b) => a.datum.localeCompare(b.datum))[0];
+const reeksen = () => [...new Set(gegevens.bijeenkomsten.map((e) => e.reeks).filter(Boolean))].sort();
+const heeftVerhaal = (e) => e.blokken.length > 0 || !!e.samenvatting.trim();
 
 function tekenEvenementenLijst() {
     const lijst = $('lijst-bijeenkomsten');
-    lijst.replaceChildren(...gesorteerdeEvenementen().map((e) => h('li', {},
+    const knop = (e) => h('li', {},
         h('button', { type: 'button', 'aria-current': String(e.id === gekozenEvenement), onclick: () => { gekozenEvenement = e.id; tekenEvenementenLijst(); tekenEvenement(); } },
+            h('small', { class: 'bh-datum', tekst: kortDatum(e.datum) }),
             h('span', { tekst: e.plekken.map(plekNaam).join(' × ') || '(nog geen plek)' }),
-            h('small', { tekst: [e.soort, e.naam].filter(Boolean).join(' · ') }),
-            h('small', { tekst: e.momenten.map((m) => kortDatum(m.datum)).join(', ') }),
+            h('small', { tekst: [e.naam || e.soort, e.thema && `Thema: ${e.thema}`].filter(Boolean).join(' · ') }),
+            e.reeks ? h('small', { class: 'bh-reekslabel', tekst: e.reeks }) : null,
+            e.datum < VANDAAG && !heeftVerhaal(e) ? h('span', { class: 'bh-nogschrijven', tekst: 'Nog geen verhaal' }) : null,
             e.zichtbaar === false ? h('span', { class: 'bh-verborgen', tekst: 'Verborgen' }) : null,
-        ),
-    )));
+        ));
+    const komt = [...gegevens.bijeenkomsten].filter((e) => e.datum >= VANDAAG).sort((a, b) => a.datum.localeCompare(b.datum));
+    const geweest = gesorteerdeEvenementen().filter((e) => e.datum < VANDAAG);
+    lijst.replaceChildren(
+        ...(komt.length ? [h('li', { class: 'bh-lijstkop', tekst: 'Komt eraan' }), ...komt.map(knop)] : []),
+        ...(geweest.length ? [h('li', { class: 'bh-lijstkop', tekst: 'Geweest' }), ...geweest.map(knop)] : []),
+    );
 }
 
-$('nieuwe-bijeenkomst').addEventListener('click', () => {
-    const id = maakSleutel('nieuwe-bijeenkomst', new Set(gegevens.evenementen.map((e) => e.id)));
-    gegevens.evenementen.push({
-        id, soort: 'Filosofisch gesprek', naam: '', thema: '', samenvatting: '',
-        plekken: [], momenten: [{ datum: new Date().toLocaleDateString('sv-SE'), plek: '', wat: '', thema: '' }],
-        omslag: null, blokken: [], zichtbaar: false,
-    });
+function nieuweBijeenkomst(velden = {}) {
+    const datum = velden.datum || VANDAAG;
+    const basis = (velden.plekken?.[0] || 'bijeenkomst') + '-' + datum;
+    const id = maakSleutel(basis, new Set(gegevens.bijeenkomsten.map((e) => e.id)));
+    const e = {
+        soort: 'Filosofisch gesprek', naam: '', vraag: '', thema: '', reeks: '', plekken: [], plek: '', wat: '',
+        samenvatting: '', omslag: null, blokken: [], zichtbaar: false, ...velden, id, datum,
+    };
+    gegevens.bijeenkomsten.push(e);
     gekozenEvenement = id;
     markeerGewijzigd();
     tekenEvenementenLijst();
     tekenEvenement();
-    $('bewerk-bijeenkomst').querySelector('input')?.select();
-});
+    return e;
+}
+$('nieuwe-bijeenkomst').addEventListener('click', () => { nieuweBijeenkomst(); $('bewerk-bijeenkomst').querySelector('input')?.select(); });
 
-// Tekstveld dat direct in het evenement schrijft (zonder opnieuw te tekenen, dan blijft de focus).
-function veld(obj, sleutel, label, { lang = false, hulp = '', naWijzig, lijst } = {}) {
+// Tekstveld dat direct in de bijeenkomst schrijft (zonder opnieuw te tekenen, dan blijft de focus).
+function veld(obj, sleutel, label, { lang = false, hulp = '', naWijzig, lijst, type = 'text' } = {}) {
     const id = 'v-' + Math.random().toString(36).slice(2);
     const invoer = h(lang ? 'textarea' : 'input', {
-        id, type: lang ? undefined : 'text', waarde: obj[sleutel] || '', list: lijst,
-        oninput: (e) => { obj[sleutel] = e.target.value; markeerGewijzigd(); naWijzig?.(); },
+        id, type: lang ? undefined : type, waarde: obj[sleutel] || '', list: lijst,
+        [type === 'date' ? 'onchange' : 'oninput']: (e) => { obj[sleutel] = e.target.value; markeerGewijzigd(); naWijzig?.(); },
     });
     return h('div', {}, h('label', { for: id, tekst: label }), hulp ? h('p', { class: 'bh-hulp', tekst: hulp }) : null, invoer);
 }
 
 function tekenEvenement() {
     const vak = $('bewerk-bijeenkomst');
-    const e = gegevens.evenementen.find((x) => x.id === gekozenEvenement);
+    const e = gegevens.bijeenkomsten.find((x) => x.id === gekozenEvenement);
     if (!e) { vak.replaceChildren(h('p', { class: 'bh-hulp', tekst: 'Kies links een bijeenkomst, of maak een nieuwe.' })); return; }
     const herteken = () => { markeerGewijzigd(); tekenEvenement(); tekenEvenementenLijst(); };
     const lijstBij = () => tekenEvenementenLijst();
 
     const algemeen = h('div', { class: 'bh-kaartvak' },
-        h('h2', { tekst: 'Over de bijeenkomst' }),
+        h('div', { class: 'bh-kaartvak-kop' },
+            h('h2', { tekst: 'Over de bijeenkomst' }),
+            h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', tekst: 'Dupliceer voor een volgende datum', onclick: () => {
+                // Handig bij een reeks: zelfde plek, soort en reeks, nieuwe datum, nog zonder verhaal.
+                const volgende = new Date(e.datum + 'T12:00:00Z'); volgende.setUTCDate(volgende.getUTCDate() + 14);
+                nieuweBijeenkomst({ soort: e.soort, reeks: e.reeks, plekken: [...e.plekken], plek: e.plek, datum: volgende.toISOString().slice(0, 10) });
+                zetStatus('Kopie gemaakt, twee weken later. Pas de datum aan als dat niet klopt.');
+            } }),
+        ),
         h('div', { class: 'bh-velden' },
-            h('datalist', { id: 'soorten' }, SOORTEN.map((naam) => h('option', { value: naam }))),
-            veld(e, 'soort', 'Soort bijeenkomst', { naWijzig: lijstBij, lijst: 'soorten', hulp: 'Kies of typ, bijvoorbeeld "Filosofisch gesprek". Dit is de kop; de plek of samenwerking zet de site er zelf onder.' }),
-            veld(e, 'naam', 'Eigen naam (optioneel)', { naWijzig: lijstBij, hulp: 'Als de bijeenkomst een naam had, bijvoorbeeld "Zwaan kleef aan" of "After Summer School".' }),
-            veld(e, 'thema', 'Thema van de hele bijeenkomst (optioneel)', { hulp: 'Heeft elke datum een eigen thema, zoals bij een reeks? Vul dat dan hieronder bij de data in.' }),
-            veld(e, 'samenvatting', 'Korte samenvatting (optioneel)', { lang: true, hulp: 'Staat in het kaartje op de kaart. Leeg laten: dan nemen we het begin van het verhaal.' }),
+            h('div', { class: 'bh-rij2' },
+                veld(e, 'datum', 'Datum', { type: 'date', naWijzig: lijstBij }),
+                h('div', {}, h('datalist', { id: 'soorten' }, SOORTEN.map((naam) => h('option', { value: naam }))),
+                    veld(e, 'soort', 'Soort bijeenkomst', { naWijzig: lijstBij, lijst: 'soorten' })),
+            ),
+            veld(e, 'vraag', 'De vraag van de avond', { naWijzig: lijstBij, hulp: 'Komt groot in beeld bovenaan het verhaal. Bijvoorbeeld "Zitten er in de simpelste dingen het grootste geluk?"' }),
+            h('div', { class: 'bh-rij2' },
+                veld(e, 'thema', 'Thema (optioneel)', { naWijzig: lijstBij, hulp: 'Eén of twee woorden, bijvoorbeeld "Simpel".' }),
+                veld(e, 'naam', 'Eigen naam (optioneel)', { naWijzig: lijstBij, hulp: 'Bijvoorbeeld "Zwaan kleef aan".' }),
+            ),
+            h('div', {}, h('datalist', { id: 'reeksen' }, reeksen().map((naam) => h('option', { value: naam }))),
+                veld(e, 'reeks', 'Reeks (optioneel)', { naWijzig: lijstBij, lijst: 'reeksen', hulp: 'Hoort deze bijeenkomst bij andere? Geef ze dezelfde reeks, bijvoorbeeld "Te gast bij SAP". In het archief staan ze dan samen.' })),
             h('div', { class: 'bh-vinkjes' },
                 h('label', {}, h('input', { type: 'checkbox', checked: e.zichtbaar !== false, onchange: (ev) => { e.zichtbaar = ev.target.checked; markeerGewijzigd(); lijstBij(); } }), 'Zichtbaar op de site'),
             ),
@@ -205,26 +235,34 @@ function tekenEvenement() {
                 opKies: (r) => {
                     const naam = nieuw.naam.trim() || r.naam || r.adres.split(',')[0];
                     const id = maakSleutel(naam, new Set(gegevens.plekken.map((x) => x.id)));
-                    gegevens.plekken.push({ id, naam, adres: r.adres, lat: r.lat, lon: r.lon });
+                    gegevens.plekken.push({ id, naam, adres: r.adres, lat: r.lat, lon: r.lon, beschrijving: '' });
                     e.plekken = [...e.plekken, id];
                     herteken();
                     tekenPlekkenLijst();
-                    zetStatus(`"${naam}" toegevoegd (nog opslaan). De precieze plek kun je verslepen onder Plekken.`);
+                    zetStatus(`"${naam}" toegevoegd (nog opslaan). Een beschrijving van de plek schrijf je onder Plekken.`);
                 },
             })),
     );
 
     const plekken = h('div', { class: 'bh-kaartvak' },
-        h('h2', { tekst: 'Plekken' }),
-        h('p', { class: 'bh-hulp', tekst: 'Kies er meer dan één bij een samenwerking: dan komt er een stippellijn tussen. Staat de plek er nog niet bij? Voeg hem hieronder toe.' }),
+        h('h2', { tekst: 'Plek' }),
+        h('p', { class: 'bh-hulp', tekst: 'Kies er meer dan één bij een samenwerking: dan komt er een stippellijn tussen. De beschrijving van de plek staat vanzelf onderaan het verhaal.' }),
         h('div', { class: 'bh-vinkjes' }, gegevens.plekken.map((p) => h('label', {},
             h('input', {
                 type: 'checkbox', checked: e.plekken.includes(p.id),
                 onchange: (ev) => {
                     e.plekken = ev.target.checked ? [...e.plekken, p.id] : e.plekken.filter((x) => x !== p.id);
+                    if (!e.plekken.includes(e.plek)) e.plek = '';
                     herteken();
                 },
             }), p.naam))),
+        e.plekken.length > 1 ? h('div', { class: 'bh-rij2' },
+            h('div', {}, h('label', { for: 'plek-van-dag', tekst: 'Waar was het die dag?' }),
+                h('select', { id: 'plek-van-dag', onchange: (ev) => { e.plek = ev.target.value; markeerGewijzigd(); } },
+                    h('option', { value: '', tekst: 'Op alle plekken' }),
+                    e.plekken.map((id) => h('option', { value: id, selected: e.plek === id, tekst: plekNaam(id) })))),
+            veld(e, 'wat', 'Wat gebeurde er (optioneel)', { hulp: 'Bijvoorbeeld "Filmvertoning".' }),
+        ) : null,
         h('div', { class: 'bh-toevoegen' },
             h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', tekst: '+ Nieuwe plek', 'aria-expanded': 'false', onclick: (ev) => {
                 nieuwePlek.hidden = !nieuwePlek.hidden;
@@ -234,24 +272,12 @@ function tekenEvenement() {
         nieuwePlek,
     );
 
-    const momenten = h('div', { class: 'bh-kaartvak' },
-        h('h2', { tekst: 'Data' }),
-        h('p', { class: 'bh-hulp', tekst: 'Per datum kun je een thema invullen, en bij een samenwerking wat er gebeurt en waar.' }),
-        h('div', { class: 'bh-momenten' }, e.momenten.map((m, i) => h('div', { class: 'bh-moment' },
-            h('input', { type: 'date', 'aria-label': 'Datum', waarde: m.datum, onchange: (ev) => { m.datum = ev.target.value; markeerGewijzigd(); lijstBij(); } }),
-            h('input', { type: 'text', 'aria-label': 'Thema van deze datum', placeholder: 'Thema (optioneel)', waarde: m.thema || '', oninput: (ev) => { m.thema = ev.target.value; markeerGewijzigd(); } }),
-            h('input', { type: 'text', 'aria-label': 'Wat gebeurt er', placeholder: 'Wat (optioneel), bijv. filmvertoning', waarde: m.wat, oninput: (ev) => { m.wat = ev.target.value; markeerGewijzigd(); } }),
-            h('select', { 'aria-label': 'Plek', onchange: (ev) => { m.plek = ev.target.value; markeerGewijzigd(); } },
-                h('option', { value: '', tekst: 'Plek (optioneel)' }),
-                e.plekken.map((id) => h('option', { value: id, selected: m.plek === id, tekst: plekNaam(id) }))),
-            h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', 'aria-label': 'Datum weghalen', disabled: e.momenten.length < 2, onclick: () => { e.momenten.splice(i, 1); herteken(); }, tekst: '×' }),
-        ))),
-        h('div', { class: 'bh-toevoegen' },
-            h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', tekst: '+ Datum', onclick: () => {
-                const laatste = e.momenten[e.momenten.length - 1];
-                e.momenten.push({ datum: laatste?.datum || '', plek: '', wat: '', thema: '' });
-                herteken();
-            } })),
+    const samenvatting = h('div', { class: 'bh-kaartvak' },
+        h('h2', { tekst: e.datum >= VANDAAG ? 'Aankondiging' : 'Samenvatting' }),
+        veld(e, 'samenvatting', e.datum >= VANDAAG ? 'Wat gaat er gebeuren?' : 'Hoe ging het, in een paar zinnen?', { lang: true,
+            hulp: e.datum >= VANDAAG
+                ? 'Staat bovenaan de pagina van deze bijeenkomst en in het kaartje op de kaart.'
+                : 'Staat bovenaan het verhaal en in het kaartje op de kaart. Het uitgebreide verhaal schrijf je hieronder.' }),
     );
 
     const omslag = h('div', { class: 'bh-kaartvak' },
@@ -271,15 +297,16 @@ function tekenEvenement() {
     );
 
     const weg = h('div', { class: 'bh-onderaan' },
+        h('a', { class: 'bh-knop bh-knop-licht', href: `op-doortocht.html#verhaal/${encodeURIComponent(e.id)}`, target: '_blank', rel: 'noopener', tekst: 'Bekijk op de site (na opslaan)' }),
         h('button', { type: 'button', class: 'bh-knop bh-knop-gevaar', tekst: 'Bijeenkomst verwijderen', onclick: () => {
             if (!confirm(`"${evenementLabel(e)}" verwijderen? Dit wordt definitief na Opslaan.`)) return;
-            gegevens.evenementen = gegevens.evenementen.filter((x) => x !== e);
+            gegevens.bijeenkomsten = gegevens.bijeenkomsten.filter((x) => x !== e);
             gekozenEvenement = gesorteerdeEvenementen()[0]?.id || null;
             markeerGewijzigd();
             tekenAlles();
         } }));
 
-    vak.replaceChildren(algemeen, plekken, momenten, omslag, blokken, weg);
+    vak.replaceChildren(algemeen, plekken, samenvatting, omslag, blokken, weg);
 }
 
 function blokEditor(e, b, i, herteken) {
@@ -398,7 +425,7 @@ function kiesPlek(id) {
 $('nieuwe-plek').addEventListener('click', () => {
     const id = maakSleutel('nieuwe-plek', new Set(gegevens.plekken.map((p) => p.id)));
     // Nieuwe plekken beginnen midden in het centrum; zoek daarna het adres of sleep de pin.
-    gegevens.plekken.push({ id, naam: 'Nieuwe plek', adres: '', lat: 51.9205, lon: 4.4805 });
+    gegevens.plekken.push({ id, naam: 'Nieuwe plek', adres: '', lat: 51.9205, lon: 4.4805, beschrijving: '' });
     markeerGewijzigd();
     kiesPlek(id);
     $('bewerk-plek').querySelector('input')?.select();
@@ -408,7 +435,7 @@ function tekenPlek() {
     const vak = $('bewerk-plek');
     const p = gegevens.plekken.find((x) => x.id === gekozenPlek);
     if (!p) { vak.replaceChildren(h('p', { class: 'bh-hulp', tekst: 'Kies links een plek, of maak een nieuwe.' })); return; }
-    const gebruiktDoor = gegevens.evenementen.filter((e) => e.plekken.includes(p.id));
+    const gebruiktDoor = gegevens.bijeenkomsten.filter((e) => e.plekken.includes(p.id));
 
     const zoeker = plekZoeker({
         id: 'adres-zoek',
@@ -432,6 +459,7 @@ function tekenPlek() {
                 h('label', { for: 'adres-zoek', tekst: 'Plek zoeken' }),
                 h('p', { class: 'bh-hulp', tekst: p.adres ? `Nu: ${p.adres}` : 'Typ een adres, of een naam en klik op "Zoek op naam". Daarna kun je de pin nog slepen.' }),
                 zoeker),
+            veld(p, 'beschrijving', 'Over deze plek', { lang: true, hulp: 'Wat voor plek is dit? Deze tekst staat onderaan elke bijeenkomst die hier plaatsvindt. Een lege regel begint een nieuwe alinea.' }),
             h('p', { class: 'bh-hulp', tekst: gebruiktDoor.length ? `Gebruikt bij: ${gebruiktDoor.map(evenementLabel).join(', ')}` : 'Nog bij geen enkele bijeenkomst gebruikt.' }),
         ),
         h('div', { class: 'bh-onderaan' },
