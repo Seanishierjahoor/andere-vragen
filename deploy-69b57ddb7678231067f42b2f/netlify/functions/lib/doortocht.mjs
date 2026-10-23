@@ -30,7 +30,7 @@ export const START = {
   versie: 2,
   plekken: [
     { id: "sap", naam: "SAP", adres: "Willem Buytewechstraat 61A, 3024 BM Rotterdam", lat: 51.9074322, lon: 4.4602528, beschrijving: "" },
-    { id: "tent", naam: "TENT", adres: "Witte de Withstraat 50, 3012 BR Rotterdam", lat: 51.9153949, lon: 4.4770797, beschrijving: "" },
+    { id: "tent", naam: "TENT", adres: "Coolhaven 32, 3024 AC Rotterdam", lat: 51.9079129, lon: 4.4605758, beschrijving: "" },
     { id: "nieuwe-instituut", naam: "Nieuwe Instituut", adres: "Museumpark 25, 3015 CB Rotterdam", lat: 51.9146161, lon: 4.4708953, beschrijving: "" },
     { id: "volkstuin", naam: "Streven naar Verbetering", adres: "Volkstuinvereniging, Rotterdam-Noord", lat: 51.9247071, lon: 4.4453405, beschrijving: "" },
     { id: "bakkerij", naam: "Studio de Bakkerij", adres: "Bergweg 283, 3037 EM Rotterdam", lat: 51.9339242, lon: 4.4735414, beschrijving: "" },
@@ -67,7 +67,11 @@ const fotoOfNull = (v) => (typeof v === "string" && FOTO_ID.test(v) ? v : null);
 //   samen in een reeks. Verhaal, omslag en samenvatting gaan mee naar de eerste datum.
 export function zetOm(gegevens) {
   if (!gegevens) return gegevens;
-  for (const p of gegevens.plekken || []) if (p.beschrijving === undefined) p.beschrijving = "";
+  for (const p of gegevens.plekken || []) {
+    if (p.beschrijving === undefined) p.beschrijving = "";
+    // TENT stond eerst per vergissing op de Witte de Withstraat; het juiste adres is Coolhaven 32.
+    if (p.id === "tent" && /Witte de Withstraat/.test(p.adres || "")) Object.assign(p, { adres: "Coolhaven 32, 3024 AC Rotterdam", lat: 51.9079129, lon: 4.4605758 });
+  }
   if (gegevens.versie === 2 && Array.isArray(gegevens.bijeenkomsten)) return gegevens;
 
   const naamVan = (id) => (gegevens.plekken || []).find((p) => p.id === id)?.naam || id;
