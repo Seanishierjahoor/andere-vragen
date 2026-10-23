@@ -96,6 +96,12 @@
   status = 302
   force = true
 
+# Kaartbestanden van Op doortocht hebben een versie in de url (?v=...): die mogen lang in de cache.
+[[headers]]
+  for = "/beeld/kaart/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 # Paden hieronder zijn relatief aan de base directory.
 [build]
   base = "deploy-69b57ddb7678231067f42b2f"

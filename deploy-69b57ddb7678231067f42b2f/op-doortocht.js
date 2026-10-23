@@ -102,17 +102,25 @@ const rasterLijn = maakSvg('image', { id: 'raster-lijn', class: 'raster', width:
 const rasterKleur = maakSvg('image', { id: 'raster-kleur', class: 'raster', width: BREED, height: HOOG, preserveAspectRatio: 'none' });
 svg.querySelector('.kaartvector').before(rasterLijn, rasterKleur);
 const klaar = { lijn: false, kleur: false };
-(async () => {
-    const schaal = SMAL.matches ? 1 : 1.5;
-    try {
-        rasterLijn.setAttribute('href', await kaart.maakAfbeelding({ lijnwerk: true, schaal }));
-        klaar.lijn = true;
-        rasterKleur.setAttribute('href', await kaart.maakAfbeelding({ schaal }));
-        klaar.kleur = true;
-    } catch (fout) {
-        console.warn('Kaartafbeelding maken lukte niet; de vectorkaart blijft staan.', fout);
-    }
-})();
+// De afbeeldingen zijn vooraf gemaakt (zelf tekenen kost een telefoon seconden rekenwerk). Ze worden pas
+// geladen als de pagina klaar en rustig is, zodat ze het eerste beeld niet vertragen. Klein voor telefoons.
+// Opnieuw maken na een kaartwijziging: zie andere-vragen-kaart/OPDRACHT-performance.md, en KAART_VERSIE ophogen.
+const KAART_VERSIE = '2026-10-23';
+function laadAfbeeldingen() {
+    const maat = Math.max(innerWidth, innerHeight) * (devicePixelRatio || 1) > 1700 ? 'groot' : 'klein';
+    const laad = (soort, image) => {
+        const url = `beeld/kaart/kaart-${soort}-${maat}.webp?v=${KAART_VERSIE}`;
+        const beeld = new Image();
+        beeld.decoding = 'async';
+        beeld.src = url;
+        return beeld.decode().then(() => { image.setAttribute('href', url); klaar[soort] = true; });
+    };
+    laad('lijn', rasterLijn).then(() => laad('kleur', rasterKleur)).catch(() => {});
+}
+const naRust = () => (window.requestIdleCallback ? requestIdleCallback(laadAfbeeldingen, { timeout: 2500 }) : setTimeout(laadAfbeeldingen, 800));
+if (document.readyState === 'complete') naRust(); else addEventListener('load', naRust, { once: true });
+// Klikt iemand voor die tijd al op de knop, dan meteen laden.
+document.querySelector('.dt-startknop').addEventListener('pointerdown', () => { if (!klaar.lijn) laadAfbeeldingen(); }, { once: true });
 
 // Tijdens bewegen het plaatje tonen; even stil, dan weer de scherpe vectorkaart.
 let stilTimer = null;
@@ -182,6 +190,7 @@ function zetBeeld(b, { stil = false } = {}) {
     if (!stil) beweeg();
     beeld = begrens(b);
     svg.setAttribute('viewBox', `${beeld.x} ${beeld.y} ${beeld.w} ${beeld.h}`);
+    pinlaag.setAttribute('viewBox', `${beeld.x} ${beeld.y} ${beeld.w} ${beeld.h}`);
     schaalPins();
     plaatsPinkaart();
 }
@@ -215,8 +224,13 @@ function zoomOm(factor, sx, sy) {
 
 // --- Lijnen en pins -----------------------------------------------------------
 
+// Pins en lijnen staan op een eigen, lichte laag boven de kaart, met hetzelfde beeld. Zo hoeft de browser
+// bij de ademende pins en de lopende stippellijn niet steeds de hele kaart met arceringen opnieuw te tekenen.
+const pinlaag = maakSvg('svg', { class: 'dt-pinlaag', preserveAspectRatio: 'xMidYMid slice', viewBox: svg.getAttribute('viewBox') });
+pinlaag.innerHTML = '<defs><filter id="knipsel-schaduw" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.2"/></filter></defs>';
+kaartVak.appendChild(pinlaag);
 const lijnen = maakSvg('g', { class: 'dt-lijnen' });
-svg.appendChild(lijnen);
+pinlaag.appendChild(lijnen);
 const lijnenVan = {};
 for (const e of EVENEMENTEN) {
     const [eerste, ...rest] = e.plekken;
@@ -232,14 +246,12 @@ for (const e of EVENEMENTEN) {
 }
 
 const bubbels = maakSvg('g', { class: 'dt-pins' });
-svg.appendChild(bubbels);
+pinlaag.appendChild(bubbels);
 const bubbelVan = {};
 
 // Pins als papieren knipsels: een met de schaar geknipt rondje (net niet rond), een witte
 // papierrand, een tikje scheef, een glimlijn waar het licht valt en een zachte schaduw eronder,
 // zodat ze boven de kaart lijken te zweven. Bij aanwijzen komt het knipsel omhoog.
-svg.querySelector('defs').insertAdjacentHTML('beforeend',
-    '<filter id="knipsel-schaduw" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.2"/></filter>');
 function knipPad(r, zaad) {
     const punten = Array.from({ length: 20 }, (_, k) => {
         const a = (k / 20) * Math.PI * 2;

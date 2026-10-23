@@ -3,6 +3,8 @@
 // claude-projects/andere-vragen-kaart/teken.mjs). Kleuren, arceringen en krijt komen hier.
 
 const ns = 'http://www.w3.org/2000/svg';
+// Ophogen als kaart.svg verandert, zodat browsers niet de oude uit hun cache halen.
+const VERSIE = '2026-10-23';
 
 // Kleurparen uit Seans tekening: [vlak, arcering].
 const KLEUREN = [
@@ -78,8 +80,8 @@ const KAART_STIJL = `
 // Tekent de kaart in `vak` en geeft hulpmiddelen terug om er pins en lijnen op te zetten.
 export async function tekenKaart(vak, { basis = 'beeld/kaart/', rand = true, lijnwerk = false } = {}) {
     const [svgTekst, maat] = await Promise.all([
-        fetch(basis + 'kaart.svg').then((r) => r.text()),
-        fetch(basis + 'kaart-maat.json').then((r) => r.json()),
+        fetch(basis + 'kaart.svg?v=' + VERSIE).then((r) => r.text()),
+        fetch(basis + 'kaart-maat.json?v=' + VERSIE).then((r) => r.json()),
     ]);
     vak.innerHTML = svgTekst;
     const svg = vak.querySelector('svg');
@@ -175,7 +177,8 @@ export async function tekenKaart(vak, { basis = 'beeld/kaart/', rand = true, lij
 
     // Maakt een afbeelding (blob-URL) van de getekende kaart, in kleur of als lijnwerk.
     // Een afbeelding verschuiven en schalen is voor de browser veel lichter dan de vectorkaart.
-    async function maakAfbeelding({ lijnwerk = false, schaal = 1.5 } = {}) {
+    // `alsBlob`: geeft de afbeelding zelf terug (gebruikt om de vaste kaartafbeeldingen te maken).
+    async function maakAfbeelding({ lijnwerk = false, schaal = 1.5, kwaliteit = 0.9, alsBlob = false } = {}) {
         const kopie = maakSvg('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: `0 0 ${BREED} ${HOOG}`, width: Math.round(BREED * schaal), height: Math.round(HOOG * schaal), class: lijnwerk ? 'lijnwerk' : '' });
         kopie.append(defs.cloneNode(true), vector.cloneNode(true));
         const bron = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(kopie)], { type: 'image/svg+xml' }));
@@ -187,8 +190,8 @@ export async function tekenKaart(vak, { basis = 'beeld/kaart/', rand = true, lij
             doek.width = kopie.getAttribute('width');
             doek.height = kopie.getAttribute('height');
             doek.getContext('2d').drawImage(beeld, 0, 0, doek.width, doek.height);
-            const blob = await new Promise((klaar) => doek.toBlob(klaar, 'image/webp', 0.9));
-            return URL.createObjectURL(blob);
+            const blob = await new Promise((klaar) => doek.toBlob(klaar, 'image/webp', kwaliteit));
+            return alsBlob ? blob : URL.createObjectURL(blob);
         } finally {
             URL.revokeObjectURL(bron);
         }

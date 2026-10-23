@@ -401,7 +401,7 @@
 
 /* Op de kaart schuift de bovenste balk weg en vult de kaart het scherm. */
 .av-header { transition: transform .6s cubic-bezier(.2, .7, .2, 1); }
-.dt-podium { transition: height .6s cubic-bezier(.2, .7, .2, 1), margin-top .6s cubic-bezier(.2, .7, .2, 1); }
+/* Alleen de balk animeert (transform is goedkoop); de kaart krijgt direct zijn volle hoogte. */
 body.dt-kaart-open .av-header { transform: translateY(-105%); }
 body.dt-kaart-open .dt-podium { height: 100svh; margin-top: -4.32rem; }
 @media (prefers-reduced-motion: reduce) { .av-header, .dt-podium { transition: none; } }
@@ -420,3 +420,7 @@ body.dt-kaart-open .dt-balkknop:hover, .dt-balkknop:focus-visible { opacity: 1; 
 .dt-balkknop:focus-visible { outline: 3px solid var(--av-coral); outline-offset: 2px; }
 body.balk-zichtbaar .dt-balkknop { opacity: 0; pointer-events: none; transition-delay: 0s; }
 @media (prefers-reduced-motion: reduce) { .dt-balkknop { transition: none; } }
+
+/* Eigen laag voor pins en lijnen (zie op-doortocht.js): klikken op lege plekken gaan door naar de kaart. */
+.dt-kaart .dt-pinlaag { position: absolute; inset: 0; pointer-events: none; }
+.dt-kaart .dt-pinlaag .bubbel { pointer-events: auto; }
