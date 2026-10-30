@@ -487,8 +487,12 @@ body.balk-zichtbaar .dt-balkknop { opacity: 0; pointer-events: none; transition-
 /* --- Foto van de plek in het kaartje bij een pin en bij "Over [plek]" ------------------ */
 .dt-pinkaart-kop.met-foto { position: relative; padding: 0; margin-bottom: .3rem; }
 .dt-pinkaart-kop.met-foto img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--radius) var(--radius) 0 0; }
-.dt-pinkaart-kop.met-foto strong { position: absolute; left: 0; right: 0; bottom: 0; padding: 2rem .9rem .6rem; color: #FFFDF6;
-    background: linear-gradient(to top, rgba(18, 42, 41, .85), rgba(18, 42, 41, 0)); font-family: var(--font-heading); font-weight: 400; font-size: 1.4rem; letter-spacing: 0; text-transform: none; }
+.dt-pinkaart-naam { display: grid; gap: .1rem; }
+.dt-pinkaart-naam span { font-size: .82rem; color: var(--av-petrol-zacht); }
+.dt-pinkaart-kop.met-foto .dt-pinkaart-naam { position: absolute; left: 0; right: 0; bottom: 0; padding: 2.2rem .9rem .65rem; color: #FFFDF6;
+    background: linear-gradient(to top, rgba(18, 42, 41, .88), rgba(18, 42, 41, 0)); }
+.dt-pinkaart-kop.met-foto strong { font-family: var(--font-heading); font-weight: 400; font-size: 1.4rem; line-height: 1.1; letter-spacing: 0; text-transform: none; }
+.dt-pinkaart-kop.met-foto .dt-pinkaart-naam span { color: #FFFDF6; opacity: .9; }
 .dt-pinkaart-kop.met-foto .dt-pinkaart-sluit { position: absolute; top: .5rem; right: .5rem; }
 .dt-overplek-foto { margin: 0 0 1.2rem; }
 .dt-artikel .dt-overplek-foto img { aspect-ratio: 16 / 9; object-fit: cover; border-radius: 3px; }

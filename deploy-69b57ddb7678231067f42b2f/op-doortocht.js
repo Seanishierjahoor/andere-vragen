@@ -29,6 +29,8 @@ const dataInJaar = (data) => opsomming(data.map((iso, i) => {
 }));
 const veilig = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const fotoUrl = (id) => '/doortocht-foto/' + encodeURIComponent(id);
+// Plekfoto met het focuspunt uit het beheer (welk deel in beeld blijft als hij wordt bijgesneden)
+const plekFoto = (p, alt = '') => `<img src="${fotoUrl(p.foto)}" alt="${veilig(alt)}" style="object-position: ${p.focus?.x ?? 50}% ${p.focus?.y ?? 50}%" draggable="false">`;
 // Opmaak uit het beheer: **vet**, *cursief* en [tekst](adres). Eerst veilig gemaakt, daarna omgezet,
 // dus alleen deze drie dingen worden echte opmaak. Links naar andere sites openen in een nieuw tabblad.
 const nadruk = (s) => s.replace(/\*\*(\S(?:[^*\n]*?\S)?)\*\*/g, '<strong>$1</strong>').replace(/\*(\S(?:[^*\n]*?\S)?)\*/g, '<em>$1</em>');
@@ -531,7 +533,7 @@ function toonPinkaart(plekId, alleen = null, alleenDatum = null) {
         : '';
     const plek = PLEKKEN[plekId];
     pinkaart.innerHTML = `<div class="dt-pinkaart-kop${plek.foto ? ' met-foto' : ''}">
-            ${plek.foto ? `<img src="${fotoUrl(plek.foto)}" alt="">` : ''}<strong>${veilig(plek.naam)}</strong>
+            ${plek.foto ? plekFoto(plek) : ''}<div class="dt-pinkaart-naam"><strong>${veilig(plek.naam)}</strong>${plek.ondertitel ? `<span>${veilig(plek.ondertitel)}</span>` : ''}</div>
             <button type="button" class="dt-pinkaart-sluit" aria-label="Sluiten">×</button></div>
         ${deel(komt, 'komt', 'Komt eraan')}${deel(geweest, 'geweest', 'Geweest')}`;
     if (SMAL.matches && !indexVak.classList.contains('ingeklapt')) zetIndex(false);
@@ -589,8 +591,8 @@ function toonPlekkaartjes(ids) {
     plekkaartVak.innerHTML = ids.map((id, i) => {
         const p = PLEKKEN[id];
         return `<figure class="dt-plekkaart${p.foto ? ' met-foto' : ''}" style="--draai: ${i % 2 ? 1.6 : -1.8}deg">
-            ${p.foto ? `<img src="${fotoUrl(p.foto)}" alt="" draggable="false">` : ''}
-            <figcaption><strong>${veilig(p.naam)}</strong>${p.adres ? `<span>${veilig(p.adres.split(',')[0])}</span>` : ''}</figcaption>
+            ${p.foto ? plekFoto(p) : ''}
+            <figcaption><strong>${veilig(p.naam)}</strong>${p.ondertitel || p.adres ? `<span>${veilig(p.ondertitel || p.adres.split(',')[0])}</span>` : ''}</figcaption>
             ${p.foto && p.fotocredit ? `<small>${veilig(p.fotocredit)}</small>` : ''}
             <span class="plakband"></span>
         </figure>`;
@@ -991,7 +993,7 @@ function verhaalHtml(e) {
     const leeg = !e.blokken.length && !e.samenvatting;
     // Vaste beschrijving van de plek(ken), onderaan elke bijeenkomst daar.
     const overPlekken = e.plekken.map((id) => PLEKKEN[id]).filter((p) => p.beschrijving)
-        .map((p) => `<section class="dt-overplek"><h2>Over ${veilig(p.naam)}</h2>${p.foto ? `<figure class="dt-overplek-foto"><img src="${fotoUrl(p.foto)}" alt="${veilig(p.naam)}" loading="lazy">${p.fotocredit ? `<figcaption>${veilig(p.fotocredit)}</figcaption>` : ''}</figure>` : ''}${alineas(p.beschrijving)}${p.adres ? `<p class="dt-overplek-adres">${veilig(p.adres)}</p>` : ''}</section>`).join('');
+        .map((p) => `<section class="dt-overplek"><h2>Over ${veilig(p.naam)}</h2>${p.foto ? `<figure class="dt-overplek-foto">${plekFoto(p, p.naam)}${p.fotocredit ? `<figcaption>${veilig(p.fotocredit)}</figcaption>` : ''}</figure>` : ''}${alineas(p.beschrijving)}${p.adres ? `<p class="dt-overplek-adres">${veilig(p.adres)}</p>` : ''}</section>`).join('');
     return `<button type="button" class="dt-sluit dt-knop">← Terug</button>
         <header class="dt-held ${e.omslag ? 'met-foto' : ''}">
             ${e.omslag ? `<img src="${fotoUrl(e.omslag)}" alt="">` : ''}

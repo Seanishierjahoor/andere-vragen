@@ -126,3 +126,16 @@
 .bh-reeks-toevoegen { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin-top: .6rem; }
 @media (max-width: 600px) { .bh-reeks-tekst { grid-column: 1 / -1; } }
 .bh-reeks-tekst .bh-opmaakuitleg { display: none; }
+
+/* Focuspunt van de plekfoto: klik op de foto, rechts de bijgesneden voorbeelden */
+.bh-focus { margin-top: .6rem; }
+.bh-focus-rij { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: .9rem; align-items: start; }
+.bh-focus-foto { position: relative; cursor: crosshair; border-radius: 8px; overflow: hidden; line-height: 0; }
+.bh-focus-foto img { width: 100%; height: auto; user-select: none; }
+.bh-focus-stip { position: absolute; width: 1.3rem; height: 1.3rem; margin: -.65rem 0 0 -.65rem; border-radius: 50%; border: 3px solid #fff;
+    background: var(--av-coral); box-shadow: 0 0 0 2px var(--av-petrol), 0 2px 8px rgba(0, 0, 0, .4); pointer-events: none; transition: left .15s, top .15s; }
+.bh-focus-voorbeelden { display: grid; gap: .6rem; }
+.bh-focus-voorbeelden figure { margin: 0; }
+.bh-focus-voorbeelden img { width: 100%; object-fit: cover; border-radius: 6px; }
+.bh-focus-voorbeelden figcaption { font-size: .78rem; color: var(--av-petrol-zacht); margin-top: .2rem; }
+@media (max-width: 600px) { .bh-focus-rij { grid-template-columns: 1fr; } }

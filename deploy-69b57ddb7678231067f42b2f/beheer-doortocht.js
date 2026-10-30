@@ -483,6 +483,30 @@ function fotoKiezer(huidig, wijzig) {
     return vak;
 }
 
+// Focuspunt: klik op de foto om te kiezen wat in beeld blijft als de foto op de kaart wordt bijgesneden.
+// Ernaast twee voorbeelden in de maten van de kaartjes.
+function focusKiezer(p) {
+    p.focus = p.focus || { x: 50, y: 50 };
+    const stip = h('span', { class: 'bh-focus-stip', 'aria-hidden': 'true' });
+    const voorbeelden = [['Kaartje bij de pin', '16 / 9'], ['Kaartje na klik in de index', '4 / 3']].map(([naam, maat]) =>
+        h('figure', {}, h('img', { src: fotoUrl(p.foto), alt: '', style: `aspect-ratio: ${maat}` }), h('figcaption', { tekst: naam })));
+    const zet = () => {
+        stip.style.left = p.focus.x + '%'; stip.style.top = p.focus.y + '%';
+        voorbeelden.forEach((f) => { f.querySelector('img').style.objectPosition = `${p.focus.x}% ${p.focus.y}%`; });
+    };
+    const groot = h('div', { class: 'bh-focus-foto', title: 'Klik op wat in beeld moet blijven' }, h('img', { src: fotoUrl(p.foto), alt: '', draggable: 'false' }), stip);
+    groot.addEventListener('click', (ev) => {
+        const r = groot.getBoundingClientRect();
+        p.focus = { x: Math.round(((ev.clientX - r.left) / r.width) * 100), y: Math.round(((ev.clientY - r.top) / r.height) * 100) };
+        zet();
+        markeerGewijzigd();
+    });
+    zet();
+    return h('div', { class: 'bh-focus' },
+        h('p', { class: 'bh-hulp', tekst: 'Klik op de foto op wat in beeld moet blijven (bijvoorbeeld de gevel). Rechts zie je hoe de kaartjes de foto bijsnijden.' }),
+        h('div', { class: 'bh-focus-rij' }, groot, h('div', { class: 'bh-focus-voorbeelden' }, voorbeelden)));
+}
+
 // --- Plekken -------------------------------------------------------------
 
 function tekenPlekkenLijst() {
@@ -542,7 +566,9 @@ function tekenPlek() {
             h('div', {},
                 h('label', { tekst: 'Foto van de plek' }),
                 h('p', { class: 'bh-hulp', tekst: 'Verschijnt op de kaart als je een bijeenkomst kiest, met de naam erover, en bij "Over deze plek" in het verhaal. Liefst liggend, van de buitenkant of de ruimte.' }),
-                fotoKiezer(p.foto, (id) => { p.foto = id; markeerGewijzigd(); tekenPlek(); })),
+                fotoKiezer(p.foto, (id) => { p.foto = id; p.focus = { x: 50, y: 50 }; markeerGewijzigd(); tekenPlek(); }),
+                p.foto ? focusKiezer(p) : null),
+            veld(p, 'ondertitel', 'Regel onder de naam (optioneel)', { hulp: 'Bijvoorbeeld "museum voor architectuur" of "volkstuin in Noord". Staat op het kaartje van de plek, onder de naam. Leeg: dan staat daar de straat.' }),
             veld(p, 'fotocredit', 'Fotocredit (optioneel)', { hulp: 'Van wie is de foto? Verplicht bij foto\'s met een vrije licentie, bijvoorbeeld: Foto: Johannes Schwartz, CC BY 2.0.' }),
             h('p', { class: 'bh-hulp', tekst: gebruiktDoor.length ? `Gebruikt bij: ${gebruiktDoor.map(evenementLabel).join(', ')}` : 'Nog bij geen enkele bijeenkomst gebruikt.' }),
         ),

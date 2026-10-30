@@ -64,6 +64,7 @@ const tekst = (v, max) => String(v ?? "").slice(0, max);
 const ID = /^[a-z0-9][a-z0-9-]{0,60}$/;
 const FOTO_ID = /^[a-z0-9-]{8,64}$/;
 const DATUM = /^\d{4}-\d{2}-\d{2}$/;
+const procent = (v) => (Number.isFinite(Number(v)) ? Math.min(100, Math.max(0, Math.round(Number(v)))) : 50);
 const fotoOfNull = (v) => (typeof v === "string" && FOTO_ID.test(v) ? v : null);
 
 // Zet oudere opslag om naar versie 2:
@@ -140,7 +141,9 @@ export function controleer(invoer) {
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) return { fout: `Plek "${p.naam}" heeft nog geen plek op de kaart.` };
     plekIds.add(p.id);
     plekken.push({ id: p.id, naam: tekst(p.naam, 120).trim(), adres: tekst(p.adres, 200), lat, lon, beschrijving: tekst(p.beschrijving, 8000),
-      foto: fotoOfNull(p.foto), fotocredit: tekst(p.fotocredit, 200).trim() });
+      foto: fotoOfNull(p.foto), fotocredit: tekst(p.fotocredit, 200).trim(), ondertitel: tekst(p.ondertitel, 120).trim(),
+      // Focuspunt van de plekfoto in procenten (welk deel in beeld blijft als de foto wordt bijgesneden)
+      focus: { x: procent(p.focus?.x), y: procent(p.focus?.y) } });
   }
 
   const ids = new Set();
