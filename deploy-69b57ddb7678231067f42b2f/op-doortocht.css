@@ -586,3 +586,14 @@ body.balk-zichtbaar .dt-balkknop { opacity: 0; pointer-events: none; transition-
     .dt-strook-tekst.draait .dt-kaart-voor { display: none; }
     .dt-strook-tekst.draait .dt-kaart-achter { transform: none; }
 }
+
+/* Citaatkaart in de strook: grote aanhalingstekens, de bron eronder */
+.dt-strook-citaat { width: max(var(--kaart-b), min(78cqw, 17rem)); height: var(--strook-h); display: flex; }
+.dt-artikel .dt-strook-citaat blockquote { flex: 1; margin: 0; display: flex; flex-direction: column; justify-content: center; gap: .9rem; overflow-y: auto;
+    padding: clamp(1.4rem, 3vw, 2.1rem); background: #FFFDF6; border: 2px solid var(--av-coral); border-radius: 12px; box-shadow: 7px 7px 0 rgba(233, 106, 75, .18); }
+.dt-artikel .dt-strook-citaat blockquote::before { content: "“"; display: block; font-family: var(--font-heading); font-size: 4.5rem; line-height: .5; color: var(--av-coral); }
+.dt-artikel .dt-strook-citaat blockquote p { margin: 0; font-family: var(--font-heading); font-size: clamp(1.4rem, 2.3vw, 1.85rem); line-height: 1.2; }
+.dt-artikel .dt-strook-citaat blockquote.lang p { font-size: clamp(1.1rem, 1.7vw, 1.35rem); }
+.dt-artikel .dt-strook-citaat footer { font-family: var(--font-body); font-size: .9rem; color: var(--av-petrol-zacht); }
+/* Lange tekstkaart: breder */
+.dt-strook-tekst.lang { width: min(84cqw, 30rem); }

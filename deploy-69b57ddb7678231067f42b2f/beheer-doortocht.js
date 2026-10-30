@@ -355,16 +355,19 @@ function tekenEvenement() {
         e.omslag ? focusKiezer(e, 'omslag', 'omslagFocus', [['Bovenaan het verhaal', '16 / 7'], ['Kaartje in de index', '16 / 9']]) : null,
     );
 
+    // Het verhaal is één strook (de kapstok); foto's, tekstkaarten en citaten hangen eraan.
+    // Een ouder verhaal met losse blokken kan met één klik worden omgezet.
+    const alStrook = !e.blokken.length || (e.blokken.length === 1 && e.blokken[0].type === 'reeks');
+    if (alStrook && !e.blokken.length) e.blokken.push({ type: 'reeks', fotos: [] });
     const blokken = h('div', { class: 'bh-kaartvak' },
         h('h2', { tekst: 'Verhaal' }),
-        h('p', { class: 'bh-hulp', tekst: 'Stapel blokken: tekst, foto\'s en citaten. Een lege regel in een tekstblok begint een nieuwe alinea.' }),
-        h('div', { class: 'bh-blokken' }, e.blokken.map((b, i) => blokEditor(e, b, i, herteken))),
-        h('div', { class: 'bh-toevoegen' },
-            // Foto's gaan standaard in een strook (kaarten naast elkaar); een grote losse foto kan ook nog.
-            [['tekst', '+ Tekst', { type: 'tekst', tekst: '' }], ['reeks', "+ Foto's", { type: 'reeks', fotos: [] }],
-             ['citaat', '+ Citaat', { type: 'citaat', tekst: '', bron: '' }], ['foto', '+ Grote foto', { type: 'foto', foto: null, onderschrift: '' }]]
-                .map(([, label, nieuw]) => h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', tekst: label, onclick: () => { e.blokken.push(structuredClone(nieuw)); herteken(); } })),
-        ),
+        alStrook
+            ? strookEditor(e.blokken[0], herteken)
+            : h('div', {},
+                h('div', { class: 'bh-omzetten' },
+                    h('p', { tekst: 'Dit verhaal bestaat nog uit losse blokken. Zet het om naar één strook: alle foto\'s, teksten en citaten komen er in deze volgorde aan te hangen, met hun onderschriften en bronnen.' }),
+                    h('button', { type: 'button', class: 'bh-knop', tekst: 'Zet om naar één strook', onclick: () => { zetOmNaarStrook(e); herteken(); } })),
+                h('div', { class: 'bh-blokken' }, e.blokken.map((b, i) => blokEditor(e, b, i, herteken)))),
     );
 
     const weg = h('div', { class: 'bh-onderaan' },
@@ -378,6 +381,19 @@ function tekenEvenement() {
         } }));
 
     vak.replaceChildren(algemeen, plekken, samenvatting, omslag, blokken, weg);
+}
+
+// Losse blokken (tekst, foto, citaat, strook) samenvoegen tot één strook, in dezelfde volgorde.
+function zetOmNaarStrook(e) {
+    const kaarten = e.blokken.flatMap((b) => {
+        if (b.type === 'reeks') return b.fotos;
+        if (b.type === 'foto') return b.foto ? [{ foto: b.foto, onderschrift: b.onderschrift || '' }] : [];
+        if (b.type === 'citaat') return String(b.tekst || '').trim() ? [{ citaat: b.tekst, bron: b.bron || '' }] : [];
+        if (b.type === 'tekst') return String(b.tekst || '').trim() ? [{ tekst: b.tekst }] : [];
+        return [];
+    });
+    e.blokken = [{ type: 'reeks', fotos: kaarten }];
+    markeerGewijzigd();
 }
 
 function blokEditor(e, b, i, herteken) {
@@ -394,31 +410,8 @@ function blokEditor(e, b, i, herteken) {
     if (b.type === 'tekst') inhoud = veld(b, 'tekst', 'Tekst', { lang: true });
     if (b.type === 'citaat') inhoud = h('div', { class: 'bh-velden' }, veld(b, 'tekst', 'Citaat', { lang: true }), veld(b, 'bron', 'Van wie (optioneel)'));
     if (b.type === 'foto') inhoud = h('div', { class: 'bh-velden' }, fotoKiezer(b.foto, (id) => { b.foto = id; herteken(); }), veld(b, 'onderschrift', 'Onderschrift (optioneel)'));
-    if (b.type === 'reeks') {
-        // Strook: foto's en tekstkaarten naast elkaar, op de site naar links te vegen.
-        const schuif = (j, stap) => { [b.fotos[j], b.fotos[j + stap]] = [b.fotos[j + stap], b.fotos[j]]; herteken(); };
-        // Levend voorbeeld met dezelfde kaarten als de site; wordt bijgewerkt bij elke wijziging in deze strook.
-        const voorbeeld = h('div', { class: 'bh-strook-voorbeeld dt-artikel' });
-        const toonVoorbeeld = () => { voorbeeld.innerHTML = `<section class="dt-strook"><div class="dt-strook-baan">${strookKaarten(b.fotos)}</div></section>`; };
-        toonVoorbeeld();
-        inhoud = h('div', { class: 'bh-velden' },
-            h('p', { class: 'bh-hulp', tekst: 'Zo ziet de strook eruit. Wijs een tekstkaart aan om te zien hoe hij omdraait.' }),
-            voorbeeld,
-            h('div', { class: 'bh-reeks' }, b.fotos.map((f, j) => h('div', { class: 'bh-reeks-foto' + (f.foto ? '' : ' bh-reeks-tekst') },
-                f.foto ? h('img', { src: fotoUrl(f.foto), alt: '' }) : null,
-                f.foto
-                    ? h('input', { type: 'text', placeholder: 'Onderschrift', 'aria-label': 'Onderschrift', waarde: f.onderschrift, oninput: (ev) => { f.onderschrift = ev.target.value; markeerGewijzigd(); toonVoorbeeld(); } })
-                    : veld(f, 'tekst', 'Tekstkaart', { lang: true, naWijzig: toonVoorbeeld }),
-                h('div', { class: 'bh-reeks-knoppen' },
-                    h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', 'aria-label': 'Naar links', tekst: '←', disabled: j === 0, onclick: () => schuif(j, -1) }),
-                    h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', 'aria-label': 'Naar rechts', tekst: '→', disabled: j === b.fotos.length - 1, onclick: () => schuif(j, 1) }),
-                    h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', tekst: 'Weghalen', onclick: () => { b.fotos.splice(j, 1); herteken(); } })),
-            ))),
-            h('div', { class: 'bh-reeks-toevoegen' },
-                uploadKnop('+ Foto\'s toevoegen', true, (ids) => { b.fotos.push(...ids.map((foto) => ({ foto, onderschrift: '' }))); herteken(); }),
-                h('button', { type: 'button', class: 'bh-knop bh-knop-licht', tekst: '+ Tekstkaart', onclick: () => { b.fotos.push({ tekst: '' }); herteken(); } })),
-        );
-    }
+    if (b.type === 'reeks') inhoud = strookEditor(b, herteken);
+
 
 
     return h('div', { class: 'bh-blok' }, kop, inhoud);
@@ -494,6 +487,39 @@ function fotoKiezer(huidig, wijzig) {
 
 // Focuspunt: klik op de foto om te kiezen wat in beeld blijft als de foto op de kaart wordt bijgesneden.
 // Ernaast twee voorbeelden in de maten van de kaartjes.
+// De strook bewerken: een levend voorbeeld bovenaan (dezelfde kaarten als de site), daaronder elke kaart
+// (foto, tekstkaart of citaat) met pijltjes om te verschuiven, en knoppen om kaarten toe te voegen.
+function strookEditor(b, herteken) {
+    const schuif = (j, stap) => { [b.fotos[j], b.fotos[j + stap]] = [b.fotos[j + stap], b.fotos[j]]; herteken(); };
+    const voorbeeld = h('div', { class: 'bh-strook-voorbeeld dt-artikel' });
+    const toonVoorbeeld = () => {
+        voorbeeld.innerHTML = b.fotos.length ? `<section class="dt-strook"><div class="dt-strook-baan">${strookKaarten(b.fotos)}</div></section>` : '';
+        voorbeeld.hidden = !b.fotos.length;
+    };
+    toonVoorbeeld();
+    const kaartVeld = (f) => {
+        if (f.foto) return [h('img', { src: fotoUrl(f.foto), alt: '' }),
+            h('input', { type: 'text', placeholder: 'Onderschrift', 'aria-label': 'Onderschrift', waarde: f.onderschrift, oninput: (ev) => { f.onderschrift = ev.target.value; markeerGewijzigd(); toonVoorbeeld(); } })];
+        if ('citaat' in f) return [veld(f, 'citaat', 'Citaat', { lang: true, naWijzig: toonVoorbeeld }), veld(f, 'bron', 'Van wie (optioneel)', { naWijzig: toonVoorbeeld })];
+        return [veld(f, 'tekst', 'Tekstkaart', { lang: true, naWijzig: toonVoorbeeld })];
+    };
+    return h('div', { class: 'bh-velden' },
+        h('p', { class: 'bh-hulp', tekst: 'Het verhaal is één strook: foto\'s, tekstkaarten en citaten naast elkaar. Bovenaan zie je hoe het eruitziet; wijs een tekstkaart aan om hem te zien omdraaien.' }),
+        voorbeeld,
+        h('div', { class: 'bh-reeks' }, b.fotos.map((f, j) => h('div', { class: 'bh-reeks-foto' + (f.foto ? '' : ' bh-reeks-tekst') + ('citaat' in f ? ' bh-reeks-citaat' : '') },
+            ...kaartVeld(f),
+            h('div', { class: 'bh-reeks-knoppen' },
+                h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', 'aria-label': 'Naar links', tekst: '←', disabled: j === 0, onclick: () => schuif(j, -1) }),
+                h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', 'aria-label': 'Naar rechts', tekst: '→', disabled: j === b.fotos.length - 1, onclick: () => schuif(j, 1) }),
+                h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', tekst: 'Weghalen', onclick: () => { b.fotos.splice(j, 1); herteken(); } })),
+        ))),
+        h('div', { class: 'bh-reeks-toevoegen' },
+            uploadKnop('+ Foto\'s', true, (ids) => { b.fotos.push(...ids.map((foto) => ({ foto, onderschrift: '' }))); herteken(); }),
+            h('button', { type: 'button', class: 'bh-knop bh-knop-licht', tekst: '+ Tekstkaart', onclick: () => { b.fotos.push({ tekst: '' }); herteken(); } }),
+            h('button', { type: 'button', class: 'bh-knop bh-knop-licht', tekst: '+ Citaat', onclick: () => { b.fotos.push({ citaat: '', bron: '' }); herteken(); } })),
+    );
+}
+
 // Werkt voor de plekfoto (foto + focus) en de omslagfoto van een bijeenkomst (omslag + omslagFocus).
 function focusKiezer(p, fotoSleutel = 'foto', focusSleutel = 'focus', maten = [['Kaartje bij de pin', '16 / 9'], ['Kaartje na klik in de index', '4 / 3']]) {
     p[focusSleutel] = p[focusSleutel] || { x: 50, y: 50 };

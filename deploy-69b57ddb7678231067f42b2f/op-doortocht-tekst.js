@@ -35,7 +35,8 @@ export function tekstKaart(tekst) {
     const plat = platteTekst(tekst);
     if (plat.length <= 140) return `<div class="dt-strook-kaart dt-strook-tekst kort"><div class="dt-strook-tekst-binnen"><p>${opmaak(String(tekst).trim()).replace(/\n+/g, '<br>')}</p></div></div>`;
     const zin = plat.match(/^.{20,}?[.?!…](?=\s|$)/)?.[0] || beginVan(plat, 110);
-    return `<div class="dt-strook-kaart dt-strook-tekst draait"><div class="dt-kaart-draai">
+    // Een lang stuk tekst krijgt een bredere kaart, zodat hij niet in een smalle kolom wordt gepropt.
+    return `<div class="dt-strook-kaart dt-strook-tekst draait${plat.length > 550 ? ' lang' : ''}"><div class="dt-kaart-draai">
         <div class="dt-kaart-voor" aria-hidden="true"><p>${veilig(zin.length > 150 ? beginVan(zin, 140) : zin)}</p><span class="dt-kaart-hint">lees verder ↻</span></div>
         <div class="dt-strook-tekst-binnen dt-kaart-achter">${alineas(tekst)}</div>
     </div></div>`;
@@ -43,4 +44,7 @@ export function tekstKaart(tekst) {
 
 // Foto: altijd helemaal te zien, met een papieren randje.
 export const fotoKaart = (k) => `<figure class="dt-strook-kaart dt-strook-foto"><img src="${fotoUrl(k.foto)}" alt="${veilig(k.onderschrift)}" loading="lazy" draggable="false">${k.onderschrift ? `<figcaption>${opmaak(k.onderschrift)}</figcaption>` : ''}</figure>`;
-export const strookKaarten = (kaarten) => kaarten.map((k) => (k.foto ? fotoKaart(k) : tekstKaart(k.tekst))).join('');
+// Citaat: een eigen kaart met grote aanhalingstekens en de bron eronder.
+export const citaatKaart = (k) => `<div class="dt-strook-kaart dt-strook-citaat"><blockquote${platteTekst(k.citaat).length > 160 ? ' class="lang"' : ''}>
+    <p>${opmaak(String(k.citaat).trim()).replace(/\n+/g, '<br>')}</p>${k.bron ? `<footer>${veilig(k.bron)}</footer>` : ''}</blockquote></div>`;
+export const strookKaarten = (kaarten) => kaarten.map((k) => (k.foto ? fotoKaart(k) : k.citaat ? citaatKaart(k) : tekstKaart(k.tekst))).join('');

@@ -144,3 +144,9 @@
 .bh-strook-voorbeeld { container-type: inline-size; display: block; max-width: none; margin: 0 0 .4rem; padding: 0; background: var(--av-paper); border-radius: 10px; overflow: hidden; }
 .bh-strook-voorbeeld .dt-strook { --strook-h: 15rem; --strook-in: 1rem; width: auto; margin: 0; }
 .bh-strook-voorbeeld .dt-strook-baan { padding: 1rem; }
+
+/* Verhaal met losse blokken: oproep om om te zetten naar één strook */
+.bh-omzetten { display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: .9rem 1rem; margin-bottom: 1rem;
+    background: #fff4ef; border: 1.5px solid var(--av-coral); border-radius: 10px; }
+.bh-omzetten p { margin: 0; flex: 1 1 20rem; }
+.bh-reeks-citaat { border-color: rgba(233, 106, 75, .6); }

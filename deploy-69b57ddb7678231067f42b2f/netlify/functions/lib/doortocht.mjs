@@ -117,12 +117,13 @@ function schoneBlokken(invoer) {
     else if (b?.type === "foto" && fotoOfNull(b.foto)) blokken.push({ type: "foto", foto: b.foto, onderschrift: tekst(b.onderschrift, 300) });
     else if (b?.type === "reeks") {
       // Een reeks is een strook kaarten: foto's en (sinds 30 okt) tekstkaarten, in de gekozen volgorde.
+      // Sinds 30 okt is het hele verhaal één strook: foto's, tekstkaarten en citaten hangen eraan.
       const fotos = (Array.isArray(b.fotos) ? b.fotos : [])
-        .filter((f) => fotoOfNull(f?.foto) || tekst(f?.tekst, 3000).trim())
-        .slice(0, 30)
-        .map((f) => (fotoOfNull(f.foto)
-          ? { foto: f.foto, onderschrift: tekst(f.onderschrift, 300) }
-          : { tekst: tekst(f.tekst, 3000) }));
+        .filter((f) => fotoOfNull(f?.foto) || tekst(f?.tekst, 8000).trim() || tekst(f?.citaat, 1000).trim())
+        .slice(0, 60)
+        .map((f) => (fotoOfNull(f.foto) ? { foto: f.foto, onderschrift: tekst(f.onderschrift, 300) }
+          : tekst(f.citaat, 1000).trim() ? { citaat: tekst(f.citaat, 1000), bron: tekst(f.bron, 200) }
+          : { tekst: tekst(f.tekst, 8000) }));
       if (fotos.length) blokken.push({ type: "reeks", fotos });
     } else if (b?.type === "citaat") blokken.push({ type: "citaat", tekst: tekst(b.tekst, 1000), bron: tekst(b.bron, 200) });
   }
