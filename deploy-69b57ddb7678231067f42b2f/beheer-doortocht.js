@@ -185,7 +185,75 @@ function veld(obj, sleutel, label, { lang = false, hulp = '', naWijzig, lijst, t
         id, type: lang ? undefined : type, waarde: obj[sleutel] || '', list: lijst,
         [type === 'date' ? 'onchange' : 'oninput']: (e) => { obj[sleutel] = e.target.value; markeerGewijzigd(); naWijzig?.(); },
     });
-    return h('div', {}, h('label', { for: id, tekst: label }), hulp ? h('p', { class: 'bh-hulp', tekst: hulp }) : null, invoer);
+    return h('div', {}, h('label', { for: id, tekst: label }), hulp ? h('p', { class: 'bh-hulp', tekst: hulp }) : null, lang ? opmaakBalk(invoer) : null, invoer);
+}
+
+// Knoppen voor vet, cursief en een link boven elk lang tekstveld. Ze zetten tekens rond de selectie
+// (**vet**, *cursief*, [tekst](adres)); de site maakt daar opmaak van. Ook met Cmd/Ctrl+B en +I.
+function voegIn(veld, tekst, selectieVan, selectieTot) {
+    veld.focus();
+    // insertText houdt Cmd+Z werkend; anders (oudere browsers) direct vervangen
+    if (!document.execCommand('insertText', false, tekst)) veld.setRangeText(tekst, veld.selectionStart, veld.selectionEnd, 'end');
+    if (selectieVan !== undefined) veld.setSelectionRange(selectieVan, selectieTot);
+    veld.dispatchEvent(new Event('input', { bubbles: true }));
+}
+function omhul(veld, teken) {
+    const { selectionStart: van, selectionEnd: tot, value } = veld;
+    const gekozen = value.slice(van, tot);
+    // Al omhuld? Dan haalt een tweede klik de opmaak weer weg.
+    if (value.slice(van - teken.length, van) === teken && value.slice(tot, tot + teken.length) === teken
+        && !(teken === '*' && value.slice(van - 2, van) === '**' && value.slice(van - 3, van) !== '***')) {
+        veld.setSelectionRange(van - teken.length, tot + teken.length);
+        voegIn(veld, gekozen, van - teken.length, tot - teken.length);
+        return;
+    }
+    const woord = gekozen || (teken === '**' ? 'vette tekst' : 'schuine tekst');
+    voegIn(veld, teken + woord + teken, van + teken.length, van + teken.length + woord.length);
+}
+function opmaakBalk(veld) {
+    const linkVak = h('div', { class: 'bh-linkvak', hidden: true });
+    const knop = (label, titel, actie, klasse) => h('button', { type: 'button', class: 'bh-opmaakknop ' + (klasse || ''), title: titel, 'aria-label': titel,
+        onmousedown: (e) => e.preventDefault(), onclick: actie }, label);
+    const openLink = () => {
+        const { selectionStart: van, selectionEnd: tot } = veld;
+        const zichtbaar = h('input', { type: 'text', waarde: veld.value.slice(van, tot), placeholder: 'bijvoorbeeld: Social Art Platform' });
+        const adres = h('input', { type: 'text', inputmode: 'url', placeholder: 'https://…' });
+        const fout = h('p', { class: 'bh-hulp bh-linkfout', hidden: true });
+        const sluit = () => { linkVak.hidden = true; linkVak.replaceChildren(); veld.focus(); };
+        const invoegen = () => {
+            let url = adres.value.trim();
+            if (url && !/^(https?:\/\/|mailto:|\/)/.test(url)) url = (url.includes('@') && !url.includes('/') ? 'mailto:' : 'https://') + url;
+            if (!url || /\s|\)/.test(url)) { fout.hidden = false; fout.textContent = 'Vul een geldig webadres in.'; adres.focus(); return; }
+            const tekst = (zichtbaar.value.trim() || url).replace(/[\[\]]/g, '');
+            veld.setSelectionRange(van, tot);
+            voegIn(veld, `[${tekst}](${url})`);
+            sluit();
+        };
+        const enter = (e) => { if (e.key === 'Enter') { e.preventDefault(); invoegen(); } if (e.key === 'Escape') sluit(); };
+        zichtbaar.addEventListener('keydown', enter); adres.addEventListener('keydown', enter);
+        linkVak.replaceChildren(
+            h('label', {}, h('span', { tekst: 'Tekst die je ziet' }), zichtbaar),
+            h('label', {}, h('span', { tekst: 'Webadres' }), adres), fout,
+            h('div', { class: 'bh-linkvak-knoppen' },
+                h('button', { type: 'button', class: 'bh-knop bh-knop-klein', onclick: invoegen }, 'Link invoegen'),
+                h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', onclick: sluit }, 'Annuleren')));
+        linkVak.hidden = false;
+        (zichtbaar.value ? adres : zichtbaar).focus();
+    };
+    veld.addEventListener('keydown', (e) => {
+        if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
+        const k = e.key.toLowerCase();
+        if (k === 'b') { e.preventDefault(); omhul(veld, '**'); }
+        if (k === 'i') { e.preventDefault(); omhul(veld, '*'); }
+        if (k === 'k') { e.preventDefault(); openLink(); }
+    });
+    return h('div', { class: 'bh-opmaak' },
+        h('div', { class: 'bh-opmaakbalk', role: 'toolbar', 'aria-label': 'Opmaak' },
+            knop(h('strong', {}, 'B'), 'Vet (Cmd+B)', () => omhul(veld, '**')),
+            knop(h('em', {}, 'I'), 'Cursief (Cmd+I)', () => omhul(veld, '*')),
+            knop('Link', 'Link toevoegen (Cmd+K)', openLink, 'bh-opmaakknop-link'),
+            h('span', { class: 'bh-opmaakuitleg', tekst: '**vet**  *cursief*  [tekst](adres)' })),
+        linkVak);
 }
 
 function tekenEvenement() {
@@ -291,7 +359,7 @@ function tekenEvenement() {
         h('div', { class: 'bh-blokken' }, e.blokken.map((b, i) => blokEditor(e, b, i, herteken))),
         h('div', { class: 'bh-toevoegen' },
             [['tekst', '+ Tekst', { type: 'tekst', tekst: '' }], ['foto', '+ Foto', { type: 'foto', foto: null, onderschrift: '' }],
-             ['reeks', '+ Fotoreeks', { type: 'reeks', fotos: [] }], ['citaat', '+ Citaat', { type: 'citaat', tekst: '', bron: '' }]]
+             ['reeks', '+ Strook', { type: 'reeks', fotos: [] }], ['citaat', '+ Citaat', { type: 'citaat', tekst: '', bron: '' }]]
                 .map(([, label, nieuw]) => h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', tekst: label, onclick: () => { e.blokken.push(structuredClone(nieuw)); herteken(); } })),
         ),
     );
@@ -310,7 +378,7 @@ function tekenEvenement() {
 }
 
 function blokEditor(e, b, i, herteken) {
-    const namen = { tekst: 'Tekst', foto: 'Foto', reeks: 'Fotoreeks', citaat: 'Citaat' };
+    const namen = { tekst: 'Tekst', foto: 'Foto', reeks: 'Strook (foto\'s en tekst)', citaat: 'Citaat' };
     const verplaats = (r) => { const [x] = e.blokken.splice(i, 1); e.blokken.splice(i + r, 0, x); herteken(); };
     const kop = h('div', { class: 'bh-blok-kop' },
         h('strong', { tekst: namen[b.type] }),
@@ -324,15 +392,26 @@ function blokEditor(e, b, i, herteken) {
     if (b.type === 'citaat') inhoud = h('div', { class: 'bh-velden' }, veld(b, 'tekst', 'Citaat', { lang: true }), veld(b, 'bron', 'Van wie (optioneel)'));
     if (b.type === 'foto') inhoud = h('div', { class: 'bh-velden' }, fotoKiezer(b.foto, (id) => { b.foto = id; herteken(); }), veld(b, 'onderschrift', 'Onderschrift (optioneel)'));
     if (b.type === 'reeks') {
+        // Strook: foto's en tekstkaarten naast elkaar, op de site naar links te vegen.
+        const schuif = (j, stap) => { [b.fotos[j], b.fotos[j + stap]] = [b.fotos[j + stap], b.fotos[j]]; herteken(); };
         inhoud = h('div', { class: 'bh-velden' },
-            h('div', { class: 'bh-reeks' }, b.fotos.map((f, j) => h('div', { class: 'bh-reeks-foto' },
-                h('img', { src: fotoUrl(f.foto), alt: '' }),
-                h('input', { type: 'text', placeholder: 'Onderschrift', 'aria-label': 'Onderschrift', waarde: f.onderschrift, oninput: (ev) => { f.onderschrift = ev.target.value; markeerGewijzigd(); } }),
-                h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', tekst: 'Weghalen', onclick: () => { b.fotos.splice(j, 1); herteken(); } }),
+            h('p', { class: 'bh-hulp', tekst: 'Op de site een rij kaarten die je naar links veegt. Zet tekstkaarten tussen de foto\'s om het verhaal te vertellen.' }),
+            h('div', { class: 'bh-reeks' }, b.fotos.map((f, j) => h('div', { class: 'bh-reeks-foto' + (f.foto ? '' : ' bh-reeks-tekst') },
+                f.foto ? h('img', { src: fotoUrl(f.foto), alt: '' }) : null,
+                f.foto
+                    ? h('input', { type: 'text', placeholder: 'Onderschrift', 'aria-label': 'Onderschrift', waarde: f.onderschrift, oninput: (ev) => { f.onderschrift = ev.target.value; markeerGewijzigd(); } })
+                    : veld(f, 'tekst', 'Tekstkaart', { lang: true }),
+                h('div', { class: 'bh-reeks-knoppen' },
+                    h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', 'aria-label': 'Naar links', tekst: '←', disabled: j === 0, onclick: () => schuif(j, -1) }),
+                    h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', 'aria-label': 'Naar rechts', tekst: '→', disabled: j === b.fotos.length - 1, onclick: () => schuif(j, 1) }),
+                    h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', tekst: 'Weghalen', onclick: () => { b.fotos.splice(j, 1); herteken(); } })),
             ))),
-            uploadKnop('+ Foto\'s toevoegen', true, (ids) => { b.fotos.push(...ids.map((foto) => ({ foto, onderschrift: '' }))); herteken(); }),
+            h('div', { class: 'bh-reeks-toevoegen' },
+                uploadKnop('+ Foto\'s toevoegen', true, (ids) => { b.fotos.push(...ids.map((foto) => ({ foto, onderschrift: '' }))); herteken(); }),
+                h('button', { type: 'button', class: 'bh-knop bh-knop-licht', tekst: '+ Tekstkaart', onclick: () => { b.fotos.push({ tekst: '' }); herteken(); } })),
         );
     }
+
     return h('div', { class: 'bh-blok' }, kop, inhoud);
 }
 

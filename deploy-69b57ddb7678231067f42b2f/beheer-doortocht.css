@@ -101,3 +101,28 @@
 .bh-kaartvak-kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .5rem; margin-bottom: .75rem; }
 .bh-kaartvak-kop h2 { margin: 0; }
 .bh-onderaan { gap: .75rem; flex-wrap: wrap; }
+
+/* Opmaakbalk boven lange tekstvelden: vet, cursief, link */
+.bh-opmaak { margin-top: .25rem; }
+.bh-opmaakbalk { display: flex; align-items: center; gap: .3rem; flex-wrap: wrap; padding: .3rem; border: 1px solid rgba(25, 59, 58, .25); border-bottom: 0; border-radius: .5rem .5rem 0 0; background: #f6f1e7; }
+.bh-opmaak + textarea { border-top-left-radius: 0; border-top-right-radius: 0; }
+.bh-opmaakknop { min-width: 2.1rem; height: 2rem; padding: 0 .55rem; font: 600 .95rem var(--font-body); color: var(--av-petrol); background: #fff; border: 1px solid rgba(25, 59, 58, .3); border-radius: .35rem; cursor: pointer; }
+.bh-opmaakknop:hover { border-color: var(--av-petrol); }
+.bh-opmaakknop:focus-visible { outline: 3px solid rgba(233, 106, 75, .45); }
+.bh-opmaakknop em { font-family: Georgia, serif; font-size: 1.05rem; }
+.bh-opmaakknop-link { text-decoration: underline; text-underline-offset: 3px; }
+.bh-opmaakuitleg { margin-left: auto; font-size: .78rem; color: var(--av-petrol-zacht); white-space: pre; }
+.bh-linkvak { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem .75rem; padding: .75rem; border: 1px solid rgba(25, 59, 58, .25); border-bottom: 0; background: #fffdf6; }
+.bh-linkvak label span { display: block; font-size: .85rem; font-weight: 600; margin-bottom: .2rem; }
+.bh-linkvak-knoppen, .bh-linkfout { grid-column: 1 / -1; display: flex; gap: .5rem; margin: 0; }
+.bh-linkfout { color: #8a3b2f; }
+@media (max-width: 600px) { .bh-linkvak { grid-template-columns: 1fr; } .bh-opmaakuitleg { display: none; } }
+
+/* Strook in het beheer: tekstkaarten breder, knoppen onder elke kaart */
+.bh-reeks-tekst { grid-column: span 2; align-content: start; padding: .5rem; border: 1.5px dashed rgba(25, 59, 58, .35); border-radius: 8px; background: #fffdf6; }
+.bh-reeks-tekst textarea { min-height: 7rem; }
+.bh-reeks-knoppen { display: flex; gap: .3rem; flex-wrap: wrap; }
+.bh-reeks-knoppen .bh-knop:disabled { opacity: .35; cursor: default; }
+.bh-reeks-toevoegen { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin-top: .6rem; }
+@media (max-width: 600px) { .bh-reeks-tekst { grid-column: 1 / -1; } }
+.bh-reeks-tekst .bh-opmaakuitleg { display: none; }

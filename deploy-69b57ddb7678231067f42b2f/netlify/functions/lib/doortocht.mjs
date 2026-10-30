@@ -31,7 +31,7 @@ export const START = {
   versie: 2,
   plekken: [
     { id: "sap", naam: "SAP", adres: "Willem Buytewechstraat 61A, 3024 BM Rotterdam", lat: 51.9074322, lon: 4.4602528, beschrijving: "" },
-    { id: "tent", naam: "TENT", adres: "Coolhaven 32, 3024 AC Rotterdam", lat: 51.9079129, lon: 4.4605758, beschrijving: "" },
+    { id: "tent", naam: "TENT", adres: "Coolhaven 32, 3024 AC Rotterdam", lat: 51.9076, lon: 4.454, beschrijving: "" },
     { id: "nieuwe-instituut", naam: "Nieuwe Instituut", adres: "Museumpark 25, 3015 CB Rotterdam", lat: 51.9146161, lon: 4.4708953, beschrijving: "" },
     { id: "volkstuin", naam: "Streven naar Verbetering", adres: "Volkstuinvereniging, Rotterdam-Noord", lat: 51.9247071, lon: 4.4453405, beschrijving: "" },
     { id: "bakkerij", naam: "Studio de Bakkerij", adres: "Bergweg 283, 3037 EM Rotterdam", lat: 51.9339242, lon: 4.4735414, beschrijving: "" },
@@ -70,12 +70,16 @@ const fotoOfNull = (v) => (typeof v === "string" && FOTO_ID.test(v) ? v : null);
 // - heel oud (vóór 21 okt): "titel"/"ondertitel" worden "soort"/"naam";
 // - versie 1 (tot 23 okt): een bijeenkomst met meer data ("momenten") wordt per datum een eigen bijeenkomst,
 //   samen in een reeks. Verhaal, omslag en samenvatting gaan mee naar de eerste datum.
+const TENT_PIN = { lat: 51.9076, lon: 4.454 };
 export function zetOm(gegevens) {
   if (!gegevens) return gegevens;
   for (const p of gegevens.plekken || []) {
     if (p.beschrijving === undefined) p.beschrijving = "";
     // TENT stond eerst per vergissing op de Witte de Withstraat; het juiste adres is Coolhaven 32.
-    if (p.id === "tent" && /Witte de Withstraat/.test(p.adres || "")) Object.assign(p, { adres: "Coolhaven 32, 3024 AC Rotterdam", lat: 51.9079129, lon: 4.4605758 });
+    if (p.id === "tent" && /Witte de Withstraat/.test(p.adres || "")) Object.assign(p, { adres: "Coolhaven 32, 3024 AC Rotterdam", lat: TENT_PIN.lat, lon: TENT_PIN.lon });
+    // De pin van TENT staat bewust iets links van SAP (Sean, 30 okt): op het adres zelf vallen de twee pins
+    // over elkaar en is het samenwerkingslijntje niet te zien. Alleen als hij nog precies op het adres staat.
+    if (p.id === "tent" && p.lat === 51.9079129 && p.lon === 4.4605758) Object.assign(p, TENT_PIN);
   }
   if (gegevens.versie === 2 && Array.isArray(gegevens.bijeenkomsten)) return gegevens;
 
@@ -111,10 +115,11 @@ function schoneBlokken(invoer) {
     if (b?.type === "tekst") blokken.push({ type: "tekst", tekst: tekst(b.tekst, 20000) });
     else if (b?.type === "foto" && fotoOfNull(b.foto)) blokken.push({ type: "foto", foto: b.foto, onderschrift: tekst(b.onderschrift, 300) });
     else if (b?.type === "reeks") {
+      // Een reeks is een strook kaarten: foto's en (sinds 30 okt) tekstkaarten, in de gekozen volgorde.
       const fotos = (Array.isArray(b.fotos) ? b.fotos : [])
-        .filter((f) => fotoOfNull(f?.foto))
+        .filter((f) => fotoOfNull(f?.foto) || tekst(f?.tekst, 3000).trim())
         .slice(0, 30)
-        .map((f) => ({ foto: f.foto, onderschrift: tekst(f.onderschrift, 300) }));
+        .map((f) => (fotoOfNull(f.foto) ? { foto: f.foto, onderschrift: tekst(f.onderschrift, 300) } : { tekst: tekst(f.tekst, 3000) }));
       if (fotos.length) blokken.push({ type: "reeks", fotos });
     } else if (b?.type === "citaat") blokken.push({ type: "citaat", tekst: tekst(b.tekst, 1000), bron: tekst(b.bron, 200) });
   }

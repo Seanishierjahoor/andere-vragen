@@ -11,10 +11,9 @@ const MAANDEN = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli',
 const KORT = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
 const DAGEN = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
 const RUSTIG = matchMedia('(prefers-reduced-motion: reduce)');
-// Strookjes: namen van de plekken altijd zichtbaar op touchscreens (en in een smal venster),
-// omdat je daar niet kunt aanwijzen. Op false zetten om terug te gaan naar alleen pins.
+// Strookjes: namen van de plekken altijd zichtbaar, op elk scherm (sinds 30 okt ook met muis; daarvoor
+// alleen op touchscreens). Op false zetten om terug te gaan naar pins met een bordje bij aanwijzen.
 const STROOKJES = true;
-const AANRAAK = matchMedia('(hover: none), (max-width: 860px)');
 const SMAL = matchMedia('(max-width: 860px)');
 
 const kortDatum = (iso) => `${+iso.slice(8, 10)} ${KORT[+iso.slice(5, 7) - 1]}`;
@@ -30,9 +29,21 @@ const dataInJaar = (data) => opsomming(data.map((iso, i) => {
 }));
 const veilig = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const fotoUrl = (id) => '/doortocht-foto/' + encodeURIComponent(id);
+// Opmaak uit het beheer: **vet**, *cursief* en [tekst](adres). Eerst veilig gemaakt, daarna omgezet,
+// dus alleen deze drie dingen worden echte opmaak. Links naar andere sites openen in een nieuw tabblad.
+const nadruk = (s) => s.replace(/\*\*(\S(?:[^*\n]*?\S)?)\*\*/g, '<strong>$1</strong>').replace(/\*(\S(?:[^*\n]*?\S)?)\*/g, '<em>$1</em>');
+const opmaak = (tekst) => {
+    const links = [];
+    const s = veilig(tekst).replace(/\[([^\]\n]+)\]\(((?:https?:\/\/|mailto:|\/)[^\s)]+)\)/g, (_, t, url) => {
+        const extern = /^https?:/.test(url) && !/^https?:\/\/(www\.)?andere-vragen\.nl(\/|$)/.test(url);
+        links.push(`<a href="${url}"${extern ? ' target="_blank" rel="noopener"' : ''}>${nadruk(t)}</a>`);
+        return `\u0000${links.length - 1}\u0000`;
+    });
+    return nadruk(s).replace(/\u0000(\d+)\u0000/g, (_, i) => links[i]);
+};
 // Alinea's bij een lege regel, een enkele enter wordt een regelafbreking.
 const alineas = (tekst) => String(tekst || '').trim().split(/\n\s*\n/).filter(Boolean)
-    .map((a) => `<p>${veilig(a).replace(/\n/g, '<br>')}</p>`).join('');
+    .map((a) => `<p>${opmaak(a).replace(/\n/g, '<br>')}</p>`).join('');
 
 const $ = (id) => document.getElementById(id);
 const podium = $('podium');
@@ -365,8 +376,7 @@ function schaalPins() {
 const voorrang = Object.keys(bubbelVan).sort((a, b) =>
     EVENEMENTEN.filter((e) => e.plekken.includes(b)).length - EVENEMENTEN.filter((e) => e.plekken.includes(a)).length);
 function plaatsStrookjes(u) {
-    podium.classList.toggle('met-strookjes', AANRAAK.matches);
-    if (!AANRAAK.matches) return;
+    podium.classList.add('met-strookjes');
     const scherm = (id) => [(xyVan[id][0] - beeld.x) / u, (xyVan[id][1] - beeld.y) / u];
     const bezet = Object.keys(bubbelVan).map((id) => { const [x, y] = scherm(id); return { id, x: x - 15, y: y - 15, w: 30, h: 30 }; });
     // Ook de zoomknoppen en de indexknop zijn bezet.
@@ -723,9 +733,77 @@ document.querySelector('.dt-startknop').addEventListener('click', () => {
 function blokHtml(b) {
     if (b.type === 'tekst') return `<div class="dt-tekst">${alineas(b.tekst)}</div>`;
     if (b.type === 'foto') return `<figure class="breed"><img src="${fotoUrl(b.foto)}" alt="${veilig(b.onderschrift)}" loading="lazy">${b.onderschrift ? `<figcaption>${veilig(b.onderschrift)}</figcaption>` : ''}</figure>`;
-    if (b.type === 'reeks') return `<div class="dt-reeks breed">${b.fotos.map((f) => `<figure><img src="${fotoUrl(f.foto)}" alt="${veilig(f.onderschrift)}" loading="lazy">${f.onderschrift ? `<figcaption>${veilig(f.onderschrift)}</figcaption>` : ''}</figure>`).join('')}</div>`;
-    if (b.type === 'citaat') return `<blockquote><p>${veilig(b.tekst)}</p>${b.bron ? `<footer>${veilig(b.bron)}</footer>` : ''}</blockquote>`;
+    if (b.type === 'reeks') return strookHtml(b.fotos);
+    if (b.type === 'citaat') return `<blockquote><p>${opmaak(b.tekst).replace(/\n/g, '<br>')}</p>${b.bron ? `<footer>${veilig(b.bron)}</footer>` : ''}</blockquote>`;
     return '';
+}
+
+// Strook: foto's en tekstkaarten naast elkaar, naar links te vegen (of met de pijltjes).
+function strookHtml(kaarten) {
+    const kaart = (k, i) => k.foto
+        ? `<figure class="dt-strook-kaart dt-strook-foto"><img src="${fotoUrl(k.foto)}" alt="${veilig(k.onderschrift)}" loading="lazy" draggable="false">${k.onderschrift ? `<figcaption>${opmaak(k.onderschrift)}</figcaption>` : ''}</figure>`
+        : `<div class="dt-strook-kaart dt-strook-tekst"><div class="dt-strook-tekst-binnen">${alineas(k.tekst)}</div></div>`;
+    const meer = kaarten.length > 1;
+    return `<section class="dt-strook breed" aria-roledescription="carrousel" aria-label="Foto's en tekst">
+        <div class="dt-strook-baan" tabindex="0">${kaarten.map(kaart).join('')}</div>
+        ${meer ? `<div class="dt-strook-bediening">
+            <button type="button" class="dt-knop dt-knop-klein dt-strook-vorige" aria-label="Vorige">←</button>
+            <div class="dt-strook-stippen" aria-hidden="true">${kaarten.map(() => '<span></span>').join('')}</div>
+            <button type="button" class="dt-knop dt-knop-klein dt-strook-volgende" aria-label="Volgende">→</button>
+        </div>` : ''}
+    </section>`;
+}
+
+// Pijltjes, stippen en slepen met de muis voor elke strook in het verhaal. Vegen en scrollen doet de browser zelf.
+function zetStrokenAan(vak) {
+    for (const strook of vak.querySelectorAll('.dt-strook')) {
+        const baan = strook.querySelector('.dt-strook-baan');
+        const kaarten = [...baan.children];
+        const stippen = [...strook.querySelectorAll('.dt-strook-stippen span')];
+        const vorige = strook.querySelector('.dt-strook-vorige'), volgende = strook.querySelector('.dt-strook-volgende');
+        const begin = () => kaarten[0].offsetLeft;
+        const huidige = () => {
+            const x = baan.scrollLeft + begin();
+            return kaarten.reduce((best, k, i) => Math.abs(k.offsetLeft - x) < Math.abs(kaarten[best].offsetLeft - x) ? i : best, 0);
+        };
+        const ga = (i) => baan.scrollTo({ left: kaarten[Math.max(0, Math.min(kaarten.length - 1, i))].offsetLeft - begin(), behavior: RUSTIG.matches ? 'auto' : 'smooth' });
+        const bij = () => {
+            const i = huidige(), eind = baan.scrollLeft >= baan.scrollWidth - baan.clientWidth - 4;
+            const actief = eind ? kaarten.length - 1 : i;
+            stippen.forEach((s, j) => s.classList.toggle('aan', j === actief));
+            if (vorige) vorige.disabled = baan.scrollLeft < 4;
+            if (volgende) volgende.disabled = eind;
+        };
+        vorige?.addEventListener('click', () => ga(huidige() - 1));
+        volgende?.addEventListener('click', () => ga(huidige() + 1));
+        baan.addEventListener('scroll', bij, { passive: true });
+        // Foto's laden pas later; daarna is de strook breder, dus opnieuw meten
+        for (const img of baan.querySelectorAll('img')) img.addEventListener('load', bij);
+        new ResizeObserver(bij).observe(baan);
+        baan.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') { e.preventDefault(); ga(huidige() + 1); }
+            if (e.key === 'ArrowLeft') { e.preventDefault(); ga(huidige() - 1); }
+        });
+        // Slepen met de muis (aanraken en trackpad werken al vanzelf)
+        let sleep = null;
+        baan.addEventListener('pointerdown', (e) => {
+            if (e.pointerType !== 'mouse' || e.button !== 0) return;
+            sleep = { x: e.clientX, links: baan.scrollLeft, bewogen: false, id: e.pointerId };
+        });
+        baan.addEventListener('pointermove', (e) => {
+            if (!sleep) return;
+            const dx = e.clientX - sleep.x;
+            if (!sleep.bewogen && Math.abs(dx) > 4) { sleep.bewogen = true; baan.classList.add('sleept'); baan.setPointerCapture(sleep.id); }
+            if (sleep.bewogen) baan.scrollLeft = sleep.links - dx;
+        });
+        baan.addEventListener('lostpointercapture', () => baan.dispatchEvent(new Event('pointerup')));
+        baan.addEventListener('pointerup', () => {
+            if (!sleep) return;
+            const was = sleep.bewogen; sleep = null;
+            if (was) { baan.classList.remove('sleept'); ga(huidige()); }
+        });
+        bij();
+    }
 }
 
 function verhaalHtml(e) {
@@ -849,6 +927,7 @@ async function toonOverlay(soort, e) {
         await vliegNaar(rondPunten(e.plekken.map((p) => xyVan[p]), { rand: 90, minW: 320 }), 850);
     }
     overlay.innerHTML = soort === 'archief' ? archiefHtml() : verhaalHtml(e);
+    zetStrokenAan(overlay);
     overlayInhoud = soort === 'archief' ? 'archief' : e.id;
     overlay.hidden = false;
     overlay.scrollTop = 0;
@@ -912,7 +991,6 @@ document.addEventListener('keydown', (ev) => {
 });
 
 let vorigeMaat = schermMaat().join();
-AANRAAK.addEventListener('change', () => schaalPins());
 new ResizeObserver(() => {
     const maat = schermMaat().join();
     if (maat === vorigeMaat) return;

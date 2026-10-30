@@ -1,7 +1,7 @@
 /* Huisstijl andere vragen (okt 2026).
    Warm papier als basis, petrol voor tekst en vlakken, koraal spaarzaam als accent.
    Koraal haalt op papier geen 3:1 contrast: nooit gebruiken voor tekst, focus of
-   als enige drager van informatie. Oude pagina's (congres e.d.) gebruiken nog styles.css. */
+   als enige drager van informatie. */
 
 :root {
     --av-paper: #F3EFE6;
@@ -555,6 +555,3 @@ a:hover { text-decoration-thickness: 2px; }
 .av-los .av-wrap { max-width: 38rem; }
 .av-los h1 { margin: 0.75rem 0 1.25rem; }
 .av-los p { margin-bottom: 1.5rem; }
-
-/* Bewerk-modus (editor.js) */
-.editing-target { outline: 1px dashed var(--av-lijn-sterk); }

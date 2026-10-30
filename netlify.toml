@@ -1,35 +1,5 @@
-[[redirects]]
-  from = "/perspective"
-  to = "/praktijk.html"
-  status = 301
-
-[[redirects]]
-  from = "/perspective.html"
-  to = "/praktijk.html"
-  status = 301
-
-[[redirects]]
-  from = "/method"
-  to = "/praktijk.html"
-  status = 301
-
-[[redirects]]
-  from = "/method.html"
-  to = "/praktijk.html"
-  status = 301
-
-[[redirects]]
-  from = "/about.html"
-  to = "/over-mij.html"
-  status = 301
-
-[[redirects]]
-  from = "/collaboration.html"
-  to = "/organisaties.html"
-  status = 301
-
-# --- Tijdelijk (pivot, sept 2026): alleen samenkomsten (en congres) zijn in gebruik. ---
-# Kopie van de volledige site: git tag `launch-sept-2026`. Verwijder dit blok om terug te gaan.
+# Sinds de pivot (sept 2026) is Samenkomsten de voorpagina. De oude pagina's zijn op 30 okt 2026 weggehaald;
+# een onbekend adres toont 404.html. De oude site staat in git: tag `launch-sept-2026`.
 
 [[redirects]]
   from = "/"
@@ -45,54 +15,6 @@
 [[redirects]]
   from = "/index.html"
   to = "/"
-  status = 302
-  force = true
-
-[[redirects]]
-  from = "/organisaties"
-  to = "/onder-constructie.html"
-  status = 302
-  force = true
-
-[[redirects]]
-  from = "/organisaties.html"
-  to = "/onder-constructie.html"
-  status = 302
-  force = true
-
-[[redirects]]
-  from = "/praktijk"
-  to = "/onder-constructie.html"
-  status = 302
-  force = true
-
-[[redirects]]
-  from = "/praktijk.html"
-  to = "/onder-constructie.html"
-  status = 302
-  force = true
-
-[[redirects]]
-  from = "/over-mij"
-  to = "/onder-constructie.html"
-  status = 302
-  force = true
-
-[[redirects]]
-  from = "/over-mij.html"
-  to = "/onder-constructie.html"
-  status = 302
-  force = true
-
-[[redirects]]
-  from = "/contact"
-  to = "/onder-constructie.html"
-  status = 302
-  force = true
-
-[[redirects]]
-  from = "/contact.html"
-  to = "/onder-constructie.html"
   status = 302
   force = true
 

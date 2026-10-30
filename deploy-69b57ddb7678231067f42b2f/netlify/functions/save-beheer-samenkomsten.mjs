@@ -1,6 +1,6 @@
 // Slaat wijzigingen uit het beheerscherm (/beheer-samenkomsten.html) op: schrijft
 // data/samenkomsten.mjs en data/instellingen.mjs opnieuw weg als commit naar GitHub.
-// Zelfde mechanisme als de bewerk-modus (save-edit.mjs): EDITOR_PASSWORD + GITHUB_TOKEN.
+// Beveiligd met EDITOR_PASSWORD; slaat op via GITHUB_TOKEN.
 //
 // Na het opslaan bouwt Netlify een nieuwe deploy, die automatisch live gaat.
 
