@@ -296,7 +296,7 @@ for (const e of EVENEMENTEN) {
         const cx = (x1 + x2) / 2 - (y2 - y1) * 0.18, cy = (y1 + y2) / 2 + (x2 - x1) * 0.18;
         // Een lichte baan eronder, en koraal stippen met een petrol rand: zo steekt de lijn af tegen de kaart.
         const d = `M${x1} ${y1}Q${cx} ${cy} ${x2} ${y2}`;
-        const g = maakSvg('g', { class: 'lijn' });
+        const g = maakSvg('g', { class: 'lijn ' + (komtNog(e) ? 'komt' : 'geweest') });
         g.append(maakSvg('path', { d, class: 'lijn-baan' }), maakSvg('path', { d, class: 'lijn-rand' }), maakSvg('path', { d, class: 'lijn-stip' }));
         return lijnen.appendChild(g);
     });
@@ -341,7 +341,7 @@ for (const p of gebruikt) {
     const data = EVENEMENTEN.filter((e) => e.plekken.includes(p.id)).flatMap((e) => e.data).sort();
     const komt = data.filter((d) => d >= VANDAAG);
     const regel = komt.length ? `Volgende: ${kortDatum(komt[0])}` : `Geweest: ${kortDatum(data[data.length - 1])}`;
-    const g = maakSvg('g', { class: 'bubbel ' + (komt.length ? 'komt' : 'geweest'), tabindex: '-1', role: 'button', 'aria-label': `${p.naam}, ${regel}` });
+    const g = maakSvg('g', { class: 'bubbel ' + (komt.length ? 'komt' : 'geweest') + (komt.length ? ' heeft-komt' : '') + (komt.length < data.length ? ' heeft-geweest' : ''), tabindex: '-1', role: 'button', 'aria-label': `${p.naam}, ${regel}` });
     g.innerHTML = `${knipsel(p.id)}
         <g class="bordje"><rect class="bordschaduw" rx="4"/><rect class="vlak" rx="4"/><text class="naam">${veilig(p.naam)}</text><text class="regel">${regel}</text></g>
         ${STROOKJES ? `<g class="strook"><g class="strook-draai"><rect class="strook-schaduw" rx="2"/><rect class="strook-vlak" rx="2"/><text class="strook-naam">${veilig(p.naam)}</text><rect class="plakband" width="15" height="7"/></g></g>` : ''}`;
@@ -382,7 +382,7 @@ function plaatsStrookjes(u) {
     const bezet = Object.keys(bubbelVan).map((id) => { const [x, y] = scherm(id); return { id, x: x - 15, y: y - 15, w: 30, h: 30 }; });
     // Ook de zoomknoppen, de indexknop en de legenda zijn bezet.
     const vak = kaartVak.getBoundingClientRect();
-    for (const el of [document.querySelector('.dt-bediening'), $('index-knop'), document.querySelector('.dt-legenda'), document.querySelector('.dt-samenwerkingen')]) {
+    for (const el of [document.querySelector('.dt-bediening'), $('index-knop'), document.querySelector('.dt-chips')]) {
         const r = el.getBoundingClientRect();
         if (r.width) bezet.push({ id: 'knoppen', x: r.left - vak.left - 6, y: r.top - vak.top - 6, w: r.width + 12, h: r.height + 12 });
     }
@@ -440,14 +440,34 @@ function teken() {
 }
 const zweefOp = (sel) => { zweef = sel; teken(); };
 
-// Knop "Zie alle samenwerkingen": alle samenwerkingslijnen tegelijk zichtbaar.
-const alleLijnenKnop = document.querySelector('.dt-samenwerkingen');
+// Chips bovenaan de kaart. "Komt eraan" en "Geweest" zijn de legenda en filteren tegelijk de pins, de lijnen
+// en de index (nog een klik: weer alles). "Samenwerkingen" zet alle samenwerkingslijnen aan of uit.
+const chips = document.querySelector('.dt-chips');
+const alleLijnenKnop = chips.querySelector('.dt-samenwerkingen');
 alleLijnenKnop.addEventListener('click', () => {
     const aan = alleLijnenKnop.getAttribute('aria-pressed') !== 'true';
     alleLijnenKnop.setAttribute('aria-pressed', String(aan));
-    alleLijnenKnop.querySelector('span').textContent = aan ? 'Verberg samenwerkingen' : 'Zie alle samenwerkingen';
     podium.classList.toggle('alle-lijnen', aan);
 });
+const filterKnoppen = [...chips.querySelectorAll('[data-filter]')];
+for (const knop of filterKnoppen) knop.addEventListener('click', () => {
+    const filter = podium.dataset.filter === knop.dataset.filter ? '' : knop.dataset.filter;
+    podium.dataset.filter = filter;
+    filterKnoppen.forEach((k) => k.setAttribute('aria-pressed', String(k.dataset.filter === filter)));
+    sluitPinkaart();
+    sluitRij();
+});
+// De eerste keer dat de kaart opengaat, lichten alle samenwerkingslijnen even op en geeft de chip een puls:
+// zo zie je meteen wat hij doet en waar hij zit.
+let alGeflitst = false;
+function flitsSamenwerkingen() {
+    if (alGeflitst || RUSTIG.matches || !lijnen.children.length) return;
+    alGeflitst = true;
+    setTimeout(() => {
+        podium.classList.add('flits');
+        setTimeout(() => podium.classList.remove('flits'), 1900);
+    }, 900);
+}
 
 // --- Kaartje bij een pin ----------------------------------------------------------
 
@@ -555,8 +575,9 @@ function plaatsPlekkaartjes() {
     // Niet onder de index, en op mobiel niet onder de legenda (bovenaan) en de zoomknoppen (rechts).
     const vak = kaartVak.getBoundingClientRect();
     const knoppen = document.querySelector('.dt-bediening').getBoundingClientRect();
-    const rechts = SMAL.matches ? Math.min(cw * vrijVlak().x1, knoppen.left - vak.left - 4) : cw * vrijVlak().x1;
-    const boven = SMAL.matches ? document.querySelector('.dt-legenda').getBoundingClientRect().bottom - vak.top + 10 : 10;
+    // (de zoomknoppen tellen alleen mee als ze er zijn; op een smal scherm zijn ze verborgen)
+    const rechts = SMAL.matches && knoppen.width ? Math.min(cw * vrijVlak().x1, knoppen.left - vak.left - 4) : cw * vrijVlak().x1;
+    const boven = document.querySelector('.dt-chips').getBoundingClientRect().bottom - vak.top + 10;
     const pos = plekkaartIds.map((id) => [(xyVan[id][0] - beeld.x) / u, (xyVan[id][1] - beeld.y) / u]);
     const minX = Math.min(...pos.map((q) => q[0]));
     plekkaartVak.querySelectorAll('.dt-plekkaart').forEach((k, i) => {
@@ -694,6 +715,7 @@ for (const groep of [
     const kop = document.createElement('h2');
     kop.innerHTML = `<span class="dt-stip ${groep.soort}" aria-hidden="true"></span>${groep.kop}`;
     const lijst = document.createElement('ol');
+    kop.className = lijst.className = 'dt-groep-' + groep.soort;
     for (const { e, d, m, nr } of groep.rijen) {
         const li = document.createElement('li');
         const namen = naamEnThemaHtml(e, [d]);
@@ -748,8 +770,7 @@ function zetStand(stand) {
     if (opKaart) window.scrollTo({ top: 0, behavior: 'instant' });
     indexVak.inert = !opKaart;
     document.querySelector('.dt-bediening').inert = !opKaart;
-    document.querySelector('.dt-legenda').inert = !opKaart;
-    alleLijnenKnop.inert = !opKaart;
+    chips.inert = !opKaart;
     document.querySelector('.dt-start').inert = opKaart;
     document.querySelector('.dt-archieflink').inert = opKaart;
     $('naar-omslag').tabIndex = opKaart ? 0 : -1;
@@ -1087,7 +1108,7 @@ async function volgHash({ eerste = false } = {}) {
     const bron = inktBron || [beeld.x + beeld.w / 2, beeld.y + beeld.h * 0.56];
     inktBron = null;
     const veranderd = zetStand(naarKaart ? 'kaart' : 'omslag');
-    if (veranderd && naarKaart && !eerste) { pinsGolf(); kleurIn(bron); return; }
+    if (veranderd && naarKaart && !eerste) { pinsGolf(); kleurIn(bron).then(flitsSamenwerkingen); return; }
     if (veranderd && !naarKaart) svg.classList.add('lijnwerk');
     if (!naarKaart) svg.classList.add('lijnwerk'); else svg.classList.remove('lijnwerk');
     if (veranderd || eerste) vliegNaar(overzicht(), eerste ? 0 : 1300);

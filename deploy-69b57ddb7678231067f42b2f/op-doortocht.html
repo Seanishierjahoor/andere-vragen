@@ -61,13 +61,12 @@
                 <div class="dt-index-binnen" id="index"></div>
             </aside>
 
-            <ul class="dt-legenda" aria-label="Legenda" inert>
-                <li><svg viewBox="-12 -12 24 24" aria-hidden="true"><circle r="10" fill="#FFFDF6" stroke="rgba(25,59,58,.3)"/><circle r="7" fill="#E96A4B"/></svg>Komt nog</li>
-                <li><svg viewBox="-12 -12 24 24" aria-hidden="true"><circle r="10" fill="#FFFDF6" stroke="rgba(25,59,58,.3)"/><circle r="7" fill="#193B3A"/></svg>Geweest</li>
-                <li><svg viewBox="0 0 34 12" aria-hidden="true"><path d="M3 6H31" stroke="#FFFDF6" stroke-width="10" stroke-linecap="round"/><path d="M3 6H31" stroke="#193B3A" stroke-width="7" stroke-dasharray="0 9" stroke-linecap="round"/><path d="M3 6H31" stroke="#E96A4B" stroke-width="4" stroke-dasharray="0 9" stroke-linecap="round"/></svg>Samenwerking</li>
-            </ul>
-
-            <button type="button" class="dt-samenwerkingen dt-knop" aria-pressed="false" inert><svg viewBox="0 0 40 12" aria-hidden="true"><path d="M3 6H37" class="baan"/><path d="M3 6H37" class="rand"/><path d="M3 6H37" class="stip"/></svg><span>Zie alle samenwerkingen</span></button>
+            <!-- Chips bovenaan: tegelijk legenda en bediening (Komt eraan / Geweest filteren, Samenwerkingen toont alle lijnen). -->
+            <div class="dt-chips" role="toolbar" aria-label="Wat je ziet op de kaart" inert>
+                <button type="button" class="dt-chip" data-filter="komt" aria-pressed="false"><span class="dt-stip komt" aria-hidden="true"></span>Komt eraan</button>
+                <button type="button" class="dt-chip" data-filter="geweest" aria-pressed="false"><span class="dt-stip geweest" aria-hidden="true"></span>Geweest</button>
+                <button type="button" class="dt-chip dt-samenwerkingen" aria-pressed="false"><svg viewBox="0 0 40 12" aria-hidden="true"><path d="M3 6H37" class="baan"/><path d="M3 6H37" class="rand"/><path d="M3 6H37" class="stip"/></svg><span>Samenwerkingen</span></button>
+            </div>
 
             <div class="dt-bediening" inert>
                 <button type="button" id="zoom-in" aria-label="Inzoomen">+</button>
