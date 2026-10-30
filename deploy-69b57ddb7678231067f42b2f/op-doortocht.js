@@ -241,17 +241,29 @@ function zetBeeld(b, { stil = false } = {}) {
 }
 
 let animatie = null;
-function vliegNaar(doel, duur = 900) {
+// Een vlucht die wordt onderbroken (slepen, zoomen, een nieuwe vlucht) telt ook als klaar. Anders blijft
+// wie erop wacht hangen, bijvoorbeeld het verhaal dat na het invliegen moet openen.
+let vluchtKlaar = null;
+function stopAnimatie() {
     cancelAnimationFrame(animatie);
+    const klaar = vluchtKlaar;
+    vluchtKlaar = null;
+    klaar?.();
+}
+
+function vliegNaar(doel, duur = 900) {
+    stopAnimatie();
     doel = begrens(doel);
     if (RUSTIG.matches || duur === 0) { zetBeeld(doel); return Promise.resolve(); }
     const start = { ...beeld }, t0 = performance.now();
     const zacht = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
     return new Promise((klaar) => {
+        vluchtKlaar = klaar;
         const stap = (nu) => {
             const t = Math.min((nu - t0) / duur, 1), k = zacht(t);
             zetBeeld({ x: start.x + (doel.x - start.x) * k, y: start.y + (doel.y - start.y) * k, w: start.w + (doel.w - start.w) * k });
-            if (t < 1) animatie = requestAnimationFrame(stap); else klaar();
+            if (t < 1) animatie = requestAnimationFrame(stap);
+            else { vluchtKlaar = null; klaar(); }
         };
         animatie = requestAnimationFrame(stap);
     });
@@ -690,7 +702,7 @@ svg.addEventListener('pointermove', (ev) => {
     if (!versleept && Math.hypot(dx, dy) < 3) return;
     if (!versleept) { svg.setPointerCapture(ev.pointerId); svg.classList.add('slepen'); }
     versleept = true;
-    cancelAnimationFrame(animatie);
+    stopAnimatie();
     const u = eenheidPerPixel();
     zetBeeld({ x: beeld.x - dx * u, y: beeld.y - dy * u, w: beeld.w });
 });
@@ -706,7 +718,7 @@ svg.addEventListener('click', () => { if (!versleept) { sluitPinkaart(); sluitRi
 kaartVak.addEventListener('wheel', (ev) => {
     if (podium.dataset.stand !== 'kaart') return;
     ev.preventDefault();
-    cancelAnimationFrame(animatie);
+    stopAnimatie();
     zetBeeld(zoomOm(Math.exp(ev.deltaY * (ev.ctrlKey ? 0.01 : 0.0015)), ev.clientX, ev.clientY));
 }, { passive: false });
 
@@ -1086,6 +1098,8 @@ async function toonOverlay(soort, e) {
         pinkaart.hidden = true;
         vast = selectieVanEvenement(e); teken();
         await vliegNaar(rondPunten(e.plekken.map((p) => xyVan[p]), { rand: 90, minW: 320 }), 850);
+        // Intussen ergens anders heen gegaan (bijvoorbeeld terug)? Dan dit verhaal niet meer openen.
+        if (location.hash !== '#verhaal/' + encodeURIComponent(e.id)) return;
     }
     overlay.innerHTML = soort === 'archief' ? archiefHtml() : verhaalHtml(e);
     zetStrokenAan(overlay);
