@@ -3,6 +3,7 @@
 // opgeslagen via /.netlify/functions/beheer-doortocht; foto's gaan los naar /doortocht-foto.
 
 import { tekenKaart, maakSvg } from './op-doortocht-kaart.js';
+import { strookKaarten, meetVerhoudingen } from './op-doortocht-tekst.js';
 
 const FUNCTIE = '/.netlify/functions/beheer-doortocht';
 const MAX_FOTO = 2000; // langste zijde in pixels na verkleinen
@@ -396,23 +397,30 @@ function blokEditor(e, b, i, herteken) {
     if (b.type === 'reeks') {
         // Strook: foto's en tekstkaarten naast elkaar, op de site naar links te vegen.
         const schuif = (j, stap) => { [b.fotos[j], b.fotos[j + stap]] = [b.fotos[j + stap], b.fotos[j]]; herteken(); };
+        // Levend voorbeeld met dezelfde kaarten als de site; wordt bijgewerkt bij elke wijziging in deze strook.
+        const voorbeeld = h('div', { class: 'bh-strook-voorbeeld dt-artikel' });
+        const toonVoorbeeld = () => { voorbeeld.innerHTML = `<section class="dt-strook"><div class="dt-strook-baan">${strookKaarten(b.fotos)}</div></section>`; meetVerhoudingen(voorbeeld); };
+        toonVoorbeeld();
         inhoud = h('div', { class: 'bh-velden' },
-            h('p', { class: 'bh-hulp', tekst: 'Op de site een rij kaarten die je naar links veegt. Zet tekstkaarten tussen de foto\'s om het verhaal te vertellen.' }),
+            h('p', { class: 'bh-hulp', tekst: 'Zo ziet de strook eruit. Dicht is elke kaart een speelkaart; wijs een kaart aan om te zien hoe hij openvouwt (foto) of omdraait (tekst).' }),
+            voorbeeld,
+            h('p', { class: 'bh-hulp', tekst: 'Hieronder: bij elke foto zie je het stuk dat zichtbaar is als de kaart dicht is. Klik op de foto om te kiezen wat dan in beeld staat. Opengevouwen is de hele foto te zien.' }),
             h('div', { class: 'bh-reeks' }, b.fotos.map((f, j) => h('div', { class: 'bh-reeks-foto' + (f.foto ? '' : ' bh-reeks-tekst') },
-                f.foto ? h('img', { src: fotoUrl(f.foto), alt: '' }) : null,
+                f.foto ? kaartFocus(f, toonVoorbeeld) : null,
                 f.foto
-                    ? h('input', { type: 'text', placeholder: 'Onderschrift', 'aria-label': 'Onderschrift', waarde: f.onderschrift, oninput: (ev) => { f.onderschrift = ev.target.value; markeerGewijzigd(); } })
-                    : veld(f, 'tekst', 'Tekstkaart', { lang: true }),
+                    ? h('input', { type: 'text', placeholder: 'Onderschrift', 'aria-label': 'Onderschrift', waarde: f.onderschrift, oninput: (ev) => { f.onderschrift = ev.target.value; markeerGewijzigd(); toonVoorbeeld(); } })
+                    : veld(f, 'tekst', 'Tekstkaart', { lang: true, naWijzig: toonVoorbeeld }),
                 h('div', { class: 'bh-reeks-knoppen' },
                     h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', 'aria-label': 'Naar links', tekst: '←', disabled: j === 0, onclick: () => schuif(j, -1) }),
                     h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', 'aria-label': 'Naar rechts', tekst: '→', disabled: j === b.fotos.length - 1, onclick: () => schuif(j, 1) }),
                     h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', tekst: 'Weghalen', onclick: () => { b.fotos.splice(j, 1); herteken(); } })),
             ))),
             h('div', { class: 'bh-reeks-toevoegen' },
-                uploadKnop('+ Foto\'s toevoegen', true, (ids) => { b.fotos.push(...ids.map((foto) => ({ foto, onderschrift: '' }))); herteken(); }),
+                uploadKnop('+ Foto\'s toevoegen', true, (ids) => { b.fotos.push(...ids.map((foto) => ({ foto, onderschrift: '', focus: { x: 50, y: 50 } }))); herteken(); }),
                 h('button', { type: 'button', class: 'bh-knop bh-knop-licht', tekst: '+ Tekstkaart', onclick: () => { b.fotos.push({ tekst: '' }); herteken(); } })),
         );
     }
+
 
     return h('div', { class: 'bh-blok' }, kop, inhoud);
 }
@@ -487,6 +495,27 @@ function fotoKiezer(huidig, wijzig) {
 
 // Focuspunt: klik op de foto om te kiezen wat in beeld blijft als de foto op de kaart wordt bijgesneden.
 // Ernaast twee voorbeelden in de maten van de kaartjes.
+// Fotokaart in een strook: de dichte kaart (speelkaartvorm) met een stip; klik om te kiezen wat dicht in beeld staat.
+function kaartFocus(f, naWijzig) {
+    f.focus = f.focus || { x: 50, y: 50 };
+    const img = h('img', { src: fotoUrl(f.foto), alt: '', draggable: 'false' });
+    const stip = h('span', { class: 'bh-focus-stip', 'aria-hidden': 'true' });
+    const zet = () => { img.style.objectPosition = `${f.focus.x}% ${f.focus.y}%`; stip.style.left = f.focus.x + '%'; stip.style.top = f.focus.y + '%'; };
+    const vak = h('div', { class: 'bh-kaart-dicht', title: 'Klik op wat in beeld moet staan als de kaart dicht is' }, img, stip);
+    // Klikken in de bijgesneden kaart: omrekenen naar een punt op de hele foto (object-fit: cover)
+    vak.addEventListener('click', (ev) => {
+        const r = vak.getBoundingClientRect();
+        const fw = img.naturalWidth || r.width, fh = img.naturalHeight || r.height;
+        const k = Math.max(r.width / fw, r.height / fh), bw = fw * k, bh = fh * k;
+        const ox = (r.width - bw) * f.focus.x / 100, oy = (r.height - bh) * f.focus.y / 100;
+        const px = (ev.clientX - r.left - ox) / bw, py = (ev.clientY - r.top - oy) / bh;
+        f.focus = { x: Math.round(Math.min(1, Math.max(0, px)) * 100), y: Math.round(Math.min(1, Math.max(0, py)) * 100) };
+        zet(); markeerGewijzigd(); naWijzig?.();
+    });
+    zet();
+    return vak;
+}
+
 // Werkt voor de plekfoto (foto + focus) en de omslagfoto van een bijeenkomst (omslag + omslagFocus).
 function focusKiezer(p, fotoSleutel = 'foto', focusSleutel = 'focus', maten = [['Kaartje bij de pin', '16 / 9'], ['Kaartje na klik in de index', '4 / 3']]) {
     p[focusSleutel] = p[focusSleutel] || { x: 50, y: 50 };

@@ -5,6 +5,11 @@
 // Gegevens komen uit /.netlify/functions/get-doortocht (beheer: /beheer-doortocht.html).
 
 import { tekenKaart, maakSvg } from './op-doortocht-kaart.js';
+import { veilig, fotoUrl, focusStijl, opmaak, alineas, platteTekst, beginVan, strookKaarten, meetVerhoudingen } from './op-doortocht-tekst.js';
+
+// Omslagfoto en plekfoto met het focuspunt uit het beheer (welk deel in beeld blijft als ze worden bijgesneden)
+const omslagFoto = (e, klasse = '') => `<img${klasse ? ` class="${klasse}"` : ''} src="${fotoUrl(e.omslag)}" alt="" style="${focusStijl(e.omslagFocus)}" loading="lazy">`;
+const plekFoto = (p, alt = '') => `<img src="${fotoUrl(p.foto)}" alt="${veilig(alt)}" style="${focusStijl(p.focus)}" draggable="false">`;
 
 const VANDAAG = new Date().toLocaleDateString('sv-SE'); // JJJJ-MM-DD in lokale tijd
 const MAANDEN = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
@@ -27,27 +32,6 @@ const dataInJaar = (data) => opsomming(data.map((iso, i) => {
     const volgende = data[i + 1];
     return volgende && volgende.slice(5, 7) === iso.slice(5, 7) ? `${+iso.slice(8, 10)}` : `${+iso.slice(8, 10)} ${MAANDEN[+iso.slice(5, 7) - 1]}`;
 }));
-const veilig = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const fotoUrl = (id) => '/doortocht-foto/' + encodeURIComponent(id);
-// Plekfoto met het focuspunt uit het beheer (welk deel in beeld blijft als hij wordt bijgesneden)
-const focusStijl = (f) => `object-position: ${f?.x ?? 50}% ${f?.y ?? 50}%`;
-const omslagFoto = (e, klasse = '') => `<img${klasse ? ` class="${klasse}"` : ''} src="${fotoUrl(e.omslag)}" alt="" style="${focusStijl(e.omslagFocus)}" loading="lazy">`;
-const plekFoto = (p, alt = '') => `<img src="${fotoUrl(p.foto)}" alt="${veilig(alt)}" style="object-position: ${p.focus?.x ?? 50}% ${p.focus?.y ?? 50}%" draggable="false">`;
-// Opmaak uit het beheer: **vet**, *cursief* en [tekst](adres). Eerst veilig gemaakt, daarna omgezet,
-// dus alleen deze drie dingen worden echte opmaak. Links naar andere sites openen in een nieuw tabblad.
-const nadruk = (s) => s.replace(/\*\*(\S(?:[^*\n]*?\S)?)\*\*/g, '<strong>$1</strong>').replace(/\*(\S(?:[^*\n]*?\S)?)\*/g, '<em>$1</em>');
-const opmaak = (tekst) => {
-    const links = [];
-    const s = veilig(tekst).replace(/\[([^\]\n]+)\]\(((?:https?:\/\/|mailto:|\/)[^\s)]+)\)/g, (_, t, url) => {
-        const extern = /^https?:/.test(url) && !/^https?:\/\/(www\.)?andere-vragen\.nl(\/|$)/.test(url);
-        links.push(`<a href="${url}"${extern ? ' target="_blank" rel="noopener"' : ''}>${nadruk(t)}</a>`);
-        return `\u0000${links.length - 1}\u0000`;
-    });
-    return nadruk(s).replace(/\u0000(\d+)\u0000/g, (_, i) => links[i]);
-};
-// Alinea's bij een lege regel, een enkele enter wordt een regelafbreking.
-const alineas = (tekst) => String(tekst || '').trim().split(/\n\s*\n/).filter(Boolean)
-    .map((a) => `<p>${opmaak(a).replace(/\n/g, '<br>')}</p>`).join('');
 
 const $ = (id) => document.getElementById(id);
 const podium = $('podium');
@@ -636,13 +620,6 @@ function plaatsPlekkaartjes() {
 // --- Index: een bijeenkomst openklappen -------------------------------------------
 // Klik in de index: de regel klapt open (foto, vraag, begin van de samenvatting en een knop naar het verhaal),
 // de kaart zoomt in op de plek(ken) en daar verschijnt het kaartje van de plek. Nog een klik klapt dicht.
-const platteTekst = (t) => String(t || '').replace(/\[([^\]\n]+)\]\([^)\s]+\)/g, '$1').replace(/\*\*?/g, '').replace(/\s+/g, ' ').trim();
-const beginVan = (t, max = 230) => {
-    const s = platteTekst(t);
-    if (s.length <= max) return s;
-    const kort = s.slice(0, max);
-    return kort.slice(0, kort.lastIndexOf(' ')).replace(/[,;:.]$/, '') + '…';
-};
 function uitklapHtml(e, d) {
     const label = d >= VANDAAG ? 'Lees meer' : e.samenvatting || e.blokken.length ? 'Lees het verhaal' : 'Bekijk de bijeenkomst';
     return `<div class="dt-uitklap" id="uitklap-${veilig(e.id)}">
@@ -916,27 +893,12 @@ function blokHtml(b) {
     return '';
 }
 
-// Tekstkaart: een kaart die je omdraait. Voorkant: de eerste zin groot; ga je erheen, dan draait hij om naar de hele tekst.
-// Een korte tekst (één zin, een citaat) heeft niets om te draaien en staat meteen groot op de kaart.
-function tekstKaart(tekst) {
-    const plat = platteTekst(tekst);
-    if (plat.length <= 140) return `<div class="dt-strook-kaart dt-strook-tekst kort"><div class="dt-strook-tekst-binnen"><p>${opmaak(String(tekst).trim()).replace(/\n+/g, '<br>')}</p></div></div>`;
-    const zin = plat.match(/^.{20,}?[.?!…](?=\s|$)/)?.[0] || beginVan(plat, 110);
-    return `<div class="dt-strook-kaart dt-strook-tekst draait"><div class="dt-kaart-draai">
-        <div class="dt-kaart-voor" aria-hidden="true"><p>${veilig(zin.length > 150 ? beginVan(zin, 140) : zin)}</p><span class="dt-kaart-hint">lees verder ↻</span></div>
-        <div class="dt-strook-tekst-binnen dt-kaart-achter">${alineas(tekst)}</div>
-    </div></div>`;
-}
 
 // Strook: foto's en tekstkaarten naast elkaar, naar links te vegen (of met de pijltjes).
 function strookHtml(kaarten) {
-    // Elke kaart heeft de vorm van een speelkaart; ga je erheen, dan wordt hij zo breed als de foto echt is (niets bijgesneden).
-    const kaart = (k, i) => k.foto
-        ? `<figure class="dt-strook-kaart dt-strook-foto"><img src="${fotoUrl(k.foto)}" alt="${veilig(k.onderschrift)}" loading="lazy" draggable="false">${k.onderschrift ? `<figcaption>${opmaak(k.onderschrift)}</figcaption>` : ''}</figure>`
-        : tekstKaart(k.tekst);
     const meer = kaarten.length > 1;
     return `<section class="dt-strook breed" aria-roledescription="carrousel" aria-label="Foto's en tekst">
-        <div class="dt-strook-baan" tabindex="0">${kaarten.map(kaart).join('')}</div>
+        <div class="dt-strook-baan" tabindex="0">${strookKaarten(kaarten)}</div>
         ${meer ? `<div class="dt-strook-bediening">
             <button type="button" class="dt-knop dt-knop-klein dt-strook-vorige" aria-label="Vorige">←</button>
             <div class="dt-strook-stippen" aria-hidden="true">${kaarten.map(() => '<span></span>').join('')}</div>
@@ -970,11 +932,7 @@ function zetStrokenAan(vak) {
             clearTimeout(rust);
             rust = setTimeout(() => vouw(actief), 160);
         };
-        // De echte verhouding van elke foto, voor de opengevouwen breedte
-        for (const img of baan.querySelectorAll('.dt-strook-foto img')) {
-            const meet = () => img.naturalWidth && img.parentElement.style.setProperty('--verhouding', (img.naturalWidth / img.naturalHeight).toFixed(4));
-            if (img.complete) meet(); else img.addEventListener('load', meet);
-        }
+        meetVerhoudingen(baan);
         vorige?.addEventListener('click', () => ga(huidige() - 1));
         volgende?.addEventListener('click', () => ga(huidige() + 1));
         baan.addEventListener('scroll', bij, { passive: true });
