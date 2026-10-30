@@ -888,15 +888,17 @@ document.querySelector('.dt-startknop').addEventListener('click', () => {
 function blokHtml(b) {
     if (b.type === 'tekst') return `<div class="dt-tekst">${alineas(b.tekst)}</div>`;
     if (b.type === 'foto') return `<figure class="breed"><img src="${fotoUrl(b.foto)}" alt="${veilig(b.onderschrift)}" loading="lazy">${b.onderschrift ? `<figcaption>${veilig(b.onderschrift)}</figcaption>` : ''}</figure>`;
-    if (b.type === 'reeks') return strookHtml(b.fotos);
+    if (b.type === 'reeks') return strookHtml(b.fotos, b);
     if (b.type === 'citaat') return `<blockquote><p>${opmaak(b.tekst).replace(/\n/g, '<br>')}</p>${b.bron ? `<footer>${veilig(b.bron)}</footer>` : ''}</blockquote>`;
     return '';
 }
 
 
 // Strook: foto's en tekstkaarten naast elkaar, naar links te vegen (of met de pijltjes).
-function strookHtml(kaarten) {
+function strookHtml(kaarten, b = {}) {
     const meer = kaarten.length > 1;
+    const credit = b.credit ? `<p class="dt-strook-credit">Foto's: ${b.creditLink
+        ? `<a href="${veilig(b.creditLink)}" target="_blank" rel="noopener">${veilig(b.credit)}</a>` : veilig(b.credit)}</p>` : '';
     return `<section class="dt-strook breed" aria-roledescription="carrousel" aria-label="Foto's en tekst">
         <div class="dt-strook-baan" tabindex="0">${strookKaarten(kaarten)}</div>
         ${meer ? `<div class="dt-strook-bediening">
@@ -904,6 +906,7 @@ function strookHtml(kaarten) {
             <div class="dt-strook-stippen" aria-hidden="true">${kaarten.map(() => '<span></span>').join('')}</div>
             <button type="button" class="dt-knop dt-knop-klein dt-strook-volgende" aria-label="Volgende">→</button>
         </div>` : ''}
+        ${credit}
     </section>`;
 }
 

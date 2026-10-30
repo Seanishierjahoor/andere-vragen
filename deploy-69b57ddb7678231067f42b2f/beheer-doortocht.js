@@ -517,6 +517,9 @@ function strookEditor(b, herteken) {
             uploadKnop('+ Foto\'s', true, (ids) => { b.fotos.push(...ids.map((foto) => ({ foto, onderschrift: '' }))); herteken(); }),
             h('button', { type: 'button', class: 'bh-knop bh-knop-licht', tekst: '+ Tekstkaart', onclick: () => { b.fotos.push({ tekst: '' }); herteken(); } }),
             h('button', { type: 'button', class: 'bh-knop bh-knop-licht', tekst: '+ Citaat', onclick: () => { b.fotos.push({ citaat: '', bron: '' }); herteken(); } })),
+        h('div', { class: 'bh-credit' },
+            veld(b, 'credit', 'Fotocredit (optioneel)', { hulp: 'Wie heeft de foto\'s gemaakt? Staat onder de strook als "Foto\'s: naam".' }),
+            veld(b, 'creditLink', 'Website van de fotograaf (optioneel)', { type: 'url', hulp: 'Dan wordt de naam een link, bijvoorbeeld https://naam.nl' })),
     );
 }
 

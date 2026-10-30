@@ -23,7 +23,7 @@
 .bh-fout { color: #8a3b2f; min-height: 1.5em; margin: 0; }
 
 .bh label, .bh-veldnaam { font-size: .85rem; font-weight: 600; display: block; margin-bottom: .2rem; }
-.bh input[type=text], .bh input[type=password], .bh input[type=date], .bh input[type=search], .bh textarea, .bh select {
+.bh input[type=text], .bh input[type=password], .bh input[type=date], .bh input[type=search], .bh input[type=url], .bh textarea, .bh select {
     font: inherit; font-size: 1rem; color: var(--av-petrol); width: 100%; padding: .55rem .7rem;
     border: 1.5px solid var(--av-lijn-sterk); border-radius: 8px; background: #fff;
 }
@@ -150,3 +150,4 @@
     background: #fff4ef; border: 1.5px solid var(--av-coral); border-radius: 10px; }
 .bh-omzetten p { margin: 0; flex: 1 1 20rem; }
 .bh-reeks-citaat { border-color: rgba(233, 106, 75, .6); }
+.bh-credit { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .8rem 1.2rem; margin-top: 1.4rem; padding-top: 1rem; border-top: 1px solid var(--av-lijn); }

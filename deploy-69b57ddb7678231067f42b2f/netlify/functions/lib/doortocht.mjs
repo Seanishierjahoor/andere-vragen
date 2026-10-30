@@ -124,7 +124,11 @@ function schoneBlokken(invoer) {
         .map((f) => (fotoOfNull(f.foto) ? { foto: f.foto, onderschrift: tekst(f.onderschrift, 300) }
           : tekst(f.citaat, 1000).trim() ? { citaat: tekst(f.citaat, 1000), bron: tekst(f.bron, 200) }
           : { tekst: tekst(f.tekst, 8000) }));
-      if (fotos.length) blokken.push({ type: "reeks", fotos });
+      // Fotocredit onder de strook: wie de foto's maakte, met eventueel een link naar diens website.
+      const credit = tekst(b.credit, 200).trim();
+      let link = tekst(b.creditLink, 500).trim();
+      if (link && !/^https?:\/\//i.test(link) && /^[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(link)) link = "https://" + link;
+      if (fotos.length) blokken.push({ type: "reeks", fotos, credit, creditLink: credit && /^https?:\/\/\S+$/.test(link) ? link : "" });
     } else if (b?.type === "citaat") blokken.push({ type: "citaat", tekst: tekst(b.tekst, 1000), bron: tekst(b.bron, 200) });
   }
   return blokken.slice(0, 80);

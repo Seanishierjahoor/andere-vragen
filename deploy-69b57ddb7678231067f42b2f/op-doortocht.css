@@ -289,6 +289,8 @@
 .dt-strook-bediening .dt-knop { position: relative; min-width: 2.75rem; justify-content: center; }
 .dt-strook-bediening .dt-knop:disabled { opacity: .35; cursor: default; transform: none; }
 .dt-strook-stippen { display: flex; gap: .45rem; }
+.dt-artikel .dt-strook-credit { margin: .9rem 0 0; padding: 0 var(--tekst-in); font-size: .85rem; color: var(--av-petrol-zacht); }
+.dt-strook-credit a { color: var(--av-petrol); text-decoration-color: var(--av-coral); text-underline-offset: .2em; }
 .dt-strook-stippen span { width: .5rem; height: .5rem; border-radius: 50%; background: var(--av-lijn-sterk); transition: background-color .25s, transform .25s; }
 .dt-strook-stippen span.aan { background: var(--av-coral); transform: scale(1.3); }
 @media (max-width: 600px) { .dt-strook { --strook-h: clamp(15rem, 52vh, 26rem); } .dt-strook-bediening .dt-knop { display: none; } }
