@@ -263,7 +263,8 @@
 /* Strook: kaarten naast elkaar die je naar links veegt. Loopt door tot de rand van het scherm, zodat de volgende
    kaart een stukje in beeld steekt; de eerste kaart lijnt uit met de tekstkolom. */
 .dt-verhaal { container-type: inline-size; }
-.dt-strook { --strook-h: clamp(17rem, 58vh, 32rem); --strook-in: max(var(--gutter), calc(50cqw - 20rem));
+/* De strook begint links aan de rand en vult zo meteen de hele breedte; pijltjes en stippen blijven bij de tekstkolom. */
+.dt-strook { --strook-h: clamp(17rem, 58vh, 32rem); --strook-in: var(--gutter); --tekst-in: max(var(--gutter), calc(50cqw - 20rem));
     width: 100cqw; margin: 3rem 0 3rem calc(50% - 50cqw); }
 .dt-strook-baan { display: flex; gap: clamp(.9rem, 2vw, 1.5rem); overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--strook-in);
     padding: .5rem var(--strook-in) 1.25rem; scrollbar-width: none; overscroll-behavior-x: contain; cursor: grab; }
@@ -284,7 +285,7 @@
 .dt-strook-tekst-binnen::before { content: ""; position: absolute; top: -2px; left: clamp(1.4rem, 3vw, 2rem); width: 2.5rem; height: 5px; background: var(--av-coral); }
 .dt-artikel .dt-strook-tekst p { font-size: 1.08rem; line-height: 1.6; }
 .dt-artikel .dt-strook-tekst p:last-child { margin-bottom: 0; }
-.dt-strook-bediening { display: flex; align-items: center; gap: 1rem; padding: 0 var(--strook-in); }
+.dt-strook-bediening { display: flex; align-items: center; gap: 1rem; padding: 0 var(--tekst-in); }
 .dt-strook-bediening .dt-knop { position: relative; min-width: 2.75rem; justify-content: center; }
 .dt-strook-bediening .dt-knop:disabled { opacity: .35; cursor: default; transform: none; }
 .dt-strook-stippen { display: flex; gap: .45rem; }
