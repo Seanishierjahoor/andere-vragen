@@ -439,6 +439,14 @@ function teken() {
 }
 const zweefOp = (sel) => { zweef = sel; teken(); };
 
+// Schakelaar in de legenda: alle samenwerkingslijnen tegelijk zichtbaar.
+const alleLijnenKnop = document.querySelector('.dt-alle-lijnen');
+alleLijnenKnop.addEventListener('click', () => {
+    const aan = alleLijnenKnop.getAttribute('aria-checked') !== 'true';
+    alleLijnenKnop.setAttribute('aria-checked', String(aan));
+    podium.classList.toggle('alle-lijnen', aan);
+});
+
 // --- Kaartje bij een pin ----------------------------------------------------------
 
 let pinkaartPlek = null;

@@ -39,7 +39,11 @@
 .lijn-baan { stroke: #FFFDF6; stroke-width: 12; stroke-opacity: .75; }
 .lijn-rand { stroke: var(--av-petrol); stroke-width: 8; stroke-dasharray: 0 14; }
 .lijn-stip { stroke: var(--av-coral); stroke-width: 4.5; stroke-dasharray: 0 14; }
-.lijn.aan .lijn-rand, .lijn.aan .lijn-stip { animation: dt-mier 1.4s linear infinite; }
+.lijn.aan .lijn-rand, .lijn.aan .lijn-stip, .alle-lijnen .lijn .lijn-rand, .alle-lijnen .lijn .lijn-stip { animation: dt-mier 1.4s linear infinite; }
+/* Schakelaar "Zie alle samenwerkingen": de lijnen verschijnen een voor een */
+.alle-lijnen .lijn { opacity: 1; transition: opacity .35s; }
+.alle-lijnen .lijn:nth-child(2) { transition-delay: .08s; } .alle-lijnen .lijn:nth-child(3) { transition-delay: .16s; }
+.alle-lijnen .lijn:nth-child(4) { transition-delay: .24s; } .alle-lijnen .lijn:nth-child(n+5) { transition-delay: .32s; }
 @keyframes dt-mier { to { stroke-dashoffset: -28; } }
 
 /* --- Podium: de kaart vult het scherm ----------------------------------- */
@@ -336,7 +340,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .bubbel .halo, .lijn.aan path, .dt-verhaal, .dt-verhaal.dicht, .dt-pinkaart { animation: none; }
+    .bubbel .halo, .lijn.aan path, .alle-lijnen .lijn path, .dt-verhaal, .dt-verhaal.dicht, .dt-pinkaart { animation: none; }
     .dt-podium .knipsel, .dt-podium .pin-schaduw { transition: none; }
     .dt-podium .knipsel-leeft, .dt-podium .schaduw-leeft { animation: none; }
     .dt-omslag, .dt-index, .dt-start, .dt-waas { transition: none; }
@@ -410,12 +414,20 @@
 .dt-legenda li { display: flex; align-items: center; gap: .4rem; }
 .dt-legenda svg { width: 1.15rem; height: 1.15rem; overflow: visible; }
 .dt-legenda li:last-child svg { width: 2.1rem; }
+.dt-alle-lijnen { display: flex; align-items: center; gap: .4rem; padding: 0; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
+.dt-alle-lijnen:focus-visible { outline: 3px solid var(--av-petrol); outline-offset: 4px; border-radius: 999px; }
+.dt-schakel { position: relative; width: 2.1rem; height: 1.2rem; margin-left: .15rem; border-radius: 999px; background: var(--av-lijn-sterk); transition: background-color .25s; flex: none; }
+.dt-schakel::after { content: ""; position: absolute; top: .15rem; left: .15rem; width: .9rem; height: .9rem; border-radius: 50%; background: #FFFDF6; box-shadow: 0 1px 3px rgba(25, 59, 58, .3); transition: transform .25s cubic-bezier(.2, .7, .2, 1); }
+.dt-alle-lijnen[aria-checked="true"] .dt-schakel { background: var(--av-coral); }
+.dt-alle-lijnen[aria-checked="true"] .dt-schakel::after { transform: translateX(.9rem); }
+.dt-alle-lijnen:hover .dt-schakel { box-shadow: 0 0 0 2px rgba(25, 59, 58, .25); }
 .dt-podium[data-stand="omslag"] .dt-legenda { opacity: 0; transition-delay: 0s; pointer-events: none; }
 .dt-bediening { bottom: 5.4rem; }
 @media (max-width: 860px) {
     .dt-legenda { left: var(--gutter); right: auto; top: 3.6rem; bottom: auto; font-size: .75rem; padding: .35rem .7rem; gap: .3rem .8rem; }
     .dt-legenda svg { width: .95rem; height: .95rem; }
     .dt-legenda li:last-child svg { width: 1.7rem; }
+    .dt-schakel { width: 1.8rem; height: 1.05rem; } .dt-schakel::after { width: .75rem; height: .75rem; } .dt-alle-lijnen[aria-checked="true"] .dt-schakel::after { transform: translateX(.75rem); }
     .dt-bediening { top: 7rem; bottom: auto; }
 }
 
