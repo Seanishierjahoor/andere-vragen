@@ -382,7 +382,7 @@ function plaatsStrookjes(u) {
     const bezet = Object.keys(bubbelVan).map((id) => { const [x, y] = scherm(id); return { id, x: x - 15, y: y - 15, w: 30, h: 30 }; });
     // Ook de zoomknoppen, de indexknop en de legenda zijn bezet.
     const vak = kaartVak.getBoundingClientRect();
-    for (const el of [document.querySelector('.dt-bediening'), $('index-knop'), document.querySelector('.dt-legenda')]) {
+    for (const el of [document.querySelector('.dt-bediening'), $('index-knop'), document.querySelector('.dt-legenda'), document.querySelector('.dt-samenwerkingen')]) {
         const r = el.getBoundingClientRect();
         if (r.width) bezet.push({ id: 'knoppen', x: r.left - vak.left - 6, y: r.top - vak.top - 6, w: r.width + 12, h: r.height + 12 });
     }
@@ -440,11 +440,12 @@ function teken() {
 }
 const zweefOp = (sel) => { zweef = sel; teken(); };
 
-// Schakelaar in de legenda: alle samenwerkingslijnen tegelijk zichtbaar.
-const alleLijnenKnop = document.querySelector('.dt-alle-lijnen');
+// Knop "Zie alle samenwerkingen": alle samenwerkingslijnen tegelijk zichtbaar.
+const alleLijnenKnop = document.querySelector('.dt-samenwerkingen');
 alleLijnenKnop.addEventListener('click', () => {
-    const aan = alleLijnenKnop.getAttribute('aria-checked') !== 'true';
-    alleLijnenKnop.setAttribute('aria-checked', String(aan));
+    const aan = alleLijnenKnop.getAttribute('aria-pressed') !== 'true';
+    alleLijnenKnop.setAttribute('aria-pressed', String(aan));
+    alleLijnenKnop.querySelector('span').textContent = aan ? 'Verberg samenwerkingen' : 'Zie alle samenwerkingen';
     podium.classList.toggle('alle-lijnen', aan);
 });
 
@@ -748,6 +749,7 @@ function zetStand(stand) {
     indexVak.inert = !opKaart;
     document.querySelector('.dt-bediening').inert = !opKaart;
     document.querySelector('.dt-legenda').inert = !opKaart;
+    alleLijnenKnop.inert = !opKaart;
     document.querySelector('.dt-start').inert = opKaart;
     document.querySelector('.dt-archieflink').inert = opKaart;
     $('naar-omslag').tabIndex = opKaart ? 0 : -1;

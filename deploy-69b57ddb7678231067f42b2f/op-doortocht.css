@@ -414,20 +414,31 @@
 .dt-legenda li { display: flex; align-items: center; gap: .4rem; }
 .dt-legenda svg { width: 1.15rem; height: 1.15rem; overflow: visible; }
 .dt-legenda li:last-child svg { width: 2.1rem; }
-.dt-alle-lijnen { display: flex; align-items: center; gap: .4rem; padding: 0; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
-.dt-alle-lijnen:focus-visible { outline: 3px solid var(--av-petrol); outline-offset: 4px; border-radius: 999px; }
-.dt-schakel { position: relative; width: 2.1rem; height: 1.2rem; margin-left: .15rem; border-radius: 999px; background: var(--av-lijn-sterk); transition: background-color .25s; flex: none; }
-.dt-schakel::after { content: ""; position: absolute; top: .15rem; left: .15rem; width: .9rem; height: .9rem; border-radius: 50%; background: #FFFDF6; box-shadow: 0 1px 3px rgba(25, 59, 58, .3); transition: transform .25s cubic-bezier(.2, .7, .2, 1); }
-.dt-alle-lijnen[aria-checked="true"] .dt-schakel { background: var(--av-coral); }
-.dt-alle-lijnen[aria-checked="true"] .dt-schakel::after { transform: translateX(.9rem); }
-.dt-alle-lijnen:hover .dt-schakel { box-shadow: 0 0 0 2px rgba(25, 59, 58, .25); }
+/* Knop "Zie alle samenwerkingen": los van de legenda, linksboven onder de titel, en hij mag opvallen. */
+.dt-samenwerkingen.dt-knop { position: absolute; left: var(--gutter); top: 8.6rem; z-index: 3; gap: .6rem; padding: .65rem 1.25rem .65rem 1rem; font-size: 1.02rem;
+    background: var(--av-petrol); color: #FFFDF6; border-color: var(--av-petrol); box-shadow: 0 10px 26px rgba(25, 59, 58, .28);
+    transition: transform .2s, background-color .25s, color .25s, opacity .5s .9s; }
+.dt-samenwerkingen.dt-knop:hover { color: #FFFDF6; background: #0f2827; }
+.dt-samenwerkingen svg { width: 2.4rem; height: .8rem; overflow: visible; }
+.dt-samenwerkingen path { fill: none; stroke-linecap: round; }
+.dt-samenwerkingen .baan { stroke: rgba(255, 253, 246, .25); stroke-width: 10; }
+.dt-samenwerkingen .rand { stroke: #FFFDF6; stroke-width: 7; stroke-dasharray: 0 9; animation: dt-mier-klein 1.4s linear infinite; }
+.dt-samenwerkingen .stip { stroke: var(--av-coral); stroke-width: 4; stroke-dasharray: 0 9; animation: dt-mier-klein 1.4s linear infinite; }
+@keyframes dt-mier-klein { to { stroke-dashoffset: -18; } }
+.dt-samenwerkingen[aria-pressed="true"] { background: var(--av-coral); border-color: var(--av-coral); color: var(--av-petrol); }
+.dt-samenwerkingen[aria-pressed="true"]:hover { background: #f07e61; color: var(--av-petrol); }
+.dt-samenwerkingen[aria-pressed="true"] .rand { stroke: var(--av-petrol); }
+.dt-samenwerkingen[aria-pressed="true"] .stip { stroke: #FFFDF6; }
+.dt-samenwerkingen[aria-pressed="true"] .baan { stroke: rgba(25, 59, 58, .18); }
+.dt-podium[data-stand="omslag"] .dt-samenwerkingen { opacity: 0; transition-delay: 0s; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .dt-samenwerkingen path { animation: none; } }
 .dt-podium[data-stand="omslag"] .dt-legenda { opacity: 0; transition-delay: 0s; pointer-events: none; }
 .dt-bediening { bottom: 5.4rem; }
 @media (max-width: 860px) {
     .dt-legenda { left: var(--gutter); right: auto; top: 3.6rem; bottom: auto; font-size: .75rem; padding: .35rem .7rem; gap: .3rem .8rem; }
     .dt-legenda svg { width: .95rem; height: .95rem; }
     .dt-legenda li:last-child svg { width: 1.7rem; }
-    .dt-schakel { width: 1.8rem; height: 1.05rem; } .dt-schakel::after { width: .75rem; height: .75rem; } .dt-alle-lijnen[aria-checked="true"] .dt-schakel::after { transform: translateX(.75rem); }
+    .dt-samenwerkingen.dt-knop { top: 6.3rem; font-size: .9rem; padding: .5rem 1rem .5rem .8rem; }
     .dt-bediening { top: 7rem; bottom: auto; }
 }
 
