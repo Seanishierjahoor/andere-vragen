@@ -519,8 +519,9 @@ function toonPinkaart(plekId, alleen = null, alleenDatum = null) {
     const rijen = DATUMRIJEN.filter((r) => hier.includes(r.e) && (!alleenDatum || r.d === alleenDatum));
     const komt = rijen.filter((r) => r.d >= VANDAAG);
     const geweest = rijen.filter((r) => r.d < VANDAAG).reverse();
+    // Geen omslagfoto's van bijeenkomsten in dit kaartje: bovenaan staat alleen de foto van de plek zelf (als die er is),
+    // anders lijkt de foto van één avond de foto van de plek.
     const item = ({ e, d, m, nr }, soort) => `<div class="dt-pinitem ${soort}">
-        ${e.omslag ? `<img src="${fotoUrl(e.omslag)}" alt="" loading="lazy">` : ''}
         <span class="dt-bovenregel">${nr} · ${langDatum(d)}</span>
         <h3>${veilig(m.wat || e.soort)}</h3>
         ${e.vraag ? `<p class="thema">${veilig(e.vraag)}</p>` : ''}
