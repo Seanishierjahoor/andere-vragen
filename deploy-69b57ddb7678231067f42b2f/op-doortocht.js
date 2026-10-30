@@ -447,16 +447,53 @@ const alleLijnenKnop = chips.querySelector('.dt-samenwerkingen');
 alleLijnenKnop.addEventListener('click', () => {
     const aan = alleLijnenKnop.getAttribute('aria-pressed') !== 'true';
     alleLijnenKnop.setAttribute('aria-pressed', String(aan));
+    alleLijnenKnop.querySelector('span').textContent = aan ? 'Samenwerkingen' : 'Toon samenwerkingen';
     podium.classList.toggle('alle-lijnen', aan);
+    podium.classList.remove('voorproef');
 });
+// Voorproefje: bij aanwijzen lichten de lijnen alvast zachtjes op.
+alleLijnenKnop.addEventListener('mouseenter', () => podium.classList.add('voorproef'));
+alleLijnenKnop.addEventListener('mouseleave', () => podium.classList.remove('voorproef'));
 const filterKnoppen = [...chips.querySelectorAll('[data-filter]')];
 for (const knop of filterKnoppen) knop.addEventListener('click', () => {
     const filter = podium.dataset.filter === knop.dataset.filter ? '' : knop.dataset.filter;
+    const oud = podium.dataset.filter || '';
     podium.dataset.filter = filter;
     filterKnoppen.forEach((k) => k.setAttribute('aria-pressed', String(k.dataset.filter === filter)));
     sluitPinkaart();
     sluitRij();
+    filterIndex(oud, filter);
 });
+
+// De index volgt het filter met een overgang: van alles naar één groep klapt de andere groep in,
+// terug naar alles klapt hij weer uit, en van de ene groep naar de andere schuift de rij naar links weg
+// en schuift de nieuwe van rechts in beeld.
+const groepVak = (soort) => index.querySelector(`.dt-groep[data-groep="${soort}"]`);
+const zichtbaarBij = (vak, filter) => !filter || vak.dataset.groep === filter;
+function klap(vak, open) {
+    if (!vak || vak.hidden === !open) return Promise.resolve();
+    if (RUSTIG.matches) { vak.hidden = !open; return Promise.resolve(); }
+    vak.hidden = false;
+    const h = vak.scrollHeight;
+    const frames = [{ height: '0px', opacity: 0 }, { height: h + 'px', opacity: 1 }];
+    const anim = vak.animate(open ? frames : frames.reverse(), { duration: 380, easing: 'cubic-bezier(.2, .7, .2, 1)' });
+    vak.style.overflow = 'hidden';
+    return anim.finished.then(() => { vak.style.overflow = ''; vak.hidden = !open; });
+}
+async function schuif(weg, erbij) {
+    if (RUSTIG.matches) { weg.hidden = true; erbij.hidden = false; return; }
+    await weg.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateX(-48px)', opacity: 0 }],
+        { duration: 220, easing: 'cubic-bezier(.4, 0, 1, 1)' }).finished;
+    weg.hidden = true;
+    erbij.hidden = false;
+    indexVak.querySelector('.dt-index-binnen').scrollTop = 0;
+    await erbij.animate([{ transform: 'translateX(48px)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+        { duration: 340, easing: 'cubic-bezier(.2, .7, .2, 1)' }).finished;
+}
+function filterIndex(oud, nieuw) {
+    if (oud && nieuw && groepVak(oud) && groepVak(nieuw)) return schuif(groepVak(oud), groepVak(nieuw));
+    for (const vak of index.querySelectorAll('.dt-groep')) klap(vak, zichtbaarBij(vak, nieuw));
+}
 // De eerste keer dat de kaart opengaat, lichten alle samenwerkingslijnen even op en geeft de chip een puls:
 // zo zie je meteen wat hij doet en waar hij zit.
 let alGeflitst = false;
@@ -715,7 +752,6 @@ for (const groep of [
     const kop = document.createElement('h2');
     kop.innerHTML = `<span class="dt-stip ${groep.soort}" aria-hidden="true"></span>${groep.kop}`;
     const lijst = document.createElement('ol');
-    kop.className = lijst.className = 'dt-groep-' + groep.soort;
     for (const { e, d, m, nr } of groep.rijen) {
         const li = document.createElement('li');
         const namen = naamEnThemaHtml(e, [d]);
@@ -738,7 +774,12 @@ for (const groep of [
         knop.addEventListener('click', () => kiesRij({ e, d, m, li, knop }));
         lijst.appendChild(li);
     }
-    index.append(kop, lijst);
+    // Elke groep in een eigen vak, zodat het filter hem kan laten inklappen of wegschuiven.
+    const vak = document.createElement('section');
+    vak.className = 'dt-groep dt-groep-' + groep.soort;
+    vak.dataset.groep = groep.soort;
+    vak.append(kop, lijst);
+    index.append(vak);
 }
 if (!EVENEMENTEN.length) index.innerHTML = '<p class="dt-leeg">Nog geen bijeenkomsten.</p>';
 index.insertAdjacentHTML('beforeend', '<p class="dt-index-voet"><a class="dt-knop dt-knop-klein" href="#archief">Volledig archief →</a></p>');
