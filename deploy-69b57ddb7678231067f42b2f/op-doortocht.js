@@ -249,6 +249,7 @@ function zetBeeld(b, { stil = false } = {}) {
     plaatsRaster();
     schaalPins();
     plaatsPinkaart();
+    plaatsPlekkaartjes();
 }
 
 let animatie = null;
@@ -379,9 +380,9 @@ function plaatsStrookjes(u) {
     podium.classList.add('met-strookjes');
     const scherm = (id) => [(xyVan[id][0] - beeld.x) / u, (xyVan[id][1] - beeld.y) / u];
     const bezet = Object.keys(bubbelVan).map((id) => { const [x, y] = scherm(id); return { id, x: x - 15, y: y - 15, w: 30, h: 30 }; });
-    // Ook de zoomknoppen en de indexknop zijn bezet.
+    // Ook de zoomknoppen, de indexknop en de legenda zijn bezet.
     const vak = kaartVak.getBoundingClientRect();
-    for (const el of [document.querySelector('.dt-bediening'), $('index-knop')]) {
+    for (const el of [document.querySelector('.dt-bediening'), $('index-knop'), document.querySelector('.dt-legenda')]) {
         const r = el.getBoundingClientRect();
         if (r.width) bezet.push({ id: 'knoppen', x: r.left - vak.left - 6, y: r.top - vak.top - 6, w: r.width + 12, h: r.height + 12 });
     }
@@ -452,6 +453,7 @@ alleLijnenKnop.addEventListener('click', () => {
 let pinkaartPlek = null;
 
 function toonPinkaart(plekId, alleen = null, alleenDatum = null) {
+    sluitRij();
     const hier = alleen ? [alleen] : EVENEMENTEN.filter((e) => e.plekken.includes(plekId));
     // Komt eraan en geweest apart, en elke datum een eigen blokje.
     const rijen = DATUMRIJEN.filter((r) => hier.includes(r.e) && (!alleenDatum || r.d === alleenDatum));
@@ -469,7 +471,9 @@ function toonPinkaart(plekId, alleen = null, alleenDatum = null) {
     const deel = (rijen, soort, kop) => rijen.length
         ? `<section class="dt-pindeel ${soort}"><h4><span class="dt-stip ${soort}" aria-hidden="true"></span>${kop}</h4>${rijen.map((r) => item(r, soort)).join('')}</section>`
         : '';
-    pinkaart.innerHTML = `<div class="dt-pinkaart-kop"><strong>${veilig(PLEKKEN[plekId].naam)}</strong>
+    const plek = PLEKKEN[plekId];
+    pinkaart.innerHTML = `<div class="dt-pinkaart-kop${plek.foto ? ' met-foto' : ''}">
+            ${plek.foto ? `<img src="${fotoUrl(plek.foto)}" alt="">` : ''}<strong>${veilig(plek.naam)}</strong>
             <button type="button" class="dt-pinkaart-sluit" aria-label="Sluiten">×</button></div>
         ${deel(komt, 'komt', 'Komt eraan')}${deel(geweest, 'geweest', 'Geweest')}`;
     if (SMAL.matches && !indexVak.classList.contains('ingeklapt')) zetIndex(false);
@@ -511,6 +515,108 @@ function plaatsPinkaart() {
     const top = Math.min(Math.max(py - 40, 12), ch - kh - 12);
     pinkaart.style.left = left + 'px';
     pinkaart.style.top = top + 'px';
+}
+
+// --- Kaartje van de plek ---------------------------------------------------------
+// Kies je een bijeenkomst in de index, dan zoomt de kaart in en verschijnt bij elke plek een kaartje:
+// een foto van de plek met de naam erover (of alleen de naam), als een knipsel met plakband.
+const plekkaartVak = document.createElement('div');
+plekkaartVak.className = 'dt-plekkaartjes';
+plekkaartVak.setAttribute('aria-hidden', 'true'); // de naam staat ook in de index
+pinkaart.before(plekkaartVak);
+let plekkaartIds = [];
+function toonPlekkaartjes(ids) {
+    verbergPlekkaartjes();
+    plekkaartIds = ids;
+    plekkaartVak.innerHTML = ids.map((id, i) => {
+        const p = PLEKKEN[id];
+        return `<figure class="dt-plekkaart${p.foto ? ' met-foto' : ''}" style="--draai: ${i % 2 ? 1.6 : -1.8}deg">
+            ${p.foto ? `<img src="${fotoUrl(p.foto)}" alt="" draggable="false">` : ''}
+            <figcaption><strong>${veilig(p.naam)}</strong>${p.adres ? `<span>${veilig(p.adres.split(',')[0])}</span>` : ''}</figcaption>
+            ${p.foto && p.fotocredit ? `<small>${veilig(p.fotocredit)}</small>` : ''}
+            <span class="plakband"></span>
+        </figure>`;
+    }).join('');
+    ids.forEach((id) => bubbelVan[id]?.classList.add('met-plekkaart'));
+    plaatsPlekkaartjes();
+    plekkaartVak.querySelectorAll('.dt-plekkaart').forEach((k, i) => setTimeout(() => k.classList.add('zichtbaar'), 30 + i * 140));
+}
+function verbergPlekkaartjes() {
+    plekkaartIds.forEach((id) => bubbelVan[id]?.classList.remove('met-plekkaart'));
+    plekkaartIds = [];
+    plekkaartVak.replaceChildren();
+}
+// Boven de pin. Bij twee plekken gaat de linker naar links en de rechter naar rechts, zodat ze niet overlappen.
+function plaatsPlekkaartjes() {
+    if (!plekkaartIds.length) return;
+    const u = eenheidPerPixel();
+    const [cw] = schermMaat();
+    // Niet onder de index, en op mobiel niet onder de legenda (bovenaan) en de zoomknoppen (rechts).
+    const vak = kaartVak.getBoundingClientRect();
+    const knoppen = document.querySelector('.dt-bediening').getBoundingClientRect();
+    const rechts = SMAL.matches ? Math.min(cw * vrijVlak().x1, knoppen.left - vak.left - 4) : cw * vrijVlak().x1;
+    const boven = SMAL.matches ? document.querySelector('.dt-legenda').getBoundingClientRect().bottom - vak.top + 10 : 10;
+    const pos = plekkaartIds.map((id) => [(xyVan[id][0] - beeld.x) / u, (xyVan[id][1] - beeld.y) / u]);
+    const minX = Math.min(...pos.map((q) => q[0]));
+    plekkaartVak.querySelectorAll('.dt-plekkaart').forEach((k, i) => {
+        const [px, py] = pos[i];
+        const w = k.offsetWidth, h = k.offsetHeight;
+        const links = pos.length > 1 ? px === minX : px + 18 + w > rechts;
+        const left = Math.min(Math.max(links ? px - 18 - w : px + 18, 8), rechts - w - 8);
+        const top = py - h - 20 < boven ? py + 26 : py - h - 20;
+        k.style.left = left + 'px';
+        k.style.top = top + 'px';
+    });
+}
+
+// --- Index: een bijeenkomst openklappen -------------------------------------------
+// Klik in de index: de regel klapt open (foto, vraag, begin van de samenvatting en een knop naar het verhaal),
+// de kaart zoomt in op de plek(ken) en daar verschijnt het kaartje van de plek. Nog een klik klapt dicht.
+const platteTekst = (t) => String(t || '').replace(/\[([^\]\n]+)\]\([^)\s]+\)/g, '$1').replace(/\*\*?/g, '').replace(/\s+/g, ' ').trim();
+const beginVan = (t, max = 230) => {
+    const s = platteTekst(t);
+    if (s.length <= max) return s;
+    const kort = s.slice(0, max);
+    return kort.slice(0, kort.lastIndexOf(' ')).replace(/[,;:.]$/, '') + '…';
+};
+function uitklapHtml(e, d) {
+    const label = d >= VANDAAG ? 'Lees meer' : e.samenvatting || e.blokken.length ? 'Lees het verhaal' : 'Bekijk de bijeenkomst';
+    return `<div class="dt-uitklap" id="uitklap-${veilig(e.id)}">
+        ${e.omslag ? `<img src="${fotoUrl(e.omslag)}" alt="" loading="lazy">` : ''}
+        ${e.vraag ? `<p class="dt-uitklap-vraag">${veilig(e.vraag)}</p>` : ''}
+        ${e.samenvatting ? `<p class="dt-uitklap-tekst">${veilig(beginVan(e.samenvatting))}</p>` : ''}
+        <a class="dt-knop dt-knop-klein" href="#verhaal/${encodeURIComponent(e.id)}">${label} →</a>
+    </div>`;
+}
+let openRij = null;
+function sluitRij() {
+    if (!openRij) return;
+    openRij.li.querySelector('.dt-uitklap')?.remove();
+    openRij.li.classList.remove('uitgeklapt');
+    openRij.knop.setAttribute('aria-expanded', 'false');
+    openRij = null;
+    vast = null;
+    teken();
+    verbergPlekkaartjes();
+}
+async function kiesRij(rij) {
+    const zelfde = openRij?.knop === rij.knop;
+    sluitRij();
+    if (zelfde) return;
+    pinkaart.hidden = true;
+    pinkaartPlek = null;
+    openRij = rij;
+    const { e, d, m, li, knop } = rij;
+    li.classList.add('uitgeklapt');
+    knop.setAttribute('aria-expanded', 'true');
+    li.insertAdjacentHTML('beforeend', uitklapHtml(e, d));
+    li.scrollIntoView({ block: 'nearest', behavior: RUSTIG.matches ? 'auto' : 'smooth' });
+    vast = selectieVanEvenement(e, d);
+    teken();
+    // De plek van die datum eerst (bij een samenwerking met een plek per datum).
+    const ids = m.plek && PLEKKEN[m.plek] ? [m.plek, ...e.plekken.filter((p) => p !== m.plek)] : e.plekken;
+    await vliegNaar(rondPunten(ids.map((p) => xyVan[p]), { rand: SMAL.matches ? 70 : 90, minW: 300 }), 800);
+    if (openRij === rij) toonPlekkaartjes(ids);
 }
 
 // --- Slepen, knijpen en scrollen om te zoomen ---------------------------------
@@ -555,7 +661,7 @@ const laatLos = (ev) => {
 };
 svg.addEventListener('pointerup', laatLos);
 svg.addEventListener('pointercancel', laatLos);
-svg.addEventListener('click', () => { if (!versleept) sluitPinkaart(); });
+svg.addEventListener('click', () => { if (!versleept) { sluitPinkaart(); sluitRij(); } });
 kaartVak.addEventListener('wheel', (ev) => {
     if (podium.dataset.stand !== 'kaart') return;
     ev.preventDefault();
@@ -565,7 +671,7 @@ kaartVak.addEventListener('wheel', (ev) => {
 
 $('zoom-in').addEventListener('click', () => vliegNaar(zoomOm(0.65), 350));
 $('zoom-uit').addEventListener('click', () => vliegNaar(zoomOm(1.5), 350));
-$('zoom-alles').addEventListener('click', () => vliegNaar(overzicht(), 600));
+$('zoom-alles').addEventListener('click', () => { sluitRij(); vliegNaar(overzicht(), 600); });
 
 // --- Pins: aanwijzen en klikken -------------------------------------------------
 
@@ -594,7 +700,7 @@ for (const groep of [
         const waar = m.plek && PLEKKEN[m.plek] && e.plekken.length > 1
             ? [PLEKKEN[m.plek].naam, ...e.plekken.filter((p) => p !== m.plek).map((p) => PLEKKEN[p].naam)].join(' × ')
             : plekNamen(e);
-        li.innerHTML = `<button type="button" class="dt-regel" data-rij="${veilig(rijSleutel(e, d))}">
+        li.innerHTML = `<button type="button" class="dt-regel" data-rij="${veilig(rijSleutel(e, d))}" aria-expanded="false" aria-controls="uitklap-${veilig(e.id)}">
             <span class="dt-nr" aria-hidden="true">${nr}</span>
             <span class="dt-bovenregel">${kortDatum(d)}</span>
             <span class="titel">${veilig(waar)}</span>
@@ -606,12 +712,7 @@ for (const groep of [
         knop.addEventListener('mouseleave', () => zweefOp(null));
         knop.addEventListener('focus', () => zweefOp(selectieVanEvenement(e, d)));
         knop.addEventListener('blur', () => zweefOp(null));
-        // Naar de plek vliegen en daar het kaartje met "Lees meer" openen.
-        knop.addEventListener('click', async () => {
-            pinkaart.hidden = true;
-            await vliegNaar(rondPunten(e.plekken.map((p) => xyVan[p]), { rand: 220, minW: 700 }), 700);
-            toonPinkaart(m.plek && PLEKKEN[m.plek] ? m.plek : e.plekken[0], e, d);
-        });
+        knop.addEventListener('click', () => kiesRij({ e, d, m, li, knop }));
         lijst.appendChild(li);
     }
     index.append(kop, lijst);
@@ -651,7 +752,7 @@ function zetStand(stand) {
     document.querySelector('.dt-archieflink').inert = opKaart;
     $('naar-omslag').tabIndex = opKaart ? 0 : -1;
     Object.values(bubbelVan).forEach((g) => { g.tabIndex = opKaart ? 0 : -1; });
-    if (!opKaart) sluitPinkaart();
+    if (!opKaart) { sluitPinkaart(); sluitRij(); }
     return true;
 }
 
@@ -826,7 +927,7 @@ function verhaalHtml(e) {
     const leeg = !e.blokken.length && !e.samenvatting;
     // Vaste beschrijving van de plek(ken), onderaan elke bijeenkomst daar.
     const overPlekken = e.plekken.map((id) => PLEKKEN[id]).filter((p) => p.beschrijving)
-        .map((p) => `<section class="dt-overplek"><h2>Over ${veilig(p.naam)}</h2>${alineas(p.beschrijving)}${p.adres ? `<p class="dt-overplek-adres">${veilig(p.adres)}</p>` : ''}</section>`).join('');
+        .map((p) => `<section class="dt-overplek"><h2>Over ${veilig(p.naam)}</h2>${p.foto ? `<figure class="dt-overplek-foto"><img src="${fotoUrl(p.foto)}" alt="${veilig(p.naam)}" loading="lazy">${p.fotocredit ? `<figcaption>${veilig(p.fotocredit)}</figcaption>` : ''}</figure>` : ''}${alineas(p.beschrijving)}${p.adres ? `<p class="dt-overplek-adres">${veilig(p.adres)}</p>` : ''}</section>`).join('');
     return `<button type="button" class="dt-sluit dt-knop">← Terug</button>
         <header class="dt-held ${e.omslag ? 'met-foto' : ''}">
             ${e.omslag ? `<img src="${fotoUrl(e.omslag)}" alt="">` : ''}
@@ -867,7 +968,7 @@ function archiefHtml() {
     const regel = (e) => {
         const plek = e.plekken.length > 1 && e.plek && PLEKKEN[e.plek] ? `bij ${PLEKKEN[e.plek].naam}` : '';
         const wat = [e.wat || (e.soort !== secties.find((x) => x.leden.includes(e)).leden[0].soort ? e.soort : ''), plek].filter(Boolean).join(' ');
-        return `<li>
+        return `<li class="dt-archief-datum">
             <time datetime="${e.datum}">${+e.datum.slice(8, 10)} ${MAANDEN[+e.datum.slice(5, 7) - 1]}</time>
             <span>
                 ${wat ? `<span class="dt-archief-wat">${veilig(wat)}</span>` : ''}

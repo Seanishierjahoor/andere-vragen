@@ -477,3 +477,50 @@ body.balk-zichtbaar .dt-balkknop { opacity: 0; pointer-events: none; transition-
 .dt-archief-vraag, .dt-archief-lees { font-family: var(--font-heading); color: var(--av-petrol); text-decoration: none; border-bottom: 1.5px solid var(--av-coral); }
 .dt-archief-lees { font-family: var(--font-body); font-size: .9rem; font-weight: 600; }
 .dt-archief-vraag:hover, .dt-archief-lees:hover { border-bottom-width: 3px; }
+
+/* --- Index: een bijeenkomst openklappen ------------------------------------------ */
+.dt-index li.uitgeklapt { background: rgba(233, 106, 75, .07); border-radius: 4px; }
+.dt-index li.uitgeklapt .dt-duim { display: none; }
+.dt-uitklap { display: grid; gap: .55rem; padding: .15rem .35rem .9rem 2.95rem; animation: dt-uitklap .35s cubic-bezier(.2, .7, .2, 1); }
+.dt-uitklap img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 4px; }
+.dt-uitklap-vraag { font-family: var(--font-heading); font-style: italic; font-size: 1.05rem; line-height: 1.3; margin: 0; }
+.dt-uitklap-tekst { font-size: .9rem; line-height: 1.5; margin: 0; color: var(--av-petrol); }
+.dt-uitklap .dt-knop { position: relative; justify-self: start; }
+@keyframes dt-uitklap { from { opacity: 0; transform: translateY(-6px); } }
+
+/* --- Kaartje van de plek op de kaart: foto met de naam erover, als een knipsel met plakband --- */
+.dt-plekkaartjes { position: absolute; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
+.dt-plekkaart { position: absolute; margin: 0; width: 13.5rem; padding: .45rem; background: #FFFDF6; border-radius: 3px;
+    box-shadow: 0 1px 0 rgba(25, 59, 58, .08), 0 14px 30px rgba(25, 59, 58, .22);
+    opacity: 0; transform: translateY(10px) rotate(var(--draai)) scale(.92); transform-origin: 50% 100%;
+    transition: opacity .4s ease, transform .55s cubic-bezier(.2, .9, .25, 1.2); }
+.dt-plekkaart.zichtbaar { opacity: 1; transform: rotate(var(--draai)); }
+.dt-plekkaart img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 2px; }
+.dt-plekkaart figcaption { display: grid; gap: .1rem; padding: .55rem .35rem .2rem; }
+.dt-plekkaart.met-foto figcaption { position: absolute; left: .45rem; right: .45rem; bottom: .45rem; padding: 2.2rem .7rem .6rem; border-radius: 0 0 2px 2px;
+    background: linear-gradient(to top, rgba(18, 42, 41, .88), rgba(18, 42, 41, 0)); color: #FFFDF6; }
+.dt-plekkaart.met-foto:has(small) figcaption { bottom: 1.55rem; }
+.dt-plekkaart strong { font-family: var(--font-heading); font-weight: 400; font-size: 1.35rem; line-height: 1.05; }
+.dt-plekkaart figcaption span { font-size: .72rem; letter-spacing: .04em; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dt-plekkaart small { display: block; padding: .3rem .2rem 0; font-size: .6rem; line-height: 1.2; color: var(--av-petrol-zacht); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dt-plekkaart .plakband { position: absolute; top: -.55rem; left: 50%; width: 3.6rem; height: 1.1rem; margin-left: -1.8rem; background: rgba(233, 106, 75, .45); transform: rotate(-3deg); }
+.dt-plekkaart:not(.met-foto) { width: auto; max-width: 13rem; padding: .6rem .9rem .5rem; border: 1.5px solid var(--av-petrol); }
+.dt-plekkaart:not(.met-foto) figcaption { padding: .2rem 0 0; }
+/* De naam staat al op het kaartje, dus het strookje van die pin even weg */
+.dt-podium.met-strookjes .bubbel.met-plekkaart .strook { opacity: 0; transition-delay: 0s; }
+@media (max-width: 860px) { .dt-plekkaart { width: 10rem; } .dt-plekkaart strong { font-size: 1.1rem; } }
+@media (prefers-reduced-motion: reduce) { .dt-plekkaart, .dt-uitklap { transition: none; animation: none; } }
+
+/* --- Foto van de plek in het kaartje bij een pin en bij "Over [plek]" ------------------ */
+.dt-pinkaart-kop.met-foto { position: relative; padding: 0; margin-bottom: .3rem; }
+.dt-pinkaart-kop.met-foto img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--radius) var(--radius) 0 0; }
+.dt-pinkaart-kop.met-foto strong { position: absolute; left: 0; right: 0; bottom: 0; padding: 2rem .9rem .6rem; color: #FFFDF6;
+    background: linear-gradient(to top, rgba(18, 42, 41, .85), rgba(18, 42, 41, 0)); font-family: var(--font-heading); font-weight: 400; font-size: 1.4rem; letter-spacing: 0; text-transform: none; }
+.dt-pinkaart-kop.met-foto .dt-pinkaart-sluit { position: absolute; top: .5rem; right: .5rem; }
+.dt-overplek-foto { margin: 0 0 1.2rem; }
+.dt-artikel .dt-overplek-foto img { aspect-ratio: 16 / 9; object-fit: cover; border-radius: 3px; }
+
+/* --- Archief: de hele regel van een datum is klikbaar --- */
+.dt-archief-datum { position: relative; transition: background-color .2s; }
+.dt-archief-datum:hover { background: rgba(233, 106, 75, .08); }
+.dt-archief-datum .dt-archief-vraag::after, .dt-archief-datum .dt-archief-lees::after { content: ""; position: absolute; inset: 0; }

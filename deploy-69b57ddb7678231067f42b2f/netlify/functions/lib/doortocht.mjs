@@ -139,7 +139,8 @@ export function controleer(invoer) {
     const lat = Number(p.lat), lon = Number(p.lon);
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) return { fout: `Plek "${p.naam}" heeft nog geen plek op de kaart.` };
     plekIds.add(p.id);
-    plekken.push({ id: p.id, naam: tekst(p.naam, 120).trim(), adres: tekst(p.adres, 200), lat, lon, beschrijving: tekst(p.beschrijving, 8000) });
+    plekken.push({ id: p.id, naam: tekst(p.naam, 120).trim(), adres: tekst(p.adres, 200), lat, lon, beschrijving: tekst(p.beschrijving, 8000),
+      foto: fotoOfNull(p.foto), fotocredit: tekst(p.fotocredit, 200).trim() });
   }
 
   const ids = new Set();
