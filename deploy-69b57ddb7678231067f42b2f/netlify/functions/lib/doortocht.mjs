@@ -121,7 +121,7 @@ function schoneBlokken(invoer) {
         .filter((f) => fotoOfNull(f?.foto) || tekst(f?.tekst, 3000).trim())
         .slice(0, 30)
         .map((f) => (fotoOfNull(f.foto)
-          ? { foto: f.foto, onderschrift: tekst(f.onderschrift, 300), focus: { x: procent(f.focus?.x), y: procent(f.focus?.y) } }
+          ? { foto: f.foto, onderschrift: tekst(f.onderschrift, 300) }
           : { tekst: tekst(f.tekst, 3000) }));
       if (fotos.length) blokken.push({ type: "reeks", fotos });
     } else if (b?.type === "citaat") blokken.push({ type: "citaat", tekst: tekst(b.tekst, 1000), bron: tekst(b.bron, 200) });

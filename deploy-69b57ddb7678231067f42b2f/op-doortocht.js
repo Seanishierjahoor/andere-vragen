@@ -5,7 +5,7 @@
 // Gegevens komen uit /.netlify/functions/get-doortocht (beheer: /beheer-doortocht.html).
 
 import { tekenKaart, maakSvg } from './op-doortocht-kaart.js';
-import { veilig, fotoUrl, focusStijl, opmaak, alineas, platteTekst, beginVan, strookKaarten, meetVerhoudingen } from './op-doortocht-tekst.js';
+import { veilig, fotoUrl, focusStijl, opmaak, alineas, platteTekst, beginVan, strookKaarten } from './op-doortocht-tekst.js';
 
 // Omslagfoto en plekfoto met het focuspunt uit het beheer (welk deel in beeld blijft als ze worden bijgesneden)
 const omslagFoto = (e, klasse = '') => `<img${klasse ? ` class="${klasse}"` : ''} src="${fotoUrl(e.omslag)}" alt="" style="${focusStijl(e.omslagFocus)}" loading="lazy">`;
@@ -920,7 +920,7 @@ function zetStrokenAan(vak) {
             return kaarten.reduce((best, k, i) => Math.abs(k.offsetLeft - x) < Math.abs(kaarten[best].offsetLeft - x) ? i : best, 0);
         };
         const ga = (i) => baan.scrollTo({ left: kaarten[Math.max(0, Math.min(kaarten.length - 1, i))].offsetLeft - begin(), behavior: RUSTIG.matches ? 'auto' : 'smooth' });
-        // De kaart waar je bent, vouwt zich open; pas als het scrollen stilstaat, anders verspringt de rij.
+        // De tekstkaart waar je bent, draait om; pas als het scrollen stilstaat, anders draait hij al tijdens het vegen.
         let rust = null;
         const vouw = (actief) => kaarten.forEach((k, j) => k.classList.toggle('open', j === actief));
         const bij = () => {
@@ -932,7 +932,6 @@ function zetStrokenAan(vak) {
             clearTimeout(rust);
             rust = setTimeout(() => vouw(actief), 160);
         };
-        meetVerhoudingen(baan);
         vorige?.addEventListener('click', () => ga(huidige() - 1));
         volgende?.addEventListener('click', () => ga(huidige() + 1));
         baan.addEventListener('scroll', bij, { passive: true });

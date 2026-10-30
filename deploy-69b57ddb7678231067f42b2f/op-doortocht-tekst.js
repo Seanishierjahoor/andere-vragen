@@ -41,13 +41,6 @@ export function tekstKaart(tekst) {
     </div></div>`;
 }
 
-// Foto: een speelkaart die zich openvouwt tot de echte verhouding (dicht bepaalt het focuspunt wat in beeld is).
-export const fotoKaart = (k) => `<figure class="dt-strook-kaart dt-strook-foto"><img src="${fotoUrl(k.foto)}" alt="${veilig(k.onderschrift)}" style="${focusStijl(k.focus)}" loading="lazy" draggable="false">${k.onderschrift ? `<figcaption>${opmaak(k.onderschrift)}</figcaption>` : ''}</figure>`;
-// Zet de echte verhouding van elke foto op zijn kaart (voor de opengevouwen breedte), zodra de foto geladen is.
-export function meetVerhoudingen(vak) {
-    for (const img of vak.querySelectorAll('.dt-strook-foto img')) {
-        const meet = () => img.naturalWidth && img.parentElement.style.setProperty('--verhouding', (img.naturalWidth / img.naturalHeight).toFixed(4));
-        if (img.complete) meet(); else img.addEventListener('load', meet, { once: true });
-    }
-}
+// Foto: altijd helemaal te zien, met een papieren randje.
+export const fotoKaart = (k) => `<figure class="dt-strook-kaart dt-strook-foto"><img src="${fotoUrl(k.foto)}" alt="${veilig(k.onderschrift)}" loading="lazy" draggable="false">${k.onderschrift ? `<figcaption>${opmaak(k.onderschrift)}</figcaption>` : ''}</figure>`;
 export const strookKaarten = (kaarten) => kaarten.map((k) => (k.foto ? fotoKaart(k) : tekstKaart(k.tekst))).join('');

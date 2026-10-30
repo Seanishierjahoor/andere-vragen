@@ -270,14 +270,12 @@
 .dt-strook-baan::-webkit-scrollbar { display: none; }
 .dt-strook-baan.sleept { cursor: grabbing; scroll-snap-type: none; user-select: none; }
 .dt-strook-baan:focus-visible { outline: 3px solid var(--av-coral); outline-offset: -3px; }
-/* Speelkaarten: dicht 5 bij 7; open zo breed als de foto echt is (tot 82% van het scherm), zonder bijsnijden. */
+/* Kaarten in de strook. Foto's staan er altijd helemaal op (niets bijgesneden), met een papieren randje;
+   een heel brede foto wordt in zijn geheel kleiner. Tekstkaarten hebben de vorm van een speelkaart (5 bij 7). */
 .dt-strook-kaart { flex: 0 0 auto; scroll-snap-align: start; margin: 0; --kaart-b: calc(var(--strook-h) * 5 / 7); }
-.dt-artikel .dt-strook-foto { margin: 0; display: flex; flex-direction: column; width: var(--kaart-b); transition: width .6s cubic-bezier(.2, .7, .2, 1); }
-.dt-artikel .dt-strook-foto.open { width: min(calc(var(--strook-h) * var(--verhouding, .714)), 82cqw); }
-@media (hover: hover) { .dt-artikel .dt-strook-foto:hover { width: min(calc(var(--strook-h) * var(--verhouding, .714)), 82cqw); } }
-.dt-strook-foto img { box-sizing: border-box; width: 100%; height: var(--strook-h); object-fit: cover; background: #FFFDF6;
-    border: 7px solid #FFFDF6; border-radius: 12px; box-shadow: 0 1px 0 rgba(25, 59, 58, .1), 0 12px 30px rgba(25, 59, 58, .18); transition: box-shadow .4s; }
-.dt-strook-foto.open img, .dt-strook-foto:hover img { object-fit: contain; box-shadow: 0 1px 0 rgba(25, 59, 58, .1), 0 18px 40px rgba(25, 59, 58, .24); }
+.dt-artikel .dt-strook-foto { margin: 0; display: flex; flex-direction: column; max-width: min(88cqw, 54rem); }
+.dt-strook-foto img { box-sizing: border-box; height: var(--strook-h); width: auto; max-width: 100%; object-fit: contain; background: #FFFDF6;
+    border: 7px solid #FFFDF6; border-radius: 12px; box-shadow: 0 1px 0 rgba(25, 59, 58, .1), 0 12px 30px rgba(25, 59, 58, .18); }
 .dt-artikel .dt-strook-foto figcaption { margin-top: .7rem; max-width: 36ch; }
 /* Tekstkaart: een eigen vak met een duidelijke rand en een harde, verschoven schaduw, als een gedrukte kaart. */
 .dt-strook-tekst { width: max(var(--kaart-b), min(78cqw, 17rem)); height: var(--strook-h); display: flex; }
@@ -487,7 +485,7 @@ body.balk-zichtbaar .dt-balkknop { opacity: 0; pointer-events: none; transition-
 /* De naam staat al op het kaartje, dus het strookje van die pin even weg */
 .dt-podium.met-strookjes .bubbel.met-plekkaart .strook { opacity: 0; transition-delay: 0s; }
 @media (max-width: 860px) { .dt-plekkaart { width: 10rem; } .dt-plekkaart strong { font-size: 1.1rem; } }
-@media (prefers-reduced-motion: reduce) { .dt-plekkaart, .dt-uitklap, .dt-artikel .dt-strook-foto { transition: none; animation: none; } }
+@media (prefers-reduced-motion: reduce) { .dt-plekkaart, .dt-uitklap { transition: none; animation: none; } }
 
 /* --- Foto van de plek in het kaartje bij een pin en bij "Over [plek]" ------------------ */
 .dt-pinkaart-kop.met-foto { position: relative; padding: 0; margin-bottom: .3rem; }
