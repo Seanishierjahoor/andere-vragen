@@ -270,14 +270,19 @@
 .dt-strook-baan::-webkit-scrollbar { display: none; }
 .dt-strook-baan.sleept { cursor: grabbing; scroll-snap-type: none; user-select: none; }
 .dt-strook-baan:focus-visible { outline: 3px solid var(--av-coral); outline-offset: -3px; }
-.dt-strook-kaart { flex: 0 0 auto; scroll-snap-align: start; margin: 0; }
-.dt-artikel .dt-strook-foto { margin: 0; display: flex; flex-direction: column; max-width: min(82cqw, 46rem); }
-.dt-strook-foto img { height: var(--strook-h); width: auto; max-width: 100%; object-fit: cover; border-radius: 4px; box-shadow: 0 10px 28px rgba(25, 59, 58, .14); }
+/* Speelkaarten: dicht 5 bij 7; open zo breed als de foto echt is (tot 82% van het scherm), zonder bijsnijden. */
+.dt-strook-kaart { flex: 0 0 auto; scroll-snap-align: start; margin: 0; --kaart-b: calc(var(--strook-h) * 5 / 7); }
+.dt-artikel .dt-strook-foto { margin: 0; display: flex; flex-direction: column; width: var(--kaart-b); transition: width .6s cubic-bezier(.2, .7, .2, 1); }
+.dt-artikel .dt-strook-foto.open { width: min(calc(var(--strook-h) * var(--verhouding, .714)), 82cqw); }
+@media (hover: hover) { .dt-artikel .dt-strook-foto:hover { width: min(calc(var(--strook-h) * var(--verhouding, .714)), 82cqw); } }
+.dt-strook-foto img { box-sizing: border-box; width: 100%; height: var(--strook-h); object-fit: cover; background: #FFFDF6;
+    border: 7px solid #FFFDF6; border-radius: 12px; box-shadow: 0 1px 0 rgba(25, 59, 58, .1), 0 12px 30px rgba(25, 59, 58, .18); transition: box-shadow .4s; }
+.dt-strook-foto.open img, .dt-strook-foto:hover img { object-fit: contain; box-shadow: 0 1px 0 rgba(25, 59, 58, .1), 0 18px 40px rgba(25, 59, 58, .24); }
 .dt-artikel .dt-strook-foto figcaption { margin-top: .7rem; max-width: 36ch; }
 /* Tekstkaart: een eigen vak met een duidelijke rand en een harde, verschoven schaduw, als een gedrukte kaart. */
-.dt-strook-tekst { width: min(78cqw, 24rem); height: var(--strook-h); display: flex; }
+.dt-strook-tekst { width: max(var(--kaart-b), min(78cqw, 17rem)); height: var(--strook-h); display: flex; }
 .dt-strook-tekst-binnen { position: relative; flex: 1; overflow-y: auto; padding: clamp(1.4rem, 3vw, 2rem); background: #FFFDF6;
-    border: 2px solid var(--av-petrol); border-radius: 6px; box-shadow: 7px 7px 0 rgba(25, 59, 58, .14); display: flex; flex-direction: column; justify-content: center; }
+    border: 2px solid var(--av-petrol); border-radius: 12px; box-shadow: 7px 7px 0 rgba(25, 59, 58, .14); display: flex; flex-direction: column; justify-content: center; }
 .dt-strook-tekst-binnen::before { content: ""; position: absolute; top: -2px; left: clamp(1.4rem, 3vw, 2rem); width: 2.5rem; height: 5px; background: var(--av-coral); }
 .dt-artikel .dt-strook-tekst p { font-size: 1.08rem; line-height: 1.6; }
 .dt-artikel .dt-strook-tekst p:last-child { margin-bottom: 0; }
@@ -482,7 +487,7 @@ body.balk-zichtbaar .dt-balkknop { opacity: 0; pointer-events: none; transition-
 /* De naam staat al op het kaartje, dus het strookje van die pin even weg */
 .dt-podium.met-strookjes .bubbel.met-plekkaart .strook { opacity: 0; transition-delay: 0s; }
 @media (max-width: 860px) { .dt-plekkaart { width: 10rem; } .dt-plekkaart strong { font-size: 1.1rem; } }
-@media (prefers-reduced-motion: reduce) { .dt-plekkaart, .dt-uitklap { transition: none; animation: none; } }
+@media (prefers-reduced-motion: reduce) { .dt-plekkaart, .dt-uitklap, .dt-artikel .dt-strook-foto { transition: none; animation: none; } }
 
 /* --- Foto van de plek in het kaartje bij een pin en bij "Over [plek]" ------------------ */
 .dt-pinkaart-kop.met-foto { position: relative; padding: 0; margin-bottom: .3rem; }
@@ -559,3 +564,26 @@ body.balk-zichtbaar .dt-balkknop { opacity: 0; pointer-events: none; transition-
 }
 @media (prefers-reduced-motion: reduce) { .dt-samenwerkingen path, .flits .dt-samenwerkingen { animation: none; } }
 .dt-index .dt-groep + .dt-groep h2 { padding-top: .7rem; }
+
+/* --- Tekstkaarten in de strook: omdraaien als een speelkaart --------------------- */
+.dt-strook-tekst.draait { perspective: 1400px; }
+.dt-kaart-draai { position: relative; flex: 1; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.3, .7, .2, 1); }
+.dt-strook-tekst.draait.open .dt-kaart-draai { transform: rotateY(180deg); }
+@media (hover: hover) { .dt-strook-tekst.draait:hover .dt-kaart-draai { transform: rotateY(180deg); } }
+.dt-kaart-voor, .dt-kaart-achter { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.dt-kaart-achter { transform: rotateY(180deg); }
+/* Voorkant: petrol met een papieren randje en koraal hoekjes, de eerste zin groot */
+.dt-kaart-voor { display: flex; flex-direction: column; justify-content: center; gap: 1.2rem; padding: clamp(1.4rem, 3vw, 2.1rem); border-radius: 12px;
+    background: var(--av-petrol); color: #FFFDF6; box-shadow: inset 0 0 0 7px #FFFDF6, inset 0 0 0 8.5px rgba(25, 59, 58, .4), 0 12px 30px rgba(25, 59, 58, .2); }
+.dt-kaart-voor::before, .dt-kaart-voor::after { content: ""; position: absolute; width: 1.1rem; height: 1.1rem; border: 2.5px solid var(--av-coral); }
+.dt-kaart-voor::before { top: 1.1rem; left: 1.1rem; border-right: 0; border-bottom: 0; }
+.dt-kaart-voor::after { bottom: 1.1rem; right: 1.1rem; border-left: 0; border-top: 0; }
+.dt-artikel .dt-kaart-voor p { font-family: var(--font-heading); font-style: italic; font-size: clamp(1.35rem, 2.2vw, 1.7rem); line-height: 1.22; margin: 0; }
+.dt-kaart-hint { font-size: .78rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--av-coral); }
+/* Korte tekst: meteen groot, als een citaat op de kaart */
+.dt-artikel .dt-strook-tekst.kort p { font-family: var(--font-heading); font-size: clamp(1.4rem, 2.3vw, 1.8rem); line-height: 1.22; }
+@media (prefers-reduced-motion: reduce) {
+    .dt-kaart-draai { transition: none; }
+    .dt-strook-tekst.draait .dt-kaart-voor { display: none; }
+    .dt-strook-tekst.draait .dt-kaart-achter { transform: none; }
+}

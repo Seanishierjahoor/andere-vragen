@@ -350,7 +350,8 @@ function tekenEvenement() {
 
     const omslag = h('div', { class: 'bh-kaartvak' },
         h('h2', { tekst: 'Omslagfoto' }),
-        fotoKiezer(e.omslag, (id) => { e.omslag = id; herteken(); }),
+        fotoKiezer(e.omslag, (id) => { e.omslag = id; e.omslagFocus = { x: 50, y: 50 }; herteken(); }),
+        e.omslag ? focusKiezer(e, 'omslag', 'omslagFocus', [['Bovenaan het verhaal', '16 / 7'], ['Kaartje in de index', '16 / 9']]) : null,
     );
 
     const blokken = h('div', { class: 'bh-kaartvak' },
@@ -358,8 +359,9 @@ function tekenEvenement() {
         h('p', { class: 'bh-hulp', tekst: 'Stapel blokken: tekst, foto\'s en citaten. Een lege regel in een tekstblok begint een nieuwe alinea.' }),
         h('div', { class: 'bh-blokken' }, e.blokken.map((b, i) => blokEditor(e, b, i, herteken))),
         h('div', { class: 'bh-toevoegen' },
-            [['tekst', '+ Tekst', { type: 'tekst', tekst: '' }], ['foto', '+ Foto', { type: 'foto', foto: null, onderschrift: '' }],
-             ['reeks', '+ Strook', { type: 'reeks', fotos: [] }], ['citaat', '+ Citaat', { type: 'citaat', tekst: '', bron: '' }]]
+            // Foto's gaan standaard in een strook (kaarten naast elkaar); een grote losse foto kan ook nog.
+            [['tekst', '+ Tekst', { type: 'tekst', tekst: '' }], ['reeks', "+ Foto's", { type: 'reeks', fotos: [] }],
+             ['citaat', '+ Citaat', { type: 'citaat', tekst: '', bron: '' }], ['foto', '+ Grote foto', { type: 'foto', foto: null, onderschrift: '' }]]
                 .map(([, label, nieuw]) => h('button', { type: 'button', class: 'bh-knop bh-knop-licht bh-knop-klein', tekst: label, onclick: () => { e.blokken.push(structuredClone(nieuw)); herteken(); } })),
         ),
     );
@@ -378,7 +380,7 @@ function tekenEvenement() {
 }
 
 function blokEditor(e, b, i, herteken) {
-    const namen = { tekst: 'Tekst', foto: 'Foto', reeks: 'Strook (foto\'s en tekst)', citaat: 'Citaat' };
+    const namen = { tekst: 'Tekst', foto: 'Grote foto', reeks: 'Foto\'s (strook met kaarten)', citaat: 'Citaat' };
     const verplaats = (r) => { const [x] = e.blokken.splice(i, 1); e.blokken.splice(i + r, 0, x); herteken(); };
     const kop = h('div', { class: 'bh-blok-kop' },
         h('strong', { tekst: namen[b.type] }),
@@ -485,19 +487,22 @@ function fotoKiezer(huidig, wijzig) {
 
 // Focuspunt: klik op de foto om te kiezen wat in beeld blijft als de foto op de kaart wordt bijgesneden.
 // Ernaast twee voorbeelden in de maten van de kaartjes.
-function focusKiezer(p) {
-    p.focus = p.focus || { x: 50, y: 50 };
+// Werkt voor de plekfoto (foto + focus) en de omslagfoto van een bijeenkomst (omslag + omslagFocus).
+function focusKiezer(p, fotoSleutel = 'foto', focusSleutel = 'focus', maten = [['Kaartje bij de pin', '16 / 9'], ['Kaartje na klik in de index', '4 / 3']]) {
+    p[focusSleutel] = p[focusSleutel] || { x: 50, y: 50 };
+    const foto = fotoUrl(p[fotoSleutel]);
     const stip = h('span', { class: 'bh-focus-stip', 'aria-hidden': 'true' });
-    const voorbeelden = [['Kaartje bij de pin', '16 / 9'], ['Kaartje na klik in de index', '4 / 3']].map(([naam, maat]) =>
-        h('figure', {}, h('img', { src: fotoUrl(p.foto), alt: '', style: `aspect-ratio: ${maat}` }), h('figcaption', { tekst: naam })));
+    const voorbeelden = maten.map(([naam, maat]) =>
+        h('figure', {}, h('img', { src: foto, alt: '', style: `aspect-ratio: ${maat}` }), h('figcaption', { tekst: naam })));
     const zet = () => {
-        stip.style.left = p.focus.x + '%'; stip.style.top = p.focus.y + '%';
-        voorbeelden.forEach((f) => { f.querySelector('img').style.objectPosition = `${p.focus.x}% ${p.focus.y}%`; });
+        const f = p[focusSleutel];
+        stip.style.left = f.x + '%'; stip.style.top = f.y + '%';
+        voorbeelden.forEach((v) => { v.querySelector('img').style.objectPosition = `${f.x}% ${f.y}%`; });
     };
-    const groot = h('div', { class: 'bh-focus-foto', title: 'Klik op wat in beeld moet blijven' }, h('img', { src: fotoUrl(p.foto), alt: '', draggable: 'false' }), stip);
+    const groot = h('div', { class: 'bh-focus-foto', title: 'Klik op wat in beeld moet blijven' }, h('img', { src: foto, alt: '', draggable: 'false' }), stip);
     groot.addEventListener('click', (ev) => {
         const r = groot.getBoundingClientRect();
-        p.focus = { x: Math.round(((ev.clientX - r.left) / r.width) * 100), y: Math.round(((ev.clientY - r.top) / r.height) * 100) };
+        p[focusSleutel] = { x: Math.round(((ev.clientX - r.left) / r.width) * 100), y: Math.round(((ev.clientY - r.top) / r.height) * 100) };
         zet();
         markeerGewijzigd();
     });

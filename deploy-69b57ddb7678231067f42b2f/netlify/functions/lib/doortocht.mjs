@@ -170,6 +170,7 @@ export function controleer(invoer) {
       wat: tekst(b.wat, 120).trim(),
       samenvatting: tekst(b.samenvatting, 4000),
       omslag: fotoOfNull(b.omslag),
+      omslagFocus: { x: procent(b.omslagFocus?.x), y: procent(b.omslagFocus?.y) },
       blokken: schoneBlokken(b.blokken),
       zichtbaar: b.zichtbaar !== false,
     });

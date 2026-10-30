@@ -30,6 +30,8 @@ const dataInJaar = (data) => opsomming(data.map((iso, i) => {
 const veilig = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const fotoUrl = (id) => '/doortocht-foto/' + encodeURIComponent(id);
 // Plekfoto met het focuspunt uit het beheer (welk deel in beeld blijft als hij wordt bijgesneden)
+const focusStijl = (f) => `object-position: ${f?.x ?? 50}% ${f?.y ?? 50}%`;
+const omslagFoto = (e, klasse = '') => `<img${klasse ? ` class="${klasse}"` : ''} src="${fotoUrl(e.omslag)}" alt="" style="${focusStijl(e.omslagFocus)}" loading="lazy">`;
 const plekFoto = (p, alt = '') => `<img src="${fotoUrl(p.foto)}" alt="${veilig(alt)}" style="object-position: ${p.focus?.x ?? 50}% ${p.focus?.y ?? 50}%" draggable="false">`;
 // Opmaak uit het beheer: **vet**, *cursief* en [tekst](adres). Eerst veilig gemaakt, daarna omgezet,
 // dus alleen deze drie dingen worden echte opmaak. Links naar andere sites openen in een nieuw tabblad.
@@ -644,7 +646,7 @@ const beginVan = (t, max = 230) => {
 function uitklapHtml(e, d) {
     const label = d >= VANDAAG ? 'Lees meer' : e.samenvatting || e.blokken.length ? 'Lees het verhaal' : 'Bekijk de bijeenkomst';
     return `<div class="dt-uitklap" id="uitklap-${veilig(e.id)}">
-        ${e.omslag ? `<img src="${fotoUrl(e.omslag)}" alt="" loading="lazy">` : ''}
+        ${e.omslag ? omslagFoto(e) : ''}
         ${e.vraag ? `<p class="dt-uitklap-vraag">${veilig(e.vraag)}</p>` : ''}
         ${e.samenvatting ? `<p class="dt-uitklap-tekst">${veilig(beginVan(e.samenvatting))}</p>` : ''}
         <a class="dt-knop dt-knop-klein" href="#verhaal/${encodeURIComponent(e.id)}">${label} →</a>
@@ -768,7 +770,7 @@ for (const groep of [
             <span class="titel">${veilig(waar)}</span>
             <span class="sub">${veilig(m.wat || e.soort)}</span>
             ${namen ? `<span class="namen">${namen}</span>` : ''}
-            ${e.omslag ? `<img class="dt-duim" src="${fotoUrl(e.omslag)}" alt="" loading="lazy">` : ''}</button>`;
+            ${e.omslag ? omslagFoto(e, 'dt-duim') : ''}</button>`;
         const knop = li.querySelector('button');
         knop.addEventListener('mouseenter', () => zweefOp(selectieVanEvenement(e, d)));
         knop.addEventListener('mouseleave', () => zweefOp(null));
@@ -914,11 +916,24 @@ function blokHtml(b) {
     return '';
 }
 
+// Tekstkaart: een kaart die je omdraait. Voorkant: de eerste zin groot; ga je erheen, dan draait hij om naar de hele tekst.
+// Een korte tekst (één zin, een citaat) heeft niets om te draaien en staat meteen groot op de kaart.
+function tekstKaart(tekst) {
+    const plat = platteTekst(tekst);
+    if (plat.length <= 140) return `<div class="dt-strook-kaart dt-strook-tekst kort"><div class="dt-strook-tekst-binnen"><p>${opmaak(String(tekst).trim()).replace(/\n+/g, '<br>')}</p></div></div>`;
+    const zin = plat.match(/^.{20,}?[.?!…](?=\s|$)/)?.[0] || beginVan(plat, 110);
+    return `<div class="dt-strook-kaart dt-strook-tekst draait"><div class="dt-kaart-draai">
+        <div class="dt-kaart-voor" aria-hidden="true"><p>${veilig(zin.length > 150 ? beginVan(zin, 140) : zin)}</p><span class="dt-kaart-hint">lees verder ↻</span></div>
+        <div class="dt-strook-tekst-binnen dt-kaart-achter">${alineas(tekst)}</div>
+    </div></div>`;
+}
+
 // Strook: foto's en tekstkaarten naast elkaar, naar links te vegen (of met de pijltjes).
 function strookHtml(kaarten) {
+    // Elke kaart heeft de vorm van een speelkaart; ga je erheen, dan wordt hij zo breed als de foto echt is (niets bijgesneden).
     const kaart = (k, i) => k.foto
         ? `<figure class="dt-strook-kaart dt-strook-foto"><img src="${fotoUrl(k.foto)}" alt="${veilig(k.onderschrift)}" loading="lazy" draggable="false">${k.onderschrift ? `<figcaption>${opmaak(k.onderschrift)}</figcaption>` : ''}</figure>`
-        : `<div class="dt-strook-kaart dt-strook-tekst"><div class="dt-strook-tekst-binnen">${alineas(k.tekst)}</div></div>`;
+        : tekstKaart(k.tekst);
     const meer = kaarten.length > 1;
     return `<section class="dt-strook breed" aria-roledescription="carrousel" aria-label="Foto's en tekst">
         <div class="dt-strook-baan" tabindex="0">${kaarten.map(kaart).join('')}</div>
@@ -943,13 +958,23 @@ function zetStrokenAan(vak) {
             return kaarten.reduce((best, k, i) => Math.abs(k.offsetLeft - x) < Math.abs(kaarten[best].offsetLeft - x) ? i : best, 0);
         };
         const ga = (i) => baan.scrollTo({ left: kaarten[Math.max(0, Math.min(kaarten.length - 1, i))].offsetLeft - begin(), behavior: RUSTIG.matches ? 'auto' : 'smooth' });
+        // De kaart waar je bent, vouwt zich open; pas als het scrollen stilstaat, anders verspringt de rij.
+        let rust = null;
+        const vouw = (actief) => kaarten.forEach((k, j) => k.classList.toggle('open', j === actief));
         const bij = () => {
             const i = huidige(), eind = baan.scrollLeft >= baan.scrollWidth - baan.clientWidth - 4;
             const actief = eind ? kaarten.length - 1 : i;
             stippen.forEach((s, j) => s.classList.toggle('aan', j === actief));
             if (vorige) vorige.disabled = baan.scrollLeft < 4;
             if (volgende) volgende.disabled = eind;
+            clearTimeout(rust);
+            rust = setTimeout(() => vouw(actief), 160);
         };
+        // De echte verhouding van elke foto, voor de opengevouwen breedte
+        for (const img of baan.querySelectorAll('.dt-strook-foto img')) {
+            const meet = () => img.naturalWidth && img.parentElement.style.setProperty('--verhouding', (img.naturalWidth / img.naturalHeight).toFixed(4));
+            if (img.complete) meet(); else img.addEventListener('load', meet);
+        }
         vorige?.addEventListener('click', () => ga(huidige() - 1));
         volgende?.addEventListener('click', () => ga(huidige() + 1));
         baan.addEventListener('scroll', bij, { passive: true });
@@ -997,7 +1022,7 @@ function verhaalHtml(e) {
         .map((p) => `<section class="dt-overplek"><h2>Over ${veilig(p.naam)}</h2>${p.foto ? `<figure class="dt-overplek-foto">${plekFoto(p, p.naam)}${p.fotocredit ? `<figcaption>${veilig(p.fotocredit)}</figcaption>` : ''}</figure>` : ''}${alineas(p.beschrijving)}${p.adres ? `<p class="dt-overplek-adres">${veilig(p.adres)}</p>` : ''}</section>`).join('');
     return `<button type="button" class="dt-sluit dt-knop">← Terug</button>
         <header class="dt-held ${e.omslag ? 'met-foto' : ''}">
-            ${e.omslag ? `<img src="${fotoUrl(e.omslag)}" alt="">` : ''}
+            ${e.omslag ? omslagFoto(e).replace(' loading="lazy"', '') : ''}
             <div class="dt-held-tekst">
                 <p class="dt-bovenregel">${veilig(plekNamen(e))} · ${kortDatum(e.datum)}${e.reeks ? ` · ${veilig(e.reeks)}` : ''}</p>
                 <h1 id="verhaal-titel">${veilig(kop)}</h1>
