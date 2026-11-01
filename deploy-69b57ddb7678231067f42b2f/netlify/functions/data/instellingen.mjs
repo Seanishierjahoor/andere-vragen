@@ -2,5 +2,5 @@
 // Beheren via /beheer-samenkomsten.html (wachtwoord vereist).
 
 export default {
-  "eenPerKeer": true
+  "eenPerKeer": false
 };
