@@ -46,7 +46,25 @@ export default [
     "duurMinuten": 120,
     "locatie": "Social Art Platform (SAP)",
     "adres": "Willem Buytewechstraat 61A, 3024 BM Rotterdam",
-    "thema": "Te gast",
+    "thema": "",
+    "capaciteit": 15
+  },
+  {
+    "id": "sk-mvxynb8gihlu",
+    "start": "2026-12-04T19:00:00+01:00",
+    "duurMinuten": 120,
+    "locatie": "Studio de Bakkerij",
+    "adres": "Bergweg 283, 3037 EM Rotterdam",
+    "thema": "",
+    "capaciteit": 15
+  },
+  {
+    "id": "sk-mvxyrnwtwp1o",
+    "start": "2026-12-17T19:00:00+01:00",
+    "duurMinuten": 120,
+    "locatie": "Studio de Bakkerij",
+    "adres": "Bergweg 283, 3037 EM Rotterdam",
+    "thema": "",
     "capaciteit": 15
   }
 ];
