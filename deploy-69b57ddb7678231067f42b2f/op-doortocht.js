@@ -51,8 +51,22 @@ document.querySelector('.dt-geheim')?.addEventListener('click', () => {
 
 const [kaart, gegevens] = await Promise.all([
     tekenKaart(kaartVak, { rand: false, lijnwerk: true }),
-    fetch('/.netlify/functions/get-doortocht').then((r) => r.json()).catch(() => null),
+    haalGegevens(),
 ]);
+
+// De gegevens komen uit een functie die soms even hapert (een koude start of een time-out). Dan niet meteen
+// een lege kaart tonen: een paar keer opnieuw proberen, en anders eerlijk zeggen dat het laden niet lukte.
+async function haalGegevens() {
+    for (let poging = 0; poging < 4; poging++) {
+        try {
+            const r = await fetch('/.netlify/functions/get-doortocht', poging ? { cache: 'no-store' } : {});
+            const g = r.ok ? await r.json() : null;
+            if (g?.ok && Array.isArray(g.bijeenkomsten)) return g;
+        } catch { /* hieronder opnieuw */ }
+        await new Promise((klaar) => setTimeout(klaar, 500 * (poging + 1)));
+    }
+    return null;
+}
 
 const PLEKKEN = Object.fromEntries((gegevens?.plekken || []).map((p) => [p.id, p]));
 // Elke bijeenkomst is één datum. Voor de rest van de code krijgt hij dezelfde vorm als vroeger
@@ -775,7 +789,8 @@ for (const groep of [
     vak.append(kop, lijst);
     index.append(vak);
 }
-if (!EVENEMENTEN.length) index.innerHTML = '<p class="dt-leeg">Nog geen bijeenkomsten.</p>';
+if (!gegevens) index.innerHTML = '<p class="dt-leeg">De bijeenkomsten konden even niet geladen worden. <button type="button" class="dt-knop dt-knop-klein" onclick="location.reload()">Opnieuw laden</button></p>';
+else if (!EVENEMENTEN.length) index.innerHTML = '<p class="dt-leeg">Nog geen bijeenkomsten.</p>';
 index.insertAdjacentHTML('beforeend', '<p class="dt-index-voet"><a class="dt-knop dt-knop-klein" href="#archief">Volledig archief →</a></p>');
 
 function zetIndex(open) {
