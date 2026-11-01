@@ -215,7 +215,7 @@
     .dt-omslag h1 { font-size: 3.2rem; }
     .dt-inleiding { font-size: 1.1rem; }
     .dt-start { left: 50%; top: 74%; width: calc(100% - 2 * var(--gutter)); text-align: center; }
-    .dt-startknop.dt-knop { font-size: 1.05rem; padding: .5rem .9rem .55rem; }
+    .dt-start .dt-startknop.dt-knop { font-size: 1.05rem; padding: .5rem .9rem .55rem; }
     .dt-index { left: var(--gutter); right: var(--gutter); top: auto; bottom: .75rem; width: auto; max-height: 40%; }
     .dt-index.ingeklapt { max-height: none; }
     .dt-index-binnen { border-radius: var(--radius); }
@@ -557,8 +557,7 @@ body.balk-zichtbaar .dt-balkknop { opacity: 0; pointer-events: none; transition-
 .dt-bediening button { width: 2.15rem; height: 2.15rem; font-size: 1.1rem; border-width: 1.5px; border-color: var(--av-lijn-sterk); box-shadow: 0 3px 10px rgba(25, 59, 58, .1); }
 
 @media (max-width: 860px) {
-    .dt-chips { top: 3.4rem; left: 0; right: 0; flex-wrap: nowrap; overflow-x: auto; padding: .3rem var(--gutter) .7rem; scrollbar-width: none; }
-    .dt-chips::-webkit-scrollbar { display: none; }
+    .dt-chips { top: 3.4rem; left: 0; right: 0; padding: .3rem var(--gutter) .7rem; gap: .4rem; }
     .dt-chip { font-size: .85rem; padding: .4rem .8rem; flex: none; }
     .dt-samenwerkingen { order: -1; } /* op een smal scherm de belangrijkste chip vooraan */
     .dt-bediening { display: none; }
