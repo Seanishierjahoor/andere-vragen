@@ -46,7 +46,7 @@ export default [
     "duurMinuten": 120,
     "locatie": "Social Art Platform (SAP)",
     "adres": "Willem Buytewechstraat 61A, 3024 BM Rotterdam",
-    "thema": "",
+    "thema": "Te gast",
     "capaciteit": 15
   }
 ];
