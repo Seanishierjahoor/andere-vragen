@@ -235,6 +235,8 @@
 
 .dt-sluit { position: fixed; top: 1rem; right: 1rem; z-index: 2; display: inline-flex; align-items: center; gap: .5rem; font: 600 .95rem var(--font-body); background: var(--av-paper); color: var(--av-petrol); border: 2px solid var(--av-petrol); border-radius: 999px; padding: .5rem 1rem; cursor: pointer; }
 .dt-sluit:hover { background: var(--av-petrol); color: #fff; }
+/* Zweeft over de tekst: een schaduw laat zien dat hij erboven ligt. */
+.dt-sluit { box-shadow: 0 6px 18px rgba(25, 59, 58, .18); }
 .dt-sluit:focus-visible { outline: 3px solid var(--av-coral); outline-offset: 2px; }
 
 .dt-held { position: relative; min-height: 78svh; display: flex; align-items: flex-end; background: var(--av-petrol); color: var(--av-paper); }
@@ -303,6 +305,12 @@
 .dt-verder-lezen a:hover span { text-decoration: underline; }
 .dt-verder-lezen a span { font-family: var(--font-heading); font-size: 1.3rem; line-height: 1.2; }
 .dt-verder-lezen a:last-child { text-align: right; margin-left: auto; }
+@media (max-width: 600px) {
+    .dt-verder-lezen { flex-direction: column; gap: 1.25rem; }
+    .dt-verder-lezen a { max-width: none; }
+    .dt-verder-lezen a:last-child { text-align: left; margin-left: 0; }
+    .dt-verder-lezen a span { font-size: 1.15rem; }
+}
 .dt-geen-verhaal { color: var(--av-petrol-zacht); font-style: italic; }
 
 /* --- Archief: alles onder elkaar, als een cv -------------------------------- */
@@ -422,6 +430,10 @@
 /* Alleen de balk animeert (transform is goedkoop); de kaart krijgt direct zijn volle hoogte. */
 body.dt-kaart-open .av-header { transform: translateY(-105%); }
 body.dt-kaart-open .dt-podium { height: 100svh; margin-top: -4.32rem; }
+/* Op de kaart staat de pagina stil: zo schuift de footer er op een telefoon niet onder vandaan. */
+html:has(body.dt-kaart-open), body.dt-kaart-open { overflow: hidden; overscroll-behavior: none; }
+/* De kaart ligt vast over het hele scherm, hoe hoog de kop op dit toestel ook is. */
+body.dt-kaart-open .dt-podium { position: fixed; inset: 0; z-index: 40; height: auto; min-height: 0; margin-top: 0; }
 @media (prefers-reduced-motion: reduce) { .av-header, .dt-podium { transition: none; } }
 
 /* Balk terughalen: over de kaart heen (de kaart schuift niet mee). */

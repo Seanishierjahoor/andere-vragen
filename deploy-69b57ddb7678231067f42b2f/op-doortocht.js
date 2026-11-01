@@ -677,7 +677,10 @@ async function kiesRij(rij) {
     li.classList.add('uitgeklapt');
     knop.setAttribute('aria-expanded', 'true');
     li.insertAdjacentHTML('beforeend', uitklapHtml(e, d));
-    li.scrollIntoView({ block: 'nearest', behavior: RUSTIG.matches ? 'auto' : 'smooth' });
+    // Alleen de lijst zelf scrollen: scrollIntoView schuift op een iPhone ook de hele pagina mee.
+    const lijst = indexVak.querySelector('.dt-index-binnen');
+    const boven = li.getBoundingClientRect().top - lijst.getBoundingClientRect().top;
+    lijst.scrollTo({ top: lijst.scrollTop + boven, behavior: RUSTIG.matches ? 'auto' : 'smooth' });
     vast = selectieVanEvenement(e, d);
     teken();
     // De plek van die datum eerst (bij een samenwerking met een plek per datum).
@@ -798,9 +801,11 @@ function zetIndex(open) {
     $('index-knop').setAttribute('aria-expanded', String(open));
 }
 $('index-knop').addEventListener('click', () => {
-    zetIndex(indexVak.classList.contains('ingeklapt'));
+    const open = indexVak.classList.contains('ingeklapt');
+    zetIndex(open);
     // Op een telefoon bedekt de index het onderste deel: schuif de pins naar het vrije stuk.
-    if (SMAL.matches) { sluitPinkaart(); requestAnimationFrame(() => vliegNaar(overzicht(), 500)); }
+    // Gaat de index dicht, dan ook de gekozen datum, anders blijven de plekkaartjes los op de kaart staan.
+    if (SMAL.matches) { sluitPinkaart(); if (!open) sluitRij(); requestAnimationFrame(() => vliegNaar(overzicht(), 500)); }
     plaatsRaster();
     schaalPins();
     plaatsPinkaart();
